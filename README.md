@@ -3,29 +3,24 @@
 Production-grade Enterprise RAG on Google Cloud Platform.
 
 **GCP project:** `var.gcp_project_id` (set via tfvars / `GCP_PROJECT_ID`; never hard-coded)  
-**Phase:** 0 Beta — Foundation + comprehensive documentation  
-**Stack:** Next.js PWA · shadcn/ui · FastAPI · Vertex AI Gemini · Terraform · Cloud Run
+**Phase:** 0 Gamma — Requirements locked (docs complete)  
+**Stack:** Next.js PWA · shadcn/ui · FastAPI · LangGraph · Vertex AI Gemini + Vector Search · Terraform · Cloud Run (`api`, `ingest-worker`, `web`)  
+**Audience:** `chandraailabs.com` + `gmail.com`
 
 ---
 
 ## Architecture (high level)
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  PWA (Next.js) — Chat UI, Voice, Admin, Analytics dashboards    │
-└────────────────────────────┬────────────────────────────────────┘
-                             │ HTTPS / JWT
-┌────────────────────────────▼────────────────────────────────────┐
-│  Cloud Run — FastAPI                                            │
-│  AuthZ · Guardrails · Query / Ingest / Admin APIs               │
-└───┬──────────────┬──────────────┬──────────────┬────────────────┘
-    ▼              ▼              ▼              ▼
- Ingestion      Retrieval      Generation     Analytics
- (versioned)    hybrid+RRF     Gemini         BigQuery
- GCS/meta       BM25+vector    Vertex AI      (hashed IDs)
+  web (Next.js PWA) ──JWT──▶ api (FastAPI + LangGraph)
+                               │
+              ┌────────────────┼────────────────┐
+              ▼                ▼                ▼
+        ingest-worker    Vertex Vector     BigQuery
+        (async MM+index) Search + BM25     (metadata)
 ```
 
-See [docs/architecture/overview.md](docs/architecture/overview.md), [docs/adr/0001-high-level-architecture.md](docs/adr/0001-high-level-architecture.md), and related ADRs.
+See [docs/architecture/overview.md](docs/architecture/overview.md), [docs/requirements.md](docs/requirements.md) (v3), and ADRs 0001–0005.
 
 ---
 
@@ -72,10 +67,10 @@ Copy `.env.example` → `.env` for local overrides. **Never commit `.env`.**
 
 | Doc | Purpose |
 |-----|---------|
-| [docs/requirements.md](docs/requirements.md) | Personas, detailed user stories, full NFRs (v2) |
-| [docs/ui-specs.md](docs/ui-specs.md) | Screens, flows, PWA, voice, shadcn/ui, a11y |
-| [docs/architecture/overview.md](docs/architecture/overview.md) | Component breakdown & diagrams |
-| [docs/adr/](docs/adr/) | ADRs (architecture, stack, versioning, guardrails) |
+| [docs/requirements.md](docs/requirements.md) | Personas, stories, NFRs (v3 Gamma lock) |
+| [docs/ui-specs.md](docs/ui-specs.md) | Screens, PWA, voice, feedback, multimodal, shadcn/ui |
+| [docs/architecture/overview.md](docs/architecture/overview.md) | Services, LangGraph, cache, multimodal |
+| [docs/adr/](docs/adr/) | ADRs 0001–0005 (incl. security posture) |
 | [docs/backlog.md](docs/backlog.md) | Living backlog (deferrals + completions) |
 | [docs/grok-three-agent-protocol.md](docs/grok-three-agent-protocol.md) | How we build (v1.0) |
 | [CHANGELOG.md](CHANGELOG.md) | Release / PR history |

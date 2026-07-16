@@ -10,14 +10,14 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- Phase 1: GCP API enablement, CMEK, auth, CI foundation
+- Phase 1: GCP API enablement, CMEK, auth allowlist, WIF CI, health version fields in code, three Cloud Run services
 
 ### Added
-- Phase 0 Beta documentation: requirements v2 (persona stories + acceptance criteria + expanded NFRs)
-- `docs/ui-specs.md` — user flows, screens, PWA, voice, shadcn/ui, responsive & a11y
-- `docs/architecture/overview.md` — component breakdown and sequence/context diagrams
-- ADR-0003 document versioning model; ADR-0004 guardrails architecture
-- ADR-0002 updated for shadcn/ui design system
+- Phase 0 Gamma requirements lock (`docs/requirements.md` v3): audience (`chandraailabs.com` + `gmail.com`), 5-star feedback, metadata filtering, semantic caching, multimodal (tables/images), health `version`+`deployed_at`, zero JSON keys / WIF / defence-in-depth, synthetic+OSS data note
+- UI specs: StarRating, multimodal rendering, non-blocking feedback
+- Architecture: Cloud Run `api` + `ingest-worker` + `web`, LangGraph path, cache/filter/multimodal
+- ADR-0005 security posture; ADR-0002 amended (LangGraph, Vertex AI Vector Search locked, multimodal)
+- Phase 0 Beta documentation: requirements v2, ui-specs, architecture overview, ADR-0003/0004, shadcn/ui
 
 ### Fixed
 - Removed hard-coded GCP project ID from docs and Terraform; use `var.gcp_project_id` / placeholder `your-gcp-project-id` (Phase 0.1)

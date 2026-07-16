@@ -118,9 +118,10 @@ Selection criteria (priority order):
 
 ## References
 
-- [ADR-0002 Tech Stack](./0002-tech-stack.md)
+- [ADR-0002 Tech Stack](./0002-tech-stack.md) (LangGraph, Vector Search, three Cloud Run services)
 - [ADR-0003 Document Versioning](./0003-document-versioning.md)
 - [ADR-0004 Guardrails Architecture](./0004-guardrails-architecture.md)
+- [ADR-0005 Security Posture](./0005-security-posture.md)
 - [Architecture overview (diagrams & components)](../architecture/overview.md)
 - [Requirements](../requirements.md) · [UI specs](../ui-specs.md)
 - Enterprise HR RAG production patterns (hybrid + RRF + PII-free BigQuery)

@@ -3,17 +3,19 @@
 ## Status
 
 Accepted — 2026-07-16  
-**Amended:** 2026-07-16 (Phase 0 Beta) — locked **shadcn/ui** + UX contract `docs/ui-specs.md`.
+**Amended:** 2026-07-16 (Phase 0 Beta) — locked **shadcn/ui** + UX contract `docs/ui-specs.md`.  
+**Amended:** 2026-07-16 (Phase 0 Gamma) — locked **LangGraph** orchestration, **Vertex AI Vector Search**, multimodal notes, three Cloud Run services.
 
 ## Context
 
 Phase 0 must lock a coherent stack for the Enterprise RAG Platform before feature work begins. Stack choices must support:
 
 - FastAPI backend services and RAG pipelines in Python
-- Next.js PWA frontend (chat, voice, admin)
+- **LangGraph** for explicit, testable query orchestration
+- Next.js PWA frontend (chat, voice, admin, feedback, multimodal render)
 - Terraform for GCP (`var.gcp_project_id` — set via tfvars; never hard-code real project IDs)
 - Reproducible dependency pins for CI
-- Production non-negotiables: non-root containers, Secret Manager, structured JSON logs, no secrets in repo
+- Production non-negotiables: non-root containers, Secret Manager, structured JSON logs, **zero JSON SA keys**, WIF/OIDC
 
 ## Decision
 
@@ -22,6 +24,7 @@ Phase 0 must lock a coherent stack for the Enterprise RAG Platform before featur
 |------|--------|
 | Language | Python 3.12 |
 | Framework | FastAPI |
+| Orchestration | **LangGraph** (query graph: guard → retrieve → ground → generate → post-check) |
 | Validation / settings | Pydantic v2 |
 | ASGI server | Uvicorn |
 | Package pinning | `requirements.txt` with pinned versions (+ optional `pyproject.toml` for packaging metadata) |
@@ -44,92 +47,109 @@ Phase 0 must lock a coherent stack for the Enterprise RAG Platform before featur
 |------|--------|
 | LLM | Vertex AI Gemini (e.g. gemini-2.5-flash class; exact model ID pinned per env) |
 | Embeddings | Vertex AI text embedding models (version pinned in config) |
-| Vector index | Vertex AI Vector Search (or equivalent managed) |
+| Vector index | **Vertex AI Vector Search** (**locked** — not “or equivalent” for MVP) |
 | Sparse retrieval | rank-bm25 (or equivalent) for v1 hybrid |
 | Fusion | Reciprocal Rank Fusion (RRF) |
+| Metadata filtering | Restrict filters on vector + sparse queries (ACL, collection, active version) |
+| Semantic cache | Optional layer (P1) keyed by embedding + ACL + corpus fingerprint |
+| Multimodal | Extract tables/images at ingest; store assets in GCS; render in UI; embed text/OCR/captions for retrieval |
 
 ### Data & Platform
 | Item | Choice |
 |------|--------|
 | Object storage | GCS (CMEK) |
-| Metadata store | Firestore (default for v1; Cloud SQL if relational needs dominate — later ADR) |
-| Analytics | BigQuery (hashed user IDs, metadata only) |
+| Metadata store | **Open** — Firestore vs Cloud SQL deferred (BL-DEC-01 / future ADR) |
+| Analytics | BigQuery (hashed user IDs, metadata only; star ratings aggregates) |
 | Secrets | Secret Manager |
-| Auth (v1) | Google OAuth / Identity Platform path |
-| Compute | Cloud Run |
+| Auth (v1) | Google OAuth; allowlist `chandraailabs.com` + `gmail.com` |
+| Compute | Cloud Run services: **`api`**, **`ingest-worker`**, **`web`** |
+| Edge / WAF | HTTPS LB + Cloud Armor **later** (not Phase 1) |
 | IaC | Terraform >= 1.5, Google provider |
-| CI (later) | Cloud Build + Workload Identity Federation |
+| CI | Cloud Build and/or GitHub Actions + **Workload Identity Federation** (no JSON keys) |
 
 ### Runtime / Containers
 | Item | Choice |
 |------|--------|
 | Backend base image | `python:3.12-slim` multi-stage |
-| Frontend image | Node build → nginx or Next standalone on Cloud Run |
+| Frontend image | Node build → Next standalone (or nginx) on Cloud Run **web** |
 | Container user | non-root uid/gid 1001 |
+| Health | `/health` + `/ready` return `version` + `deployed_at` |
 
 ### Architectural Principles (mandatory)
-1. **Stateless services** — no in-memory session affinity; JWT/auth externalized
-2. **No secrets in code or committed `.env`** — `.env.example` only; Secret Manager in deploy
-3. **Pinned dependencies** — CI installs only from lock/requirements files
-4. **Structured JSON logging** — Cloud Logging compatible; no PII in logs
-5. **Idempotent infra** — Terraform and scripts safe to re-run
+1. **Stateless services** — no in-memory session affinity; JWT/auth externalized  
+2. **No secrets in code or committed `.env`** — `.env.example` only; Secret Manager in deploy  
+3. **Zero JSON SA keys** — WIF/OIDC + runtime metadata SA only ([ADR-0005](./0005-security-posture.md))  
+4. **Pinned dependencies** — CI installs only from lock/requirements files  
+5. **Structured JSON logging** — Cloud Logging compatible; no PII in logs  
+6. **Idempotent infra** — Terraform and scripts safe to re-run  
+7. **LangGraph for query orchestration** — explicit nodes, testable edges  
 
 ## Rationale
 
-- **Python + FastAPI** is the default for production RAG on GCP (Vertex SDKs, async I/O, OpenAPI).
-- **Next.js** provides App Router, SSR/SSG options, and a clear PWA path for enterprise chat UX.
-- **shadcn/ui** provides accessible Radix primitives with in-repo source ownership and Tailwind consistency.
-- **Vertex AI** keeps data path and IAM inside GCP; reduces multi-cloud key sprawl.
-- **requirements.txt pins** match Chandra’s production non-negotiable for CI hermetic installs.
-- **Terraform** is the standard for reviewable, idempotent GCP foundation.
+- **Python + FastAPI** is the default for production RAG on GCP (Vertex SDKs, async I/O, OpenAPI).  
+- **LangGraph** makes multi-step RAG (cache → retrieve → ground → generate → feedback hooks) explicit and unit-testable vs ad-hoc call chains.  
+- **Vertex AI Vector Search** is locked for managed ANN, IAM alignment, and metadata filters.  
+- **Three Cloud Run services** separate query latency path (`api`) from heavy ingest (`ingest-worker`) and static/SSR UI (`web`).  
+- **shadcn/ui** provides accessible primitives for chat, tables, and star ratings.  
+- **requirements.txt pins** match production non-negotiable for CI hermetic installs.  
+- **Terraform + WIF** keep infra and deploy keyless.
 
 ## Consequences
 
 ### Positive
-- Single language for API + RAG orchestration
-- Strong GCP integration and IAM story
-- Clear frontend path to PWA and voice UI later
-- Reproducible installs and infra
+- Clear orchestration and service boundaries  
+- Strong GCP integration and IAM story  
+- Multimodal and feedback fit the same stack  
+- Reproducible installs and infra  
 
 ### Negative
-- Next.js operational surface larger than pure static SPA
-- Python cold starts on Cloud Run
-- Vertex AI regional/model availability must be validated per region
+- LangGraph adds a dependency and learning curve  
+- Multimodal increases ingest complexity and storage  
+- Next.js operational surface larger than pure static SPA  
+- Python cold starts on Cloud Run  
 
 ### Risks and Mitigations
-- **Risk:** Model deprecation / ID change
-  - **Mitigation:** Model IDs in config/Secret Manager; ADR when changing
-- **Risk:** Frontend SSR secrets leakage
-  - **Mitigation:** Public env vars only for browser; server-only secrets never prefixed `NEXT_PUBLIC_`
-- **Risk:** Dependency drift
-  - **Mitigation:** Pin all packages; `pip check` in CI; renovate/manual bumps via PR
+- **Risk:** Model deprecation / ID change  
+  - **Mitigation:** Model IDs in config/Secret Manager; ADR when changing  
+- **Risk:** Frontend SSR secrets leakage  
+  - **Mitigation:** Public env vars only for browser; server-only secrets never prefixed `NEXT_PUBLIC_`  
+- **Risk:** Dependency drift  
+  - **Mitigation:** Pin all packages; `pip check` in CI; renovate/manual bumps via PR  
+- **Risk:** Semantic cache serves stale post-publish answers  
+  - **Mitigation:** Corpus fingerprint + event invalidation (US-QA-07)  
 
 ## Alternatives Rejected
 
 ### Backend: Node.js / NestJS only
 - Why rejected: Weaker fit for RAG/ML libraries and Vertex Python tooling as primary path
 
+### Orchestration: ad-hoc Python functions only
+- Why rejected: Harder to test, observe, and evolve multi-step RAG with cache/guard nodes
+
 ### Frontend: Vite SPA only (no Next.js)
-- Why rejected: Phase goals include PWA + richer routing/SSR options for enterprise auth and installable app; Next.js is the specified stack for this project
+- Why rejected: Phase goals include PWA + richer routing for enterprise auth; Next.js is the specified stack
 
 ### Frontend: Heavy proprietary component kits
-- Why rejected: Less portable; shadcn keeps components owned in-repo and aligned with Tailwind
-
-### Package managers: Poetry-only without requirements.txt
-- Why rejected: CI non-negotiable is install from requirements.txt with pins; pyproject may coexist for metadata
+- Why rejected: Less portable; shadcn keeps components owned in-repo
 
 ### Vector DB: Self-hosted from day one
-- Why rejected: Prefer managed Vertex index until proven otherwise (see ADR-0001)
+- Why rejected: Vertex AI Vector Search locked for MVP
 
 ### Compute: GKE first
-- Why rejected: Cloud Run sufficient for Phase 0–N; revisit if multi-service mesh complexity appears
+- Why rejected: Three Cloud Run services sufficient; revisit if mesh complexity appears
+
+### CI: JSON SA keys in secrets
+- Why rejected: Explicitly forbidden (ADR-0005)
 
 ## References
 
-- [ADR-0001 High-Level Architecture](./0001-high-level-architecture.md)
-- [UI specs](../ui-specs.md)
-- FastAPI: https://fastapi.tiangolo.com
-- Next.js: https://nextjs.org/docs
-- shadcn/ui: https://ui.shadcn.com
-- Vertex AI: https://cloud.google.com/vertex-ai/docs
-- Terraform Google provider: https://registry.terraform.io/providers/hashicorp/google/latest/docs
+- [ADR-0001 High-Level Architecture](./0001-high-level-architecture.md)  
+- [ADR-0005 Security Posture](./0005-security-posture.md)  
+- [UI specs](../ui-specs.md)  
+- [Architecture overview](../architecture/overview.md)  
+- FastAPI: https://fastapi.tiangolo.com  
+- LangGraph: https://langchain-ai.github.io/langgraph/  
+- Next.js: https://nextjs.org/docs  
+- shadcn/ui: https://ui.shadcn.com  
+- Vertex AI Vector Search: https://cloud.google.com/vertex-ai/docs/vector-search/overview  
+- Terraform Google provider: https://registry.terraform.io/providers/hashicorp/google/latest/docs  

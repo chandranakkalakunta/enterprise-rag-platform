@@ -1,9 +1,10 @@
 # Enterprise RAG Platform — UI / UX Specification
 
-**Document version:** 1.0 (Phase 0 Beta)  
+**Document version:** 1.1 (Phase 0 Gamma)  
 **Date:** 2026-07-16  
-**Status:** Pre-implementation baseline  
+**Status:** Requirements-locked UI contract  
 **Stack alignment:** Next.js App Router · TypeScript · **shadcn/ui** · Tailwind · PWA  
+**Auth audience:** `chandraailabs.com` + `gmail.com` only  
 
 Related: [requirements.md](./requirements.md) · [architecture/overview.md](./architecture/overview.md) · [ADR-0002](./adr/0002-tech-stack.md)
 
@@ -24,6 +25,8 @@ Related: [requirements.md](./requirements.md) · [architecture/overview.md](./ar
 11. [Analytics UI (product)](#11-analytics-ui-product)
 12. [Out of scope (UI)](#12-out-of-scope-ui)
 13. [Traceability](#13-traceability)
+14. [Multimodal rendering](#14-multimodal-rendering)
+15. [Feedback (5-star)](#15-feedback-5-star)
 
 ---
 
@@ -72,6 +75,9 @@ Related: [requirements.md](./requirements.md) · [architecture/overview.md](./ar
 |-----------|---------|
 | `ChatMessage` | User/assistant bubbles; markdown safe-render |
 | `CitationList` / `CitationChip` | Version-aware sources |
+| `StarRating` | 1–5 star feedback under assistant messages (optional) |
+| `AnswerTable` | Accessible HTML table for markdown/extracted tables |
+| `AnswerImage` | Caption + alt; lazy-load multimodal figure |
 | `Composer` | Textarea + send + mic |
 | `SessionList` | History sidebar/sheet |
 | `DocVersionBadge` | `v3 · published` style badge |
@@ -208,8 +214,8 @@ flowchart TD
 |---------|------|
 | Layout | Centered card, max-width ~400px |
 | Primary CTA | “Continue with Google” (Button) |
-| Copy | Product name + one-line value prop |
-| Errors | OAuth failure Alert |
+| Copy | Product name + one-line value prop; note: org + gmail accounts only |
+| Errors | OAuth failure Alert; **domain denied** Alert for non-allowlisted emails |
 | A11y | Focus on CTA; keyboard only |
 
 ### 5.2 Chat (`/chat`)
@@ -220,16 +226,18 @@ flowchart TD
 |--------|------|
 | Message list | Reverse-chronological or top-down chronological with auto-scroll to latest |
 | User bubble | Align end; neutral bg |
-| Assistant bubble | Align start; includes answer + `CitationList` |
-| Refusal | `Alert` variant warning/destructive-soft — not styled as normal answer |
+| Assistant bubble | Align start; includes answer body (text + tables + images) + `CitationList` + **`StarRating`** |
+| Refusal | `Alert` variant warning/destructive-soft — not styled as normal answer; **no star row required** (optional “was this helpful?” later) |
 | Composer | Textarea auto-grow (max ~6 lines); Send button; Mic button |
-| Collection filter | Optional Select (when US-QA-05 live) above composer |
+| Collection filter | Optional Select (when US-QA-05 live) above composer — drives metadata filter |
 | Streaming | If enabled: partial tokens + disabled double-send |
 
 **Citation interaction:**
 - Chip shows `Title · vN`.  
-- Click → Sheet/Dialog with excerpt, version, locator, “copy citation”.  
+- Click → Sheet/Dialog with excerpt, version, locator, optional table/image preview, “copy citation”.  
 - Deep link to source file only if ACL allows and signed URL available (later).
+
+**Feedback:** see [§15](#15-feedback-5-star). **Multimodal:** see [§14](#14-multimodal-rendering).
 
 ### 5.3 History (`/history`)
 
@@ -270,8 +278,8 @@ flowchart TD
 
 | Element | Spec |
 |---------|------|
-| KPI row | Queries, p50, p95, error %, refusal % |
-| Charts | Volume over time; latency trend (library TBD: recharts common with shadcn) |
+| KPI row | Queries, p50, p95, error %, refusal %, **avg stars**, **cache hit %** (when live) |
+| Charts | Volume over time; latency trend; star histogram (library TBD: recharts common with shadcn) |
 | Notes | Banner: “Metadata only — no raw queries” |
 | Filters | Date range, environment |
 
@@ -446,7 +454,9 @@ Example prompts (editable copy):
 - Real-time multi-user co-editing  
 - WYSIWYG document authoring (upload/version only)  
 - Full design-marketing site  
-- Custom illustration system (use simple Lucide + empty states)
+- Custom illustration system (use simple Lucide + empty states)  
+- Free-text feedback comments in MVP (stars only)  
+- Global LB / Cloud Armor UX (infra later)
 
 ---
 
@@ -455,9 +465,73 @@ Example prompts (editable copy):
 | Spec area | Requirements |
 |-----------|--------------|
 | Chat + citations | US-EU-02, US-EU-03, US-QA-*, US-PWA-03 |
+| 5-star feedback | US-EU-08, US-QA-06, NFR-UX-03 |
+| Multimodal | US-EU-09, US-MM-01, US-MM-02 |
 | Admin docs/versioning | US-CA-*, US-DOC-* |
 | Voice | US-EU-06, US-VOICE-* |
 | PWA | US-EU-07, US-PWA-* |
 | Analytics UI | US-PO-*, US-ANL-* |
 | A11y / mobile | NFR-A11Y-*, NFR-UX-* |
 | Design system | NFR-MNT-05, ADR-0002 |
+
+---
+
+## 14. Multimodal rendering
+
+### 14.1 Tables
+
+| Rule | Spec |
+|------|------|
+| Source | Markdown tables in model output **or** structured table payload from retrieval |
+| Render | Semantic `<table>` via `AnswerTable` (shadcn Table primitives OK) |
+| Mobile | Horizontal scroll container; do not crush columns unreadably |
+| A11y | Header row (`th`), caption if provided |
+| Failure | If parse fails, show fenced plain text fallback |
+
+### 14.2 Images
+
+| Rule | Spec |
+|------|------|
+| Source | Signed/authorized URL for version-bound asset from API |
+| Render | `AnswerImage`: max-width 100%, lazy loading, blur placeholder optional |
+| Alt / caption | Required alt (fallback: “Figure from {doc title} vN”) |
+| ACL | If 403 on asset, show broken-image state + “source restricted” |
+| Click | Optional lightbox Dialog for larger view |
+| Privacy | No hotlink to unauthenticated GCS; always via API or short-lived signed URL |
+
+### 14.3 Placement in message
+
+```
+[Assistant markdown prose]
+[AnswerTable …]
+[AnswerImage …]
+[CitationList]
+[StarRating]     ← always below content when answer succeeded
+```
+
+---
+
+## 15. Feedback (5-star)
+
+### 15.1 Placement & behavior
+
+| Rule | Spec |
+|------|------|
+| Where | Directly under every **successful** assistant message (after citations) |
+| Control | `StarRating`: 5 buttons/icons (Lucide star); fill 1…n on select |
+| Optional | User may ignore forever — **non-blocking** (NFR-UX-03) |
+| Change | Allow change until session ends or permanently (prefer allow update) |
+| Pending | Optimistic UI; revert + toast on API error |
+| Loading | Disable stars while message still streaming |
+| Refusal | Stars optional/hidden for pure refusals (product default: **hidden**) |
+
+### 15.2 Copy & a11y
+
+- Group label: “Rate this answer” (`aria-label`).  
+- Each star: “{n} stars”.  
+- After submit: subtle “Thanks” text; no modal.  
+- Do not force comment field in MVP.
+
+### 15.3 Analytics UI
+
+- Product analytics shows aggregate stars only (US-PO-04); not individual user emails.
