@@ -6,7 +6,7 @@ Accepted — 2026-07-16
 
 ## Context
 
-We are building a production-grade Enterprise RAG (Retrieval-Augmented Generation) platform on Google Cloud Platform (GCP project: `sport-slot-dev`). The system must support:
+We are building a production-grade Enterprise RAG (Retrieval-Augmented Generation) platform on Google Cloud Platform. The target project is supplied at apply time via Terraform variable `var.gcp_project_id` (never hard-coded in application code or committed docs). The system must support:
 
 1. **Document Q&A** with citations over versioned enterprise corpora
 2. **PWA UI** for web and installable mobile experience
@@ -70,7 +70,7 @@ Selection criteria (priority order):
 - **Region:** asia-south1 (primary; override via Terraform variables — never hardcode in app code)
 - **Compute:** Cloud Run for API + frontend static/SSR container
 - **CI/CD:** Cloud Build + WIF (keyless) in later phase
-- **Environments:** `dev` first (`sport-slot-dev`); staging/prod via Terraform workspaces/envs later
+- **Environments:** `dev` first (`var.gcp_project_id` via tfvars); staging/prod via Terraform workspaces/envs later
 
 ## Rationale
 

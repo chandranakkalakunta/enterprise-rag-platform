@@ -10,7 +10,7 @@ Phase 0 must lock a coherent stack for the Enterprise RAG Platform before featur
 
 - FastAPI backend services and RAG pipelines in Python
 - Next.js PWA frontend (chat, voice, admin)
-- Terraform for GCP (`sport-slot-dev`)
+- Terraform for GCP (`var.gcp_project_id` — set via tfvars; never hard-code real project IDs)
 - Reproducible dependency pins for CI
 - Production non-negotiables: non-root containers, Secret Manager, structured JSON logs, no secrets in repo
 

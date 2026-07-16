@@ -13,18 +13,20 @@ terraform {
   }
 
   # Remote state backend — configure after GCS state bucket exists (Phase 1).
+  # Backend blocks cannot interpolate variables; set the bucket name explicitly
+  # in a backend.hcl or partial config (derived from your gcp_project_id at apply time).
   # backend "gcs" {
-  #   bucket = "sport-slot-dev-tfstate"
+  #   bucket = "your-gcp-project-id-tfstate"
   #   prefix = "enterprise-rag-platform"
   # }
 }
 
 provider "google" {
-  project = var.project_id
+  project = var.gcp_project_id
   region  = var.region
 }
 
 provider "google-beta" {
-  project = var.project_id
+  project = var.gcp_project_id
   region  = var.region
 }

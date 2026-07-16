@@ -2,7 +2,7 @@
 
 Production-grade Enterprise RAG on Google Cloud Platform.
 
-**GCP project:** `sport-slot-dev`  
+**GCP project:** `var.gcp_project_id` (set via tfvars / `GCP_PROJECT_ID`; never hard-coded)  
 **Phase:** 0 — Project Initialization & Foundation  
 **Stack:** Next.js PWA · FastAPI · Vertex AI Gemini · Terraform · Cloud Run
 

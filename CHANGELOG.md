@@ -12,6 +12,9 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ### Planned
 - Phase 1: GCP API enablement, CMEK, auth, CI foundation
 
+### Fixed
+- Removed hard-coded GCP project ID from docs and Terraform; use `var.gcp_project_id` / placeholder `your-gcp-project-id` (Phase 0.1)
+
 ---
 
 ## [0.1.0] — 2026-07-16 — Phase 0: Project Foundation
@@ -25,7 +28,7 @@ Phases map to project delivery, not strictly SemVer until first production relea
 - `docs/adr/0002-tech-stack.md` — stack & toolchain (Accepted)
 - `docs/backlog.md` — living backlog with domain groups
 - `docs/grok-three-agent-protocol.md` — Grok-adapted Three-Agent Protocol v1.0
-- Terraform skeleton (`providers.tf`, `variables.tf`, `main.tf`, dev tfvars example) targeting `sport-slot-dev`
+- Terraform skeleton (`providers.tf`, `variables.tf`, `main.tf`, dev tfvars example) parameterized via `var.gcp_project_id`
 - FastAPI placeholder API with `/health`, `/ready`, OpenAPI
 - Backend `requirements.txt` (pinned) + `pyproject.toml` + pytest smoke tests
 - Next.js 15 + TypeScript frontend placeholder (`package.json`, App Router page)

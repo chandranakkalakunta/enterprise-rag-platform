@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-16 (Phase 0 initialization)
+Last updated: 2026-07-16 (Phase 0.1 — project ID parameterization)
 
 ---
 
@@ -24,7 +24,8 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-FND-01 | Git monorepo structure, docs, placeholders | Done | Phase 0 | This PR |
 | BL-FND-02 | ADR-0001 architecture + ADR-0002 tech stack | Done | Phase 0 | This PR |
 | BL-FND-03 | requirements.md + backlog + protocol | Done | Phase 0 | This PR |
-| BL-FND-04 | Terraform skeleton for `sport-slot-dev` | Done | Phase 0 | Skeleton only; no apply yet |
+| BL-FND-04 | Terraform skeleton (`var.gcp_project_id`) | Done | Phase 0 | Skeleton only; no apply yet |
+| BL-FND-09 | Remove hard-coded GCP project IDs from docs/TF | Done | Phase 0.1 | Use `var.gcp_project_id` + placeholders |
 | BL-FND-05 | Enable required GCP APIs (idempotent script) | Todo | Phase 1 | List APIs in runbook |
 | BL-FND-06 | CMEK keys + GCS buckets | Todo | Phase 1 | Non-negotiable early |
 | BL-FND-07 | Cloud Build + WIF keyless CI | Todo | Phase 1–2 | |
@@ -110,4 +111,5 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-16** — Phase 0.1: removed hard-coded GCP project IDs; Terraform `var.gcp_project_id` + placeholders only.
 - **2026-07-16** — Phase 0 foundation: repo structure, requirements, ADRs 0001–0002, protocol, Terraform skeleton, placeholders.

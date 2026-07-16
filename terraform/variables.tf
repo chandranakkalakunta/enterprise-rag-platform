@@ -1,7 +1,7 @@
-variable "project_id" {
-  description = "GCP project ID"
+variable "gcp_project_id" {
+  description = "GCP project ID. Set via tfvars or -var; do not hardcode real project IDs in code or docs."
   type        = string
-  default     = "sport-slot-dev"
+  default     = "your-gcp-project-id"
 }
 
 variable "region" {

@@ -1,7 +1,7 @@
 # Enterprise RAG Platform — Requirements
 
 **Project:** enterprise-rag-platform  
-**GCP project:** `sport-slot-dev`  
+**GCP project:** set via Terraform `var.gcp_project_id` / env `GCP_PROJECT_ID` (never hard-coded)  
 **Document version:** 1.0  
 **Date:** 2026-07-16  
 **Status:** Phase 0 baseline

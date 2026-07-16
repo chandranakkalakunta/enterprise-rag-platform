@@ -1,7 +1,7 @@
 # Enterprise RAG Platform — Terraform root module (skeleton)
 # Phase 0: structure only. No resources applied until Phase 1 foundation.
 #
-# Project: sport-slot-dev (override via -var or tfvars; never commit secrets)
+# GCP project: var.gcp_project_id (set via tfvars or -var; never commit secrets)
 
 locals {
   name_prefix = "erp-${var.environment}"
@@ -20,9 +20,9 @@ locals {
 #   - iam.googleapis.com
 #   - artifactregistry.googleapis.com
 
-output "project_id" {
-  description = "Active GCP project"
-  value       = var.project_id
+output "gcp_project_id" {
+  description = "Active GCP project (from var.gcp_project_id)"
+  value       = var.gcp_project_id
 }
 
 output "region" {
