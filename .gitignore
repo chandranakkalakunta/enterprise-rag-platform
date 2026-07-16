@@ -1,0 +1,80 @@
+# ── OS ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# ── Secrets & local env ───────────────────────────────────────
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+credentials.json
+*-sa.json
+service-account*.json
+.secrets/
+
+# ── Python ────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+*.log
+
+# ── Node / Next.js ────────────────────────────────────────────
+node_modules/
+.npm/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+.pnpm-store/
+
+# ── Terraform ─────────────────────────────────────────────────
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# ── IDE / editors ─────────────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+.cursor/
+
+# ── Tooling / agent ───────────────────────────────────────────
+.grok/
+.claude/
+.codex/
+
+# ── Misc ──────────────────────────────────────────────────────
+tmp/
+temp/
+*.bak
+.cache/

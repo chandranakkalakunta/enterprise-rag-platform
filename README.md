@@ -1,3 +1,124 @@
 # Enterprise RAG Platform
 
-Bootstrap branch. Feature work lands via PR from `phase-0-initialization`.
+Production-grade Enterprise RAG on Google Cloud Platform.
+
+**GCP project:** `sport-slot-dev`  
+**Phase:** 0 — Project Initialization & Foundation  
+**Stack:** Next.js PWA · FastAPI · Vertex AI Gemini · Terraform · Cloud Run
+
+---
+
+## Architecture (high level)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  PWA (Next.js) — Chat UI, Voice, Admin, Analytics dashboards    │
+└────────────────────────────┬────────────────────────────────────┘
+                             │ HTTPS / JWT
+┌────────────────────────────▼────────────────────────────────────┐
+│  Cloud Run — FastAPI                                            │
+│  AuthZ · Guardrails · Query / Ingest / Admin APIs               │
+└───┬──────────────┬──────────────┬──────────────┬────────────────┘
+    ▼              ▼              ▼              ▼
+ Ingestion      Retrieval      Generation     Analytics
+ (versioned)    hybrid+RRF     Gemini         BigQuery
+ GCS/meta       BM25+vector    Vertex AI      (hashed IDs)
+```
+
+See [docs/adr/0001-high-level-architecture.md](docs/adr/0001-high-level-architecture.md) and [docs/adr/0002-tech-stack.md](docs/adr/0002-tech-stack.md).
+
+---
+
+## Repository layout
+
+```
+enterprise-rag-platform/
+├── backend/          # FastAPI API + RAG services
+├── frontend/         # Next.js PWA
+├── terraform/        # GCP infrastructure (skeleton in Phase 0)
+├── docs/             # Requirements, ADRs, backlog, protocol, runbooks
+├── scripts/          # Idempotent ops scripts (later)
+├── config/           # Non-secret config samples
+├── CHANGELOG.md
+└── README.md
+```
+
+---
+
+## Quick start (local)
+
+### Backend
+
+```bash
+cd backend
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt && pip check
+uvicorn app.main:app --reload --port 8000
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Copy `.env.example` → `.env` for local overrides. **Never commit `.env`.**
+
+---
+
+## Documentation map
+
+| Doc | Purpose |
+|-----|---------|
+| [docs/requirements.md](docs/requirements.md) | User stories & NFRs |
+| [docs/backlog.md](docs/backlog.md) | Living backlog (deferrals + completions) |
+| [docs/grok-three-agent-protocol.md](docs/grok-three-agent-protocol.md) | How we build (v1.0) |
+| [docs/adr/](docs/adr/) | Architecture Decision Records |
+| [CHANGELOG.md](CHANGELOG.md) | Release / PR history |
+
+---
+
+## Engineering protocol
+
+We follow the **Grok Three-Agent Protocol** (project adaptation v1.0):
+
+- Feature branches only — never push feature work to `main`
+- ADRs for significant decisions
+- Living `docs/backlog.md` and `CHANGELOG.md`
+- Root cause over silent workarounds
+- Fail-fast verification every phase
+
+---
+
+## Phase roadmap (summary)
+
+| Phase | Focus |
+|-------|--------|
+| **0** | Foundation, docs, ADRs, skeletons |
+| **1** | GCP foundation, auth, CI skeleton |
+| **2** | Ingestion & document versioning |
+| **3** | Hybrid RAG + citations + guardrails baseline |
+| **4** | Multi-turn, ACL depth, safety tuning |
+| **5** | Voice + PWA |
+| **6** | Analytics, evaluation gates, cost dashboards |
+
+Details: [docs/requirements.md](docs/requirements.md) · [docs/backlog.md](docs/backlog.md)
+
+---
+
+## Security non-negotiables
+
+- Secrets in **Secret Manager** only
+- Least-privilege service accounts
+- CMEK on data stores (from foundation phase)
+- Non-root containers (uid/gid 1001)
+- No PII in logs (hash user identifiers)
+- Structured JSON logging
+
+---
+
+## License
+
+Proprietary — Chandra AI Labs / project owner.

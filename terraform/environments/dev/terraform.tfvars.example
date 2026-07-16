@@ -1,0 +1,9 @@
+project_id  = "sport-slot-dev"
+region      = "asia-south1"
+environment = "dev"
+
+labels = {
+  project     = "enterprise-rag-platform"
+  managed_by  = "terraform"
+  environment = "dev"
+}
