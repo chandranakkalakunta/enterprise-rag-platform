@@ -3,8 +3,8 @@
 Production-grade Enterprise RAG on Google Cloud Platform.
 
 **GCP project:** `var.gcp_project_id` (set via tfvars / `GCP_PROJECT_ID`; never hard-coded)  
-**Phase:** 0 — Project Initialization & Foundation  
-**Stack:** Next.js PWA · FastAPI · Vertex AI Gemini · Terraform · Cloud Run
+**Phase:** 0 Beta — Foundation + comprehensive documentation  
+**Stack:** Next.js PWA · shadcn/ui · FastAPI · Vertex AI Gemini · Terraform · Cloud Run
 
 ---
 
@@ -25,7 +25,7 @@ Production-grade Enterprise RAG on Google Cloud Platform.
  GCS/meta       BM25+vector    Vertex AI      (hashed IDs)
 ```
 
-See [docs/adr/0001-high-level-architecture.md](docs/adr/0001-high-level-architecture.md) and [docs/adr/0002-tech-stack.md](docs/adr/0002-tech-stack.md).
+See [docs/architecture/overview.md](docs/architecture/overview.md), [docs/adr/0001-high-level-architecture.md](docs/adr/0001-high-level-architecture.md), and related ADRs.
 
 ---
 
@@ -72,10 +72,12 @@ Copy `.env.example` → `.env` for local overrides. **Never commit `.env`.**
 
 | Doc | Purpose |
 |-----|---------|
-| [docs/requirements.md](docs/requirements.md) | User stories & NFRs |
+| [docs/requirements.md](docs/requirements.md) | Personas, detailed user stories, full NFRs (v2) |
+| [docs/ui-specs.md](docs/ui-specs.md) | Screens, flows, PWA, voice, shadcn/ui, a11y |
+| [docs/architecture/overview.md](docs/architecture/overview.md) | Component breakdown & diagrams |
+| [docs/adr/](docs/adr/) | ADRs (architecture, stack, versioning, guardrails) |
 | [docs/backlog.md](docs/backlog.md) | Living backlog (deferrals + completions) |
 | [docs/grok-three-agent-protocol.md](docs/grok-three-agent-protocol.md) | How we build (v1.0) |
-| [docs/adr/](docs/adr/) | Architecture Decision Records |
 | [CHANGELOG.md](CHANGELOG.md) | Release / PR history |
 
 ---

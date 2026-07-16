@@ -12,6 +12,13 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ### Planned
 - Phase 1: GCP API enablement, CMEK, auth, CI foundation
 
+### Added
+- Phase 0 Beta documentation: requirements v2 (persona stories + acceptance criteria + expanded NFRs)
+- `docs/ui-specs.md` — user flows, screens, PWA, voice, shadcn/ui, responsive & a11y
+- `docs/architecture/overview.md` — component breakdown and sequence/context diagrams
+- ADR-0003 document versioning model; ADR-0004 guardrails architecture
+- ADR-0002 updated for shadcn/ui design system
+
 ### Fixed
 - Removed hard-coded GCP project ID from docs and Terraform; use `var.gcp_project_id` / placeholder `your-gcp-project-id` (Phase 0.1)
 

@@ -121,7 +121,9 @@ After each phase/PR:
 
 - GCP project: `var.gcp_project_id` / `GCP_PROJECT_ID` (never hardcode project/region in app code or docs; use config/TF vars).
 - Quality gates for retrieval/generation use **held-out** evaluation sets only.
-- Hybrid retrieval + citations + version awareness are product pillars (see ADR-0001).
+- Hybrid retrieval + citations + version awareness are product pillars (see ADR-0001, ADR-0003).
+- Guardrails are layered per ADR-0004; refuse when ungrounded.
+- UI contract: `docs/ui-specs.md` (shadcn/ui); product contract: `docs/requirements.md`.
 - Analytics: hashed IDs + metadata — no raw query text by default (NFR-PRV-01).
 
 ---

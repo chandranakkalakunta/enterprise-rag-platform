@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted — 2026-07-16
+Accepted — 2026-07-16  
+**Amended:** 2026-07-16 (Phase 0 Beta) — cross-links to overview, versioning (ADR-0003), guardrails (ADR-0004); no change to core decision.
 
 ## Context
 
@@ -117,7 +118,11 @@ Selection criteria (priority order):
 
 ## References
 
-- ADR-0002 (Tech Stack)
+- [ADR-0002 Tech Stack](./0002-tech-stack.md)
+- [ADR-0003 Document Versioning](./0003-document-versioning.md)
+- [ADR-0004 Guardrails Architecture](./0004-guardrails-architecture.md)
+- [Architecture overview (diagrams & components)](../architecture/overview.md)
+- [Requirements](../requirements.md) · [UI specs](../ui-specs.md)
 - Enterprise HR RAG production patterns (hybrid + RRF + PII-free BigQuery)
 - Vertex AI Gemini / Vector Search docs
 - Three-Agent Engineering Protocol (project adaptation: `docs/grok-three-agent-protocol.md`)

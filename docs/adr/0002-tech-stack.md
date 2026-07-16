@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted — 2026-07-16
+Accepted — 2026-07-16  
+**Amended:** 2026-07-16 (Phase 0 Beta) — locked **shadcn/ui** + UX contract `docs/ui-specs.md`.
 
 ## Context
 
@@ -31,10 +32,12 @@ Phase 0 must lock a coherent stack for the Enterprise RAG Platform before featur
 |------|--------|
 | Framework | Next.js 15 (App Router) + TypeScript |
 | UI | React 19 (as shipped with Next) |
-| Styling | Tailwind CSS (placeholder; design system later) |
+| Design system | **shadcn/ui** + Tailwind CSS + Lucide icons |
+| Forms (recommended) | React Hook Form + Zod |
 | PWA | `@ducanh2912/next-pwa` or next-pwa-compatible setup (wired in later phase) |
 | Package manager | npm (lockfile committed); pnpm optional later if monorepo workspaces demand it |
 | Node | 22 LTS |
+| UX contract | `docs/ui-specs.md` |
 
 ### AI / RAG
 | Item | Choice |
@@ -75,6 +78,7 @@ Phase 0 must lock a coherent stack for the Enterprise RAG Platform before featur
 
 - **Python + FastAPI** is the default for production RAG on GCP (Vertex SDKs, async I/O, OpenAPI).
 - **Next.js** provides App Router, SSR/SSG options, and a clear PWA path for enterprise chat UX.
+- **shadcn/ui** provides accessible Radix primitives with in-repo source ownership and Tailwind consistency.
 - **Vertex AI** keeps data path and IAM inside GCP; reduces multi-cloud key sprawl.
 - **requirements.txt pins** match Chandra’s production non-negotiable for CI hermetic installs.
 - **Terraform** is the standard for reviewable, idempotent GCP foundation.
@@ -106,7 +110,10 @@ Phase 0 must lock a coherent stack for the Enterprise RAG Platform before featur
 - Why rejected: Weaker fit for RAG/ML libraries and Vertex Python tooling as primary path
 
 ### Frontend: Vite SPA only (no Next.js)
-- Why rejected: Phase goals include PWA + richer routing/SSR options for enterprise auth and SEO-free but installable app; Next.js is the specified stack for this project
+- Why rejected: Phase goals include PWA + richer routing/SSR options for enterprise auth and installable app; Next.js is the specified stack for this project
+
+### Frontend: Heavy proprietary component kits
+- Why rejected: Less portable; shadcn keeps components owned in-repo and aligned with Tailwind
 
 ### Package managers: Poetry-only without requirements.txt
 - Why rejected: CI non-negotiable is install from requirements.txt with pins; pyproject may coexist for metadata
@@ -119,8 +126,10 @@ Phase 0 must lock a coherent stack for the Enterprise RAG Platform before featur
 
 ## References
 
-- ADR-0001 High-Level Architecture
+- [ADR-0001 High-Level Architecture](./0001-high-level-architecture.md)
+- [UI specs](../ui-specs.md)
 - FastAPI: https://fastapi.tiangolo.com
 - Next.js: https://nextjs.org/docs
+- shadcn/ui: https://ui.shadcn.com
 - Vertex AI: https://cloud.google.com/vertex-ai/docs
 - Terraform Google provider: https://registry.terraform.io/providers/hashicorp/google/latest/docs
