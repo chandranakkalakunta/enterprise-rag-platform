@@ -1,11 +1,31 @@
 # Enterprise RAG Platform
 
-Production-grade Enterprise RAG on Google Cloud Platform.
+Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
-**GCP project:** `var.gcp_project_id` (set via tfvars / `GCP_PROJECT_ID`; never hard-coded)  
-**Phase:** 0 Gamma — Requirements locked (docs complete)  
-**Stack:** Next.js PWA · shadcn/ui · FastAPI · LangGraph · Vertex AI Gemini + Vector Search · Terraform · Cloud Run (`api`, `ingest-worker`, `web`)  
-**Audience:** `chandraailabs.com` + `gmail.com`
+**Owner:** Chandra AI Labs (`chandraailabs.com`)  
+**Status:** **Phase 0 Complete — Requirements Locked**  
+**PR:** [#1 — Phase 0: Project Foundation](https://github.com/chandranakkalakunta/enterprise-rag-platform/pull/1)  
+**GCP project:** `var.gcp_project_id` / `GCP_PROJECT_ID` (never hard-coded)  
+**Audience (auth allowlist):** `chandraailabs.com` + `gmail.com`  
+**Stack:** Next.js PWA · shadcn/ui · FastAPI · **LangGraph** · Vertex AI Gemini + **Vector Search** · Terraform · Cloud Run (`api`, `ingest-worker`, `web`)
+
+---
+
+## Phase progress
+
+| Phase | Focus | Status |
+|-------|--------|--------|
+| **0** | Foundation & requirements lock | ✅ **Complete** |
+| **1** | GCP foundation, auth, WIF CI, health metadata | 🔜 Next |
+| **2** | Ingestion & document versioning | Planned |
+| **3** | Hybrid RAG, citations, guardrails, 5-star feedback | Planned |
+| **4** | Multi-turn, ACL depth, safety tuning | Planned |
+| **5** | Voice + PWA install/offline | Planned |
+| **6** | Analytics, eval gates, cost dashboards | Planned |
+
+Full index: [docs/phases.md](docs/phases.md)  
+Phase 0 retrospective: [docs/retrospectives/phase-0.md](docs/retrospectives/phase-0.md)  
+Phase 0 engineering report: [docs/reports/phase-0-engineering-report.md](docs/reports/phase-0-engineering-report.md)
 
 ---
 
@@ -17,10 +37,27 @@ Production-grade Enterprise RAG on Google Cloud Platform.
               ┌────────────────┼────────────────┐
               ▼                ▼                ▼
         ingest-worker    Vertex Vector     BigQuery
-        (async MM+index) Search + BM25     (metadata)
+        (async MM+index) Search + BM25     (metadata only)
 ```
 
-See [docs/architecture/overview.md](docs/architecture/overview.md), [docs/requirements.md](docs/requirements.md) (v3), and ADRs 0001–0005.
+Details: [docs/architecture/overview.md](docs/architecture/overview.md) · ADRs [0001](docs/adr/0001-high-level-architecture.md)–[0005](docs/adr/0005-security-posture.md)
+
+---
+
+## Documentation map
+
+| Doc | Purpose |
+|-----|---------|
+| [docs/requirements.md](docs/requirements.md) | Personas, user stories, NFRs (v3 locked) |
+| [docs/ui-specs.md](docs/ui-specs.md) | Screens, PWA, voice, StarRating, multimodal, shadcn/ui |
+| [docs/architecture/overview.md](docs/architecture/overview.md) | Services, LangGraph, cache, multimodal |
+| [docs/adr/](docs/adr/) | Architecture Decision Records (0001–0005) |
+| [docs/backlog.md](docs/backlog.md) | Living backlog |
+| [docs/phases.md](docs/phases.md) | Phase index |
+| [docs/grok-three-agent-protocol.md](docs/grok-three-agent-protocol.md) | How we build |
+| [docs/retrospectives/](docs/retrospectives/) | Phase retrospectives |
+| [docs/reports/](docs/reports/) | Engineering reports |
+| [CHANGELOG.md](CHANGELOG.md) | Change history |
 
 ---
 
@@ -28,19 +65,21 @@ See [docs/architecture/overview.md](docs/architecture/overview.md), [docs/requir
 
 ```
 enterprise-rag-platform/
-├── backend/          # FastAPI API + RAG services
-├── frontend/         # Next.js PWA
-├── terraform/        # GCP infrastructure (skeleton in Phase 0)
-├── docs/             # Requirements, ADRs, backlog, protocol, runbooks
-├── scripts/          # Idempotent ops scripts (later)
-├── config/           # Non-secret config samples
+├── backend/          # FastAPI + LangGraph (api / ingest-worker)
+├── frontend/         # Next.js PWA (web)
+├── terraform/        # GCP IaC skeleton (var.gcp_project_id)
+├── docs/             # Requirements, ADRs, backlog, retros, reports
+├── scripts/          # Ops scripts (later)
+├── config/           # Non-secret samples
 ├── CHANGELOG.md
 └── README.md
 ```
 
 ---
 
-## Quick start (local)
+## Local development (quick start)
+
+**Requirements:** Python **3.12** (not 3.14), Node **22**, optional Terraform ≥ 1.5.
 
 ### Backend
 
@@ -51,6 +90,11 @@ pip install -r requirements.txt && pip check
 uvicorn app.main:app --reload --port 8000
 ```
 
+- Health: http://localhost:8000/health  
+- OpenAPI: http://localhost:8000/docs  
+
+> Phase 1 will add `version` + `deployed_at` to `/health` and `/ready` (already required in NFRs).
+
 ### Frontend
 
 ```bash
@@ -59,29 +103,42 @@ npm install
 npm run dev
 ```
 
-Copy `.env.example` → `.env` for local overrides. **Never commit `.env`.**
+Open http://localhost:3000
+
+### Config
+
+```bash
+cp .env.example .env
+# set GCP_PROJECT_ID and other local values — never commit .env
+```
+
+### Terraform (skeleton only in Phase 0)
+
+```bash
+cd terraform
+# copy environments/dev/terraform.tfvars.example → terraform.tfvars (gitignored)
+# terraform init / plan in Phase 1 after APIs and backend state exist
+```
 
 ---
 
-## Documentation map
+## Security highlights
 
-| Doc | Purpose |
-|-----|---------|
-| [docs/requirements.md](docs/requirements.md) | Personas, stories, NFRs (v3 Gamma lock) |
-| [docs/ui-specs.md](docs/ui-specs.md) | Screens, PWA, voice, feedback, multimodal, shadcn/ui |
-| [docs/architecture/overview.md](docs/architecture/overview.md) | Services, LangGraph, cache, multimodal |
-| [docs/adr/](docs/adr/) | ADRs 0001–0005 (incl. security posture) |
-| [docs/backlog.md](docs/backlog.md) | Living backlog (deferrals + completions) |
-| [docs/grok-three-agent-protocol.md](docs/grok-three-agent-protocol.md) | How we build (v1.0) |
-| [CHANGELOG.md](CHANGELOG.md) | Release / PR history |
+- **Zero JSON service-account keys** — WIF/OIDC for CI; runtime uses attached Cloud Run SAs ([ADR-0005](docs/adr/0005-security-posture.md))
+- Secrets in **Secret Manager** only; `.env` gitignored
+- Least-privilege **custom SAs** per service (`api`, `ingest-worker`, `web`)
+- CMEK on data stores (from foundation phase)
+- Non-root containers (uid/gid **1001**)
+- No PII in logs/analytics by default (hashed subject IDs)
+- Auth domain allowlist: `chandraailabs.com`, `gmail.com`
 
 ---
 
-## Engineering protocol
+## Contributing / protocol
 
-We follow the **Grok Three-Agent Protocol** (project adaptation v1.0):
+We follow the **Grok Three-Agent Protocol** ([docs/grok-three-agent-protocol.md](docs/grok-three-agent-protocol.md)):
 
-- Feature branches only — never push feature work to `main`
+- Feature branches only — never push feature work directly to `main`
 - ADRs for significant decisions
 - Living `docs/backlog.md` and `CHANGELOG.md`
 - Root cause over silent workarounds
@@ -89,33 +146,6 @@ We follow the **Grok Three-Agent Protocol** (project adaptation v1.0):
 
 ---
 
-## Phase roadmap (summary)
-
-| Phase | Focus |
-|-------|--------|
-| **0** | Foundation, docs, ADRs, skeletons |
-| **1** | GCP foundation, auth, CI skeleton |
-| **2** | Ingestion & document versioning |
-| **3** | Hybrid RAG + citations + guardrails baseline |
-| **4** | Multi-turn, ACL depth, safety tuning |
-| **5** | Voice + PWA |
-| **6** | Analytics, evaluation gates, cost dashboards |
-
-Details: [docs/requirements.md](docs/requirements.md) · [docs/backlog.md](docs/backlog.md)
-
----
-
-## Security non-negotiables
-
-- Secrets in **Secret Manager** only
-- Least-privilege service accounts
-- CMEK on data stores (from foundation phase)
-- Non-root containers (uid/gid 1001)
-- No PII in logs (hash user identifiers)
-- Structured JSON logging
-
----
-
 ## License
 
-Proprietary — Chandra AI Labs / project owner.
+Proprietary — **Chandra AI Labs** / project owner.

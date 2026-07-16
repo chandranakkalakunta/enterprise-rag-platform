@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-16 (Phase 0 Gamma — requirements lock)
+Last updated: 2026-07-16 (**Phase 0 complete** — PR #1)
 
 ---
 
@@ -22,21 +22,22 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-FND-01 | Git monorepo structure, docs, placeholders | Done | Phase 0 | |
-| BL-FND-02 | ADR-0001 architecture + ADR-0002 tech stack | Done | Phase 0 | Amended Gamma |
-| BL-FND-03 | requirements.md + backlog + protocol | Done | Phase 0 | v3 Gamma lock |
-| BL-FND-04 | Terraform skeleton (`var.gcp_project_id`) | Done | Phase 0 | Skeleton only |
-| BL-FND-09 | Remove hard-coded GCP project IDs | Done | Phase 0.1 | |
-| BL-FND-10 | Detailed requirements v2 + UI specs + arch overview | Done | Phase 0 Beta | |
-| BL-FND-11 | ADR-0003 versioning + ADR-0004 guardrails | Done | Phase 0 Beta | |
-| BL-FND-12 | Requirements lock Gamma (feedback, MM, LangGraph, security) | Done | Phase 0 Gamma | This change set |
-| BL-FND-13 | ADR-0005 security posture (zero JSON keys, WIF) | Done | Phase 0 Gamma | |
+| BL-FND-01 | Git monorepo structure, docs, placeholders | Done | ✓ Done — Phase 0 / PR #1 | |
+| BL-FND-02 | ADR-0001 architecture + ADR-0002 tech stack | Done | ✓ Done — Phase 0 / PR #1 | |
+| BL-FND-03 | requirements.md + backlog + protocol | Done | ✓ Done — Phase 0 / PR #1 | v3 Gamma lock |
+| BL-FND-04 | Terraform skeleton (`var.gcp_project_id`) | Done | ✓ Done — Phase 0 / PR #1 | Skeleton only |
+| BL-FND-09 | Remove hard-coded GCP project IDs | Done | ✓ Done — Phase 0.1 / PR #1 | |
+| BL-FND-10 | Detailed requirements v2 + UI specs + arch overview | Done | ✓ Done — Phase 0 Beta / PR #1 | |
+| BL-FND-11 | ADR-0003 versioning + ADR-0004 guardrails | Done | ✓ Done — Phase 0 Beta / PR #1 | |
+| BL-FND-12 | Requirements lock Gamma (feedback, MM, LangGraph, security) | Done | ✓ Done — Phase 0 Gamma / PR #1 | |
+| BL-FND-13 | ADR-0005 security posture (zero JSON keys, WIF) | Done | ✓ Done — Phase 0 Gamma / PR #1 | |
+| BL-FND-17 | Phase 0 closure (retro, eng report, README, phases index) | Done | ✓ Done — Phase 0 / PR #1 | Closure commit |
 | BL-FND-05 | Enable required GCP APIs (idempotent script) | Todo | Phase 1 | |
 | BL-FND-06 | CMEK keys + GCS buckets | Todo | Phase 1 | |
 | BL-FND-07 | Cloud Build/GHA + WIF keyless CI | Todo | Phase 1–2 | US-OPS-04 |
 | BL-FND-08 | detect-secrets in CI | Todo | Phase 1 | |
-| BL-FND-14 | Three Cloud Run services (api, ingest-worker, web) | Todo | Phase 1–2 | |
-| BL-FND-15 | Health returns version + deployed_at | Todo | Phase 1 | NFR-REL-03a; code change Phase 1 |
+| BL-FND-14 | Three Cloud Run services (api, ingest-worker, web) | Todo | Phase 1–2 | Scaffold |
+| BL-FND-15 | Health returns version + deployed_at | Todo | Phase 1 | NFR-REL-03a; **code** |
 | BL-FND-16 | HTTPS LB + Cloud Armor | Deferred | Pre-prod | Explicitly later |
 
 ## Auth & Security
@@ -64,7 +65,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-ING-06 | Atomic index alias swap on publish | Todo | Phase 3 | |
 | BL-ING-07 | Ingest job visibility UI/API | Todo | Phase 2 | |
 | BL-ING-08 | Multimodal table/image extraction | Todo | Phase 2–3 | US-MM-01 · P1 |
-| BL-ING-09 | Synthetic + OSS fixture corpus | Todo | Phase 2 | Data source policy |
+| BL-ING-09 | Synthetic + OSS fixture corpus | Todo | Phase 2 | |
 
 ## Retrieval & Generation
 
@@ -78,10 +79,10 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-RAG-06 | Multi-turn conversation memory | Deferred | Phase 4 | |
 | BL-RAG-07 | Collection / filter scope (UX) | Deferred | Phase 4 | US-QA-05 |
 | BL-RAG-08 | Optional token streaming to client | Deferred | Phase 3+ | |
-| BL-RAG-09 | LangGraph query orchestration | Todo | Phase 3 | P0 · ADR-0002 |
+| BL-RAG-09 | LangGraph query orchestration | Todo | Phase 3 | P0 · locked in Phase 0 docs |
 | BL-RAG-10 | Metadata filtering at index query | Todo | Phase 3 | P0 · US-QA-08 |
 | BL-RAG-11 | Semantic caching | Todo | Phase 3–4 | P1 · US-QA-07 |
-| BL-RAG-12 | Vertex AI Vector Search index wiring | Todo | Phase 2–3 | Locked choice |
+| BL-RAG-12 | Vertex AI Vector Search index wiring | Todo | Phase 2–3 | Locked product choice |
 
 ## Feedback
 
@@ -95,7 +96,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-GRD-01 | Prompt-injection defenses | Todo | Phase 3–4 | |
+| BL-GRD-01 | Prompt-injection defenses | Todo | Phase 3–4 | Spec locked Phase 0 |
 | BL-GRD-02 | Output grounding / citation checks | Todo | Phase 3–4 | |
 | BL-GRD-03 | Configurable safety policies | Deferred | Phase 4 | |
 | BL-GRD-04 | Guardrail metrics counters | Todo | Phase 3 | |
@@ -124,7 +125,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
 | BL-FE-01 | Next.js app scaffold beyond placeholder | Todo | Phase 1 | |
-| BL-FE-02 | shadcn/ui + app shell per ui-specs | Todo | Phase 1–2 | |
+| BL-FE-02 | shadcn/ui + app shell per ui-specs | Todo | Phase 1–2 | Spec locked Phase 0 |
 | BL-FE-03 | Chat UI + citations rendering | Todo | Phase 3 | |
 | BL-FE-04 | Admin document management UI | Todo | Phase 2–3 | |
 | BL-FE-05 | History + settings screens | Todo | Phase 3–4 | |
@@ -144,13 +145,14 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-DEC-05 | Ingest enqueue: Cloud Tasks vs Pub/Sub | Todo | Phase 2 ADR |
 | BL-DEC-06 | Semantic cache backing store | Todo | Phase 3 |
 
-**Resolved in Gamma (no longer open):** LangGraph; Vertex AI Vector Search product choice; Cloud Run service split (api / ingest-worker / web); zero JSON keys + WIF posture (ADR-0005).
+**Resolved in Phase 0 (docs lock):** LangGraph; Vertex AI Vector Search; Cloud Run service split (`api` / `ingest-worker` / `web`); zero JSON keys + WIF posture (ADR-0005); audience allowlist; 5-star feedback (P0); multimodal (P1).
 
 ---
 
 ## Recently completed
 
-- **2026-07-16** — Phase 0 Gamma: requirements v3 lock (audience, feedback, multimodal, LangGraph, metadata filters, semantic cache, health version, security); ui-specs + architecture; ADR-0002 amend; ADR-0005.
-- **2026-07-16** — Phase 0 Beta: requirements v2, ui-specs, architecture overview, ADR-0003/0004.
+- **2026-07-16** — **Phase 0 complete** (PR #1): foundation, requirements v3, UI specs, architecture, ADRs 0001–0005, retrospective, engineering report, README + phases index.
+- **2026-07-16** — Phase 0 Gamma: requirements lock (feedback, multimodal, LangGraph, security, health NFR).
+- **2026-07-16** — Phase 0 Beta: requirements v2, ui-specs, architecture, ADR-0003/0004.
 - **2026-07-16** — Phase 0.1: project ID parameterization.
-- **2026-07-16** — Phase 0 foundation scaffold.
+- **2026-07-16** — Phase 0 Alpha: monorepo scaffold + initial docs.
