@@ -1,0 +1,12 @@
+# Copy to terraform.tfvars (gitignored) and set real values locally.
+# Never commit real project IDs or secrets.
+
+gcp_project_id = "your-gcp-project-id"
+region         = "asia-south1"
+environment    = "dev"
+
+labels = {
+  project     = "enterprise-rag-platform"
+  managed_by  = "terraform"
+  environment = "dev"
+}

@@ -1,0 +1,25 @@
+[project]
+name = "enterprise-rag-platform-backend"
+version = "0.1.0"
+description = "Enterprise RAG Platform — FastAPI backend"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Proprietary" }
+authors = [{ name = "Chandra Nakkalakunta" }]
+
+# Runtime dependencies are pinned in requirements.txt for CI hermetic installs.
+# Keep this metadata section for packaging/tooling only.
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.coverage.run]
+source = ["app"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 0
+show_missing = true
