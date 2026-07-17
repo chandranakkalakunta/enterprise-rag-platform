@@ -164,3 +164,20 @@ output "cloud_run_service_accounts" {
     k => google_service_account.rag[s.sa_key].email
   }
 }
+
+# ── Phase 1.7: Artifact Registry ─────────────────────────────────────────────
+
+output "artifact_registry_repository" {
+  description = "Artifact Registry repository ID"
+  value       = google_artifact_registry_repository.containers.repository_id
+}
+
+output "artifact_registry_location" {
+  description = "Artifact Registry location"
+  value       = google_artifact_registry_repository.containers.location
+}
+
+output "artifact_registry_docker_base" {
+  description = "Base path for docker push/pull (without image name/tag)"
+  value       = "${var.region}-docker.pkg.dev/${var.gcp_project_id}/${google_artifact_registry_repository.containers.repository_id}"
+}
