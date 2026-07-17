@@ -4,11 +4,11 @@
 
 # ── CI service account (sa-rag-ci) — project roles ───────────────────────────
 # roles/run.admin              — deploy/update Cloud Run services (narrow later)
-# roles/storage.admin          — TEMP: push artifacts / temporary object ops; replace with bucket IAM
 # roles/secretmanager.secretAccessor — read deploy-time secrets
 # roles/artifactregistry.writer — push container images
 # roles/cloudbuild.builds.editor — submit builds if using Cloud Build
 # roles/logging.logWriter      — CI logs
+# storage: bucket-scoped objectAdmin on rag-docs-* only (gcs.tf); NO project storage.admin
 
 resource "google_project_iam_member" "ci" {
   for_each = local.ci_project_roles

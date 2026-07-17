@@ -3,7 +3,7 @@
 Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
-**Status:** **Phase 1.4 applied** — document GCS buckets with CMEK  
+**Status:** **Phase 1.5 applied** — health contract + CI storage.admin removed  
 **GCP project:** set via `var.gcp_project_id` / `GCP_PROJECT_ID` (never hard-coded in app code)  
 **Project ID:** `enterprise-rag-platform-502711` (number `642114828076`)  
 
@@ -21,8 +21,9 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 | **1.1** | Multi-env Terraform, APIs, state buckets | ✅ **Complete** |
 | **1.2** | Custom SAs + GitHub WIF | ✅ **Complete** |
 | **1.3** | CMEK + Secret Manager shells | ✅ **Complete** |
-| **1.4** | Application GCS buckets with CMEK | ✅ **Applied** (this PR) |
-| **1.5+** | Auth, health code, Cloud Run, Binary Auth (later) | 🔜 Next |
+| **1.4** | Application GCS buckets with CMEK | ✅ **Complete** |
+| **1.5** | Health endpoints + CI IAM tighten | ✅ **Applied** (this PR) |
+| **1.6+** | Auth, Cloud Run, Binary Auth (later) | 🔜 Next |
 | **2** | Ingestion & document versioning | Planned |
 | **3** | Hybrid RAG, citations, guardrails, 5-star feedback | Planned |
 | **4** | Multi-turn, ACL depth, safety tuning | Planned |
@@ -97,9 +98,10 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 - Health: http://localhost:8000/health  
+- Ready: http://localhost:8000/ready  
 - OpenAPI: http://localhost:8000/docs  
 
-> Phase 1 will add `version` + `deployed_at` to `/health` and `/ready` (already required in NFRs).
+Both return `status`, `service` (`rag-api`), `version` (`APP_VERSION`, default `dev`), and `deployed_at` (`DEPLOYED_AT`, default `""`). Set both env vars at Cloud Run deploy.
 
 ### Frontend
 

@@ -51,8 +51,8 @@ gs://rag-docs-dev/processed/{document_id}/{version_id}/chunks.jsonl
 | `sa-rag-ci` | `roles/storage.objectAdmin` (bucket-scoped) |
 | `sa-rag-web` | **none** (web should not touch GCS data plane) |
 
-**Note:** `sa-rag-ci` still has project-level `roles/storage.admin` from Phase 1.2.  
-After confirming CI only needs bucket-scoped access, **remove** project `storage.admin` (backlog BL-FND-24).
+**Note (Phase 1.5):** Project-level `roles/storage.admin` on `sa-rag-ci` has been **removed**.  
+CI storage access is **bucket-scoped** `objectAdmin` on `rag-docs-*` only.
 
 ## KMS
 

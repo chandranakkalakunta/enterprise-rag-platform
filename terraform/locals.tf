@@ -42,11 +42,11 @@ locals {
     }
   }
 
-  # Project-level roles for CI (bootstrap — tighten in later phases)
-  # Justifications documented on each grant in iam.tf
+  # Project-level roles for CI
+  # Phase 1.5: removed roles/storage.admin — use bucket-scoped objectAdmin on rag-docs-* only
+  # Justifications documented in iam.tf
   ci_project_roles = toset([
     "roles/run.admin",
-    "roles/storage.admin",
     "roles/secretmanager.secretAccessor",
     "roles/artifactregistry.writer",
     "roles/cloudbuild.builds.editor",
