@@ -5,7 +5,9 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
 **Status:** **Phase 0 Complete — Requirements Locked**  
 **PR:** [#1 — Phase 0: Project Foundation](https://github.com/chandranakkalakunta/enterprise-rag-platform/pull/1)  
-**GCP project:** `var.gcp_project_id` / `GCP_PROJECT_ID` (never hard-coded)  
+**GCP project:** set via `var.gcp_project_id` / `GCP_PROJECT_ID` (never hard-coded in app code)  
+**Current dev example:** `enterprise-rag-platform-502711` (project number `642114828076`)  
+
 **Audience (auth allowlist):** `chandraailabs.com` + `gmail.com`  
 **Stack:** Next.js PWA · shadcn/ui · FastAPI · **LangGraph** · Vertex AI Gemini + **Vector Search** · Terraform · Cloud Run (`api`, `ingest-worker`, `web`)
 

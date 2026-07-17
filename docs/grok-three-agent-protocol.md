@@ -119,7 +119,7 @@ After each phase/PR:
 
 ## 9. Project-Specific Notes (Enterprise RAG)
 
-- GCP project: `var.gcp_project_id` / `GCP_PROJECT_ID` (never hardcode project/region in app code or docs; use config/TF vars).
+- GCP project: `var.gcp_project_id` / `GCP_PROJECT_ID` (never hardcode in application code; current dev example `enterprise-rag-platform-502711`).
 - Quality gates for retrieval/generation use **held-out** evaluation sets only.
 - Hybrid retrieval + citations + version awareness are product pillars (see ADR-0001, ADR-0003).
 - Orchestration: **LangGraph**; vector index: **Vertex AI Vector Search**; services: **api / ingest-worker / web**.

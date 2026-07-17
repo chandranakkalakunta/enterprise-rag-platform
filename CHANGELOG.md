@@ -12,6 +12,9 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ### Planned
 - Phase 1: GCP API enablement, CMEK, auth allowlist, WIF CI, health `version` + `deployed_at` in code, three Cloud Run services
 
+### Changed
+- Phase 0.1 hotfix: GCP project example/default switched to `enterprise-rag-platform-502711` (project number `642114828076`) via `var.gcp_project_id` / `GCP_PROJECT_ID` — no application hard-coding; old placeholder/dev IDs removed from examples
+
 ---
 
 ## [0.1.0] — 2026-07-16 — Phase 0: Foundation & Requirements Lock (**Complete**)

@@ -12,7 +12,8 @@ Governing ADRs: [0001](../adr/0001-high-level-architecture.md) · [0002](../adr/
 
 This document expands ADR-0001 into an implementable **component breakdown**, data/control flows, and diagram set for engineering phases. It does not replace ADRs for decision history.
 
-**GCP project/region:** always from Terraform/config (`var.gcp_project_id`, `var.region`) — never hard-coded real project IDs in application code.
+**GCP project/region:** always from Terraform/config (`var.gcp_project_id`, `var.region`) — never hard-coded in application code.  
+**Current dev example project ID:** `enterprise-rag-platform-502711` (number `642114828076`).
 
 **Audience:** OAuth allowlist `chandraailabs.com` + `gmail.com`.  
 **Corpora (near term):** synthetic + public open-source documents.

@@ -1,7 +1,7 @@
 variable "gcp_project_id" {
-  description = "GCP project ID. Set via tfvars or -var; do not hardcode real project IDs in code or docs."
+  description = "GCP project ID. Set via tfvars or -var. Application code must read from env/config only — never hard-code. Default is the current dev project example."
   type        = string
-  default     = "your-gcp-project-id"
+  default     = "enterprise-rag-platform-502711"
 }
 
 variable "region" {

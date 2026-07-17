@@ -14,9 +14,9 @@ terraform {
 
   # Remote state backend — configure after GCS state bucket exists (Phase 1).
   # Backend blocks cannot interpolate variables; set the bucket name explicitly
-  # in a backend.hcl or partial config (derived from your gcp_project_id at apply time).
+  # in a backend.hcl or partial config (derived from var.gcp_project_id at apply time).
   # backend "gcs" {
-  #   bucket = "your-gcp-project-id-tfstate"
+  #   bucket = "enterprise-rag-platform-502711-tfstate"
   #   prefix = "enterprise-rag-platform"
   # }
 }

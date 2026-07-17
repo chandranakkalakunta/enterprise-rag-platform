@@ -7,7 +7,7 @@ Accepted — 2026-07-16
 
 ## Context
 
-We are building a production-grade Enterprise RAG (Retrieval-Augmented Generation) platform on Google Cloud Platform. The target project is supplied at apply time via Terraform variable `var.gcp_project_id` (never hard-coded in application code or committed docs). The system must support:
+We are building a production-grade Enterprise RAG (Retrieval-Augmented Generation) platform on Google Cloud Platform. The target project is supplied at apply time via Terraform variable `var.gcp_project_id` / env `GCP_PROJECT_ID` (never hard-coded in application code). Current dev example: `enterprise-rag-platform-502711`. The system must support:
 
 1. **Document Q&A** with citations over versioned enterprise corpora
 2. **PWA UI** for web and installable mobile experience
