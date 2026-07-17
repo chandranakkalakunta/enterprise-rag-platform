@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-17 (**Phase 0.1** — GCP project ID switch)
+Last updated: 2026-07-17 (**Phase 1.1** — multi-env Terraform foundation applied)
 
 ---
 
@@ -27,19 +27,23 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-FND-03 | requirements.md + backlog + protocol | Done | ✓ Done — Phase 0 / PR #1 | v3 Gamma lock |
 | BL-FND-04 | Terraform skeleton (`var.gcp_project_id`) | Done | ✓ Done — Phase 0 / PR #1 | Skeleton only |
 | BL-FND-09 | Parameterize GCP project IDs (no hard-code in app) | Done | ✓ Done — Phase 0 / PR #1 | Placeholders + var.gcp_project_id |
-| BL-FND-18 | Switch GCP project example to `enterprise-rag-platform-502711` | Done | ✓ Done — Phase 0.1 | Project number 642114828076; TF + .env.example + docs |
+| BL-FND-18 | Switch GCP project example to `enterprise-rag-platform-502711` | Done | ✓ Done — Phase 0.1 | Project number 642114828076 |
 | BL-FND-10 | Detailed requirements v2 + UI specs + arch overview | Done | ✓ Done — Phase 0 Beta / PR #1 | |
 | BL-FND-11 | ADR-0003 versioning + ADR-0004 guardrails | Done | ✓ Done — Phase 0 Beta / PR #1 | |
 | BL-FND-12 | Requirements lock Gamma (feedback, MM, LangGraph, security) | Done | ✓ Done — Phase 0 Gamma / PR #1 | |
 | BL-FND-13 | ADR-0005 security posture (zero JSON keys, WIF) | Done | ✓ Done — Phase 0 Gamma / PR #1 | |
 | BL-FND-17 | Phase 0 closure (retro, eng report, README, phases index) | Done | ✓ Done — Phase 0 / PR #1 | Closure commit |
-| BL-FND-05 | Enable required GCP APIs (idempotent script) | Todo | Phase 1 | |
-| BL-FND-06 | CMEK keys + GCS buckets | Todo | Phase 1 | |
-| BL-FND-07 | Cloud Build/GHA + WIF keyless CI | Todo | Phase 1–2 | US-OPS-04 |
-| BL-FND-08 | detect-secrets in CI | Todo | Phase 1 | |
+| BL-FND-05 | Enable required GCP APIs (Terraform for_each) | Done | ✓ Done — Phase 1.1 | 13 services; billing required |
+| BL-FND-19 | Multi-env Terraform layout (dev/test/prod) | Done | ✓ Done — Phase 1.1 | tfvars + backend.hcl |
+| BL-FND-20 | State buckets enterprise-rag-tfstate-{dev,test,prod} | Done | ✓ Done — Phase 1.1 | versioning, UBLA, soft-delete 7d |
+| BL-FND-21 | Remote state migration to GCS (dev backend) | Done | ✓ Done — Phase 1.1 | gs://enterprise-rag-tfstate-dev |
+| BL-FND-06 | CMEK keys + data GCS buckets | Todo | Phase 1.2+ | Not state buckets |
+| BL-FND-07 | Cloud Build/GHA + WIF keyless CI | Todo | Phase 1.2 | US-OPS-04 |
+| BL-FND-08 | detect-secrets in CI | Todo | Phase 1.2 | |
 | BL-FND-14 | Three Cloud Run services (api, ingest-worker, web) | Todo | Phase 1–2 | Scaffold |
 | BL-FND-15 | Health returns version + deployed_at | Todo | Phase 1 | NFR-REL-03a; **code** |
 | BL-FND-16 | HTTPS LB + Cloud Armor | Deferred | Pre-prod | Explicitly later |
+| BL-FND-22 | Custom SAs per Cloud Run service | Todo | Phase 1.2 | ADR-0005 |
 
 ## Auth & Security
 
@@ -152,6 +156,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-17** — **Phase 1.1:** multi-env Terraform, required APIs, state buckets `enterprise-rag-tfstate-{dev,test,prod}`, remote state on dev backend; billing linked as apply prerequisite.
 - **2026-07-17** — Phase 0.1: GCP project example/default → `enterprise-rag-platform-502711` (number `642114828076`); Terraform, `.env.example`, docs.
 - **2026-07-16** — **Phase 0 complete** (PR #1): foundation, requirements v3, UI specs, architecture, ADRs 0001–0005, retrospective, engineering report, README + phases index.
 - **2026-07-16** — Phase 0 Gamma: requirements lock (feedback, multimodal, LangGraph, security, health NFR).

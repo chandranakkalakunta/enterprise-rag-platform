@@ -6,8 +6,10 @@ Update when a phase opens or closes.
 | Phase | Name | Status | Primary artifacts |
 |-------|------|--------|-------------------|
 | **0** | Foundation & Requirements Lock | ✅ **Complete** — [PR #1](https://github.com/chandranakkalakunta/enterprise-rag-platform/pull/1) | [requirements](./requirements.md) · [ui-specs](./ui-specs.md) · [architecture](./architecture/overview.md) · [ADRs](./adr/) · [retro](./retrospectives/phase-0.md) · [report](./reports/phase-0-engineering-report.md) |
-| **0.1** | GCP project ID switch | ✅ **Done** (this branch) | Example/default `enterprise-rag-platform-502711` via `var.gcp_project_id` |
-| **1** | GCP Foundation | 🔜 Next | APIs, CMEK, SAs, WIF, health version fields, three Cloud Run services, OAuth allowlist |
+| **0.1** | GCP project ID switch | ✅ **Complete** | Example/default `enterprise-rag-platform-502711` |
+| **1.1** | Multi-env Terraform + APIs + state buckets | ✅ **Applied** | [bootstrap runbook](./runbooks/terraform-bootstrap.md) |
+| **1.2** | SAs + WIF | 🔜 Next | Least privilege, keyless CI |
+| **1.x** | CMEK, auth, health code, Cloud Run | Planned | Remainder of Phase 1 |
 | **2** | Ingestion & Versioning | Planned | Upload, parse, version publish/retire, ingest-worker |
 | **3** | Hybrid RAG + Guardrails | Planned | LangGraph path, citations, feedback, metadata filters |
 | **4** | Multi-turn & ACL depth | Planned | Conversations, collections, safety tuning |
