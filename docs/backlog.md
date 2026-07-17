@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-16 (**Phase 0 complete** — PR #1)
+Last updated: 2026-07-17 (**Phase 0.1** — GCP project ID switch)
 
 ---
 
@@ -26,7 +26,8 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-FND-02 | ADR-0001 architecture + ADR-0002 tech stack | Done | ✓ Done — Phase 0 / PR #1 | |
 | BL-FND-03 | requirements.md + backlog + protocol | Done | ✓ Done — Phase 0 / PR #1 | v3 Gamma lock |
 | BL-FND-04 | Terraform skeleton (`var.gcp_project_id`) | Done | ✓ Done — Phase 0 / PR #1 | Skeleton only |
-| BL-FND-09 | Remove hard-coded GCP project IDs | Done | ✓ Done — Phase 0.1 / PR #1 | |
+| BL-FND-09 | Parameterize GCP project IDs (no hard-code in app) | Done | ✓ Done — Phase 0 / PR #1 | Placeholders + var.gcp_project_id |
+| BL-FND-18 | Switch GCP project example to `enterprise-rag-platform-502711` | Done | ✓ Done — Phase 0.1 | Project number 642114828076; TF + .env.example + docs |
 | BL-FND-10 | Detailed requirements v2 + UI specs + arch overview | Done | ✓ Done — Phase 0 Beta / PR #1 | |
 | BL-FND-11 | ADR-0003 versioning + ADR-0004 guardrails | Done | ✓ Done — Phase 0 Beta / PR #1 | |
 | BL-FND-12 | Requirements lock Gamma (feedback, MM, LangGraph, security) | Done | ✓ Done — Phase 0 Gamma / PR #1 | |
@@ -151,6 +152,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-17** — Phase 0.1: GCP project example/default → `enterprise-rag-platform-502711` (number `642114828076`); Terraform, `.env.example`, docs.
 - **2026-07-16** — **Phase 0 complete** (PR #1): foundation, requirements v3, UI specs, architecture, ADRs 0001–0005, retrospective, engineering report, README + phases index.
 - **2026-07-16** — Phase 0 Gamma: requirements lock (feedback, multimodal, LangGraph, security, health NFR).
 - **2026-07-16** — Phase 0 Beta: requirements v2, ui-specs, architecture, ADR-0003/0004.

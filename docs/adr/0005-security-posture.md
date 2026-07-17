@@ -6,7 +6,7 @@ Accepted — 2026-07-16
 
 ## Context
 
-The Enterprise RAG Platform handles document content, user identity, and LLM traffic on GCP. Common anti-patterns in GCP projects include:
+The Enterprise RAG Platform handles document content, user identity, and LLM traffic on GCP (project selected via `var.gcp_project_id` / `GCP_PROJECT_ID`; current dev example `enterprise-rag-platform-502711`). Common anti-patterns in GCP projects include:
 
 - Downloading **JSON service-account keys** that leak via git, CI logs, or laptops  
 - Over-privileged single SA used by all services  

@@ -1,7 +1,9 @@
 # Enterprise RAG Platform — Requirements
 
 **Project:** enterprise-rag-platform  
-**GCP project:** set via Terraform `var.gcp_project_id` / env `GCP_PROJECT_ID` (never hard-coded)  
+**GCP project:** set via Terraform `var.gcp_project_id` / env `GCP_PROJECT_ID` (never hard-coded in application code)  
+**Current dev example:** `enterprise-rag-platform-502711` (number `642114828076`)  
+
 **Document version:** 3.0 (Phase 0 Gamma — requirements lock)  
 **Date:** 2026-07-16  
 **Status:** Requirements locked for Phase 1 kickoff (docs complete; implementation follows)

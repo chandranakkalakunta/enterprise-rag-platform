@@ -1,7 +1,8 @@
 # Enterprise RAG Platform — Terraform root module (skeleton)
 # Phase 0: structure only. No resources applied until Phase 1 foundation.
 #
-# GCP project: var.gcp_project_id (set via tfvars or -var; never commit secrets)
+# GCP project: var.gcp_project_id (default example: enterprise-rag-platform-502711)
+# Application code must never hard-code project ID; use env/config only.
 
 locals {
   name_prefix = "erp-${var.environment}"

@@ -6,6 +6,7 @@ Update when a phase opens or closes.
 | Phase | Name | Status | Primary artifacts |
 |-------|------|--------|-------------------|
 | **0** | Foundation & Requirements Lock | ✅ **Complete** — [PR #1](https://github.com/chandranakkalakunta/enterprise-rag-platform/pull/1) | [requirements](./requirements.md) · [ui-specs](./ui-specs.md) · [architecture](./architecture/overview.md) · [ADRs](./adr/) · [retro](./retrospectives/phase-0.md) · [report](./reports/phase-0-engineering-report.md) |
+| **0.1** | GCP project ID switch | ✅ **Done** (this branch) | Example/default `enterprise-rag-platform-502711` via `var.gcp_project_id` |
 | **1** | GCP Foundation | 🔜 Next | APIs, CMEK, SAs, WIF, health version fields, three Cloud Run services, OAuth allowlist |
 | **2** | Ingestion & Versioning | Planned | Upload, parse, version publish/retire, ingest-worker |
 | **3** | Hybrid RAG + Guardrails | Planned | LangGraph path, citations, feedback, metadata filters |
@@ -20,4 +21,4 @@ Update when a phase opens or closes.
 - Backlog: [docs/backlog.md](./backlog.md)
 - Protocol: [docs/grok-three-agent-protocol.md](./grok-three-agent-protocol.md)
 
-Last updated: 2026-07-16
+Last updated: 2026-07-17

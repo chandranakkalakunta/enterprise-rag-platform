@@ -13,7 +13,7 @@ Phase 0 must lock a coherent stack for the Enterprise RAG Platform before featur
 - FastAPI backend services and RAG pipelines in Python
 - **LangGraph** for explicit, testable query orchestration
 - Next.js PWA frontend (chat, voice, admin, feedback, multimodal render)
-- Terraform for GCP (`var.gcp_project_id` — set via tfvars; never hard-code real project IDs)
+- Terraform for GCP (`var.gcp_project_id` — set via tfvars; current dev example `enterprise-rag-platform-502711`; never hard-code in application code)
 - Reproducible dependency pins for CI
 - Production non-negotiables: non-root containers, Secret Manager, structured JSON logs, **zero JSON SA keys**, WIF/OIDC
 
