@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-17 (**Phase 2.4** — publish + retire version lifecycle)
+Last updated: 2026-07-17 (**Phase 2 Complete** — closure; residual ingest items → backlog; Phase 5 = full PWA)
 
 ---
 
@@ -40,7 +40,8 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-FND-06 | CMEK keyring + crypto keys (gcs + secrets) | Done | ✓ Done — Phase 1.3 / PR #5 | rag-keyring / rag-*-key |
 | BL-FND-06b | Data GCS buckets with CMEK (`rag-docs-*`) | Done | ✓ Done — Phase 1.4 / PR #6 | versioning, lifecycle 90d, UBLA |
 | BL-FND-07 | Cloud Build/GHA + WIF keyless CI (pool + provider + SA) | Done | ✓ Done — Phase 1.2 / PR #4 | Identity foundation |
-| BL-FND-08 | detect-secrets in CI | Todo | Phase 2+ | Residual follow-up |
+| BL-FND-08 | detect-secrets in CI | Todo | Post–Phase 2 | Residual follow-up |
+| BL-FND-32 | Phase 2 closure (retro, eng report, backlog tidy) | Done | ✓ Done — Phase 2 closure | |
 | BL-FND-14 | Three Cloud Run services (rag-api, rag-ingest, rag-web) | Done | ✓ Done — Phase 1.6 / PR #8 | Stubs + SAs |
 | BL-FND-15 | Health returns version + deployed_at | Done | ✓ Done — Phase 1.5 / PR #7 | APP_VERSION / DEPLOYED_AT |
 | BL-FND-16 | HTTPS LB + Cloud Armor | Deferred | Pre-prod | Explicitly later |
@@ -59,33 +60,42 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-SEC-01 | Google OAuth + domain allowlist (chandraailabs.com, gmail.com) | Todo | Phase 2 | Spec documented Phase 1.6 |
-| BL-SEC-02 | Role model: user / content_admin / operator | Todo | Phase 2 | |
+| BL-SEC-01 | Google OAuth + domain allowlist (chandraailabs.com, gmail.com) | Todo | Backlog (post–Phase 2) | Spec documented Phase 1.6; not Phase 3 gate |
+| BL-SEC-02 | Role model: user / content_admin / operator | Todo | Backlog (post–Phase 2) | |
 | BL-SEC-03 | Secret Manager shells + CMEK | Done | ✓ Done — Phase 1.3 / PR #5 | Values via runbook later |
 | BL-SEC-04 | Non-root Docker images (uid 1001) | Done | ✓ Done — Phase 1.7 / PR #9 | API Dockerfile |
-| BL-SEC-05 | PII-free structured logging | Todo | Phase 2 | Baseline JSON logging exists |
-| BL-SEC-06 | Admin action audit log | Todo | Phase 2 | |
+| BL-SEC-05 | PII-free structured logging | Todo | Backlog | Baseline JSON logging exists |
+| BL-SEC-06 | Admin action audit log | Todo | Backlog | |
 | BL-SEC-07 | Custom SAs per service + least privilege | Done | ✓ Done — Phase 1.2 / PR #4 | Baseline roles |
 | BL-SEC-08 | Enforce zero JSON SA keys (WIF only for CI) | Done | ✓ Done — Phase 1.2 / PR #4 | NFR-SEC-10 |
 | BL-SEC-09 | **Binary Authorization for Cloud Run** | Todo | **P1 / Phase 6+** | NFR-SEC-14; deferred supply-chain hardening |
+| BL-SEC-10 | **Real content_admin auth on ingest endpoints** | Todo | **Backlog** (was Phase 2 residual) | Replace AUTH_DEV_BYPASS / Bearer stub on upload/publish/retire |
 
 ## Ingestion & Versioning
+
+### Phase 2 MVP — complete
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
 | BL-ING-01 | Document upload API + GCS storage | Done | ✓ Done — Phase 2.1 | POST /api/v1/documents/upload |
-| BL-ING-02 | Parse PDF/DOCX/MD/HTML | In Progress | Phase 2.2 partial | PDF+MD text extraction (pdfminer); DOCX/HTML later |
 | BL-ING-02a | Firestore Native DB + IAM (api/ingest) | Done | ✓ Done — Phase 2.2 | asia-south1; roles/datastore.user |
 | BL-ING-02b | Version status processing→ready/failed | Done | ✓ Done — Phase 2.2 | Sync extraction in API; module worker-ready |
 | BL-ING-03 | Chunking + processed/ GCS storage | Done | ✓ Done — Phase 2.3 | full.txt + chunks.jsonl; Firestore pointers only |
-| BL-ING-03b | **Chunking strategy tuning** (size, overlap, separators, evaluation) | Todo | Phase 2–3 | Defaults 1000/150; evaluate on held-out corpus later |
 | BL-ING-03c | Cloud Run TF lifecycle ignore (CI-owned images) | Done | ✓ Done — Phase 2.3 | ignore_changes on template containers |
 | BL-ING-04 | Version publish / retire workflow | Done | ✓ Done — Phase 2.4 | publish/retire APIs; auto-retire previous published |
-| BL-ING-05 | Embed + index pipeline on ingest-worker | Todo | Phase 2–3 | |
-| BL-ING-06 | Atomic index alias swap on publish | Todo | Phase 3 | |
-| BL-ING-07 | Ingest job visibility UI/API | Todo | Phase 2 | |
-| BL-ING-08 | Multimodal table/image extraction | Todo | Phase 2–3 | US-MM-01 · P1 |
-| BL-ING-09 | Synthetic + OSS fixture corpus | Todo | Phase 2 | |
+
+### Moved from Phase 2 residual → living backlog (not Phase 3 scope)
+
+| ID | Item | Status | Target | Notes |
+|----|------|--------|--------|-------|
+| BL-ING-10 | **Async ingest worker (`rag-ingest`)** | Todo | **Backlog** | Move extract/chunk/embed off API; enqueue per BL-DEC-05 |
+| BL-ING-07 | **Ingest job visibility UI/API** | Todo | **Backlog** | Operator job status; not a Phase 3 gate |
+| BL-ING-02 | Parse DOCX/HTML (+ full matrix beyond PDF/MD) | Todo | **Backlog** | PDF+MD done in Phase 2.2; real auth on ingest: BL-SEC-10 |
+| BL-ING-03b | **Chunking strategy tuning** | Todo | **Backlog** | Defaults 1000/150; evaluate later |
+| BL-ING-08 | Multimodal table/image extraction | Todo | **Backlog** / Phase 3–4 | US-MM-01 · P1 |
+| BL-ING-09 | Synthetic + OSS fixture corpus | Todo | **Backlog** | Eval fixtures |
+| BL-ING-05 | Embed + index pipeline | Todo | **Phase 3** | With retrieval path |
+| BL-ING-06 | Atomic index alias swap on publish | Todo | **Phase 3+** | After Vector Search wiring |
 
 ## Retrieval & Generation
 
@@ -102,7 +112,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-RAG-09 | LangGraph query orchestration | Todo | Phase 3 | P0 · ADR-0002 |
 | BL-RAG-10 | Metadata filtering at index query | Todo | Phase 3 | P0 · US-QA-08 |
 | BL-RAG-11 | Semantic caching | Todo | Phase 3–4 | P1 · US-QA-07 |
-| BL-RAG-12 | Vertex AI Vector Search index wiring | Todo | Phase 2–3 | Locked product choice |
+| BL-RAG-12 | Vertex AI Vector Search index wiring | Todo | Phase 3 | Locked product choice |
 
 ## Feedback
 
@@ -121,14 +131,17 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-GRD-03 | Configurable safety policies | Deferred | Phase 4 | |
 | BL-GRD-04 | Guardrail metrics counters | Todo | Phase 3 | |
 
-## Voice & PWA
+## Voice & PWA (Phase 5 = full PWA; no native apps)
+
+**Scope lock:** Phase 5 delivers responsive **desktop / tablet / mobile browser** UX plus **installable PWA**. Native App Store / Play Store apps are **out of scope**.
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-VOICE-01 | STT integration | Deferred | Phase 5 | |
-| BL-VOICE-02 | TTS integration | Deferred | Phase 5 | |
-| BL-PWA-01 | Installable PWA shell | Deferred | Phase 5 | |
-| BL-PWA-02 | Offline UI shell | Deferred | Phase 5 | P2 |
+| BL-VOICE-01 | STT integration | Deferred | Phase 5 | In-PWA only |
+| BL-VOICE-02 | TTS integration | Deferred | Phase 5 | In-PWA only |
+| BL-PWA-01 | Installable PWA shell (manifest + SW) | Deferred | Phase 5 | Desktop/tablet/mobile browser |
+| BL-PWA-02 | Offline UI shell | Deferred | Phase 5 | P2; shell only, not offline RAG |
+| BL-PWA-03 | Responsive desktop/tablet/mobile layouts | Deferred | Phase 5 | Full PWA profile |
 
 ## Analytics & Evaluation
 
@@ -144,15 +157,15 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-FE-01 | Next.js app scaffold beyond placeholder | Todo | Phase 2+ | |
-| BL-FE-02 | shadcn/ui + app shell per ui-specs | Todo | Phase 2+ | Spec locked Phase 0 |
+| BL-FE-01 | Next.js app scaffold beyond placeholder | Todo | Backlog / Phase 3 UI | |
+| BL-FE-02 | shadcn/ui + app shell per ui-specs | Todo | Backlog / Phase 3 UI | Spec locked Phase 0 |
 | BL-FE-03 | Chat UI + citations rendering | Todo | Phase 3 | |
-| BL-FE-04 | Admin document management UI | Todo | Phase 2–3 | |
+| BL-FE-04 | Admin document management UI | Todo | Backlog | Upload/publish can use API/OpenAPI until UI |
 | BL-FE-05 | History + settings screens | Todo | Phase 3–4 | |
 | BL-FE-06 | Analytics dashboard UI | Todo | Phase 6 | |
 | BL-FE-07 | A11y pass on primary flows | Todo | Phase 3+ | |
 | BL-FE-08 | Multimodal table/image rendering | Todo | Phase 3–4 | P1 · US-MM-02 |
-| BL-FE-09 | Domain-denied login state | Todo | Phase 2 | |
+| BL-FE-09 | Domain-denied login state | Todo | Backlog (with OAuth) | |
 
 ## Open decisions (need ADR soon)
 
@@ -162,16 +175,18 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-DEC-02 | Exact embedding model + dimensions | Todo | ADR-0007 |
 | BL-DEC-03 | Vector Search index topology / filter schema | Todo | ADR-0007 |
 | BL-DEC-04 | STT/TTS provider selection | Deferred | Phase 5 ADR |
-| BL-DEC-05 | Ingest enqueue: Cloud Tasks vs Pub/Sub | Todo | Phase 2 ADR |
+| BL-DEC-05 | Ingest enqueue: Cloud Tasks vs Pub/Sub | Todo | Backlog ADR (with BL-ING-10) |
 | BL-DEC-06 | Semantic cache backing store | Todo | Phase 3 |
 
 **Resolved in Phase 0–1:** LangGraph; Vertex AI Vector Search; Cloud Run service split; zero JSON keys + WIF; audience allowlist; CMEK secrets/docs; CI deploy path.  
-**Resolved in Phase 2.0:** Metadata store = **Firestore Native** (ADR-0006).
+**Resolved in Phase 2:** Metadata store = Firestore Native (ADR-0006); MVP ingest lifecycle complete; residual worker/auth/jobs → backlog (not Phase 3 incomplete).  
+**Phase 5 scope:** Full PWA only — no native apps.
 
 ---
 
 ## Recently completed
 
+- **2026-07-17** — **Phase 2 complete:** retrospective + engineering report; residual items moved to backlog; Phase 5 PWA scope clarified.
 - **2026-07-17** — **Phase 2.4:** Publish + retire endpoints; atomic active_version_id; previous published auto-retired; strict 409 transitions; tests + runbook.
 - **2026-07-17** — **Phase 2.3:** Chunking (1000/150); processed/ full.txt + chunks.jsonl; Firestore preview/pointers only; Cloud Run image lifecycle ignore.
 - **2026-07-17** — **Phase 2.2:** Firestore DB `(default)` asia-south1 + IAM; Markdown/PDF extraction; status `ready`/`failed`; tests + runbooks.

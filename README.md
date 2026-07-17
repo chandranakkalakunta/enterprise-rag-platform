@@ -3,12 +3,12 @@
 Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
-**Status:** **Phase 1 Complete** — GCP foundation live (keyless CI, CMEK, Cloud Run, health)  
+**Status:** **Phase 2 Complete** — ingestion MVP lifecycle live; **Phase 3 next** (retrieval)  
 **GCP project:** set via `var.gcp_project_id` / `GCP_PROJECT_ID` (never hard-coded in app code)  
 **Project ID:** `enterprise-rag-platform-502711` (number `642114828076`)  
 
 **Audience (auth allowlist):** `chandraailabs.com` + `gmail.com`  
-**Stack:** Next.js PWA · shadcn/ui · FastAPI · **LangGraph** · Vertex AI Gemini + **Vector Search** · Terraform · Cloud Run (`rag-api`, `rag-ingest`, `rag-web`)
+**Stack:** Next.js **PWA** (no native apps) · shadcn/ui · FastAPI · **LangGraph** · Vertex AI Gemini + **Vector Search** · Terraform · Cloud Run (`rag-api`, `rag-ingest`, `rag-web`)
 
 ---
 
@@ -19,22 +19,27 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 | **0** | Foundation & requirements lock | ✅ **Complete** |
 | **0.1** | GCP project ID switch | ✅ **Complete** |
 | **1** | **GCP Foundation** (1.1–1.7) | ✅ **Complete** (PRs #3–#9) |
-| **1.1** | Multi-env Terraform, APIs, state buckets | ✅ **Complete** |
-| **1.2** | Custom SAs + GitHub WIF | ✅ **Complete** |
-| **1.3** | CMEK + Secret Manager shells | ✅ **Complete** |
-| **1.4** | Application GCS buckets with CMEK | ✅ **Complete** |
-| **1.5** | Health endpoints + CI IAM tighten | ✅ **Complete** |
-| **1.6** | Cloud Run stubs + OAuth allowlist prep | ✅ **Complete** |
-| **1.7** | CI skeleton (GHA + WIF deploy) | ✅ **Complete** |
-| **2** | Ingestion & document versioning | 🔜 **Next** |
-| **3** | Hybrid RAG, citations, guardrails, 5-star feedback | Planned |
+| **2** | **Ingestion MVP** (upload → extract → chunk → publish/retire) | ✅ **Complete** (PRs #11–#15) |
+| **2.0–2.4** | ADR-0006, upload, Firestore, chunking, lifecycle | ✅ **Complete** |
+| **3** | Hybrid RAG, citations, guardrails, 5-star feedback | 🔜 **Next** |
 | **4** | Multi-turn, ACL depth, safety tuning | Planned |
-| **5** | Voice + PWA install/offline | Planned |
+| **5** | Voice + **full PWA** (desktop/tablet/mobile browser + installable) | Planned — **no native apps** |
 | **6** | Analytics, eval gates, cost dashboards | Planned |
 
 Full index: [docs/phases.md](docs/phases.md)  
 Phase 0: [retro](docs/retrospectives/phase-0.md) · [report](docs/reports/phase-0-engineering-report.md)  
-Phase 1: [retro](docs/retrospectives/phase-1.md) · [report](docs/reports/phase-1-engineering-report.md)
+Phase 1: [retro](docs/retrospectives/phase-1.md) · [report](docs/reports/phase-1-engineering-report.md)  
+Phase 2: [retro](docs/retrospectives/phase-2.md) · [report](docs/reports/phase-2-engineering-report.md)
+
+### Phase 2 MVP lifecycle (API)
+
+```text
+POST /api/v1/documents/upload
+POST /api/v1/documents/{id}/versions/{vid}/publish
+POST /api/v1/documents/{id}/versions/{vid}/retire
+```
+
+Runbooks: [upload](docs/runbooks/document-upload-api.md) · [lifecycle](docs/runbooks/version-lifecycle.md)
 
 ---
 
@@ -60,7 +65,7 @@ Details: [docs/architecture/overview.md](docs/architecture/overview.md) · ADRs 
 | [docs/requirements.md](docs/requirements.md) | Personas, user stories, NFRs (v3 locked) |
 | [docs/ui-specs.md](docs/ui-specs.md) | Screens, PWA, voice, StarRating, multimodal, shadcn/ui |
 | [docs/architecture/overview.md](docs/architecture/overview.md) | Services, LangGraph, cache, multimodal |
-| [docs/adr/](docs/adr/) | Architecture Decision Records (0001–0005) |
+| [docs/adr/](docs/adr/) | Architecture Decision Records (0001–0006) |
 | [docs/backlog.md](docs/backlog.md) | Living backlog |
 | [docs/phases.md](docs/phases.md) | Phase index |
 | [docs/grok-three-agent-protocol.md](docs/grok-three-agent-protocol.md) | How we build |

@@ -788,14 +788,13 @@ See [ADR-0005 Security Posture](./adr/0005-security-posture.md) · [OAuth allowl
 
 ## 8. Out of scope
 
-### Near-term (Phase 0–1)
+### Near-term / product scope
 - Multi-region active-active  
-- Native iOS/Android apps (PWA first)  
+- **Native iOS/Android store apps** — **out of scope**; Phase 5 is **full PWA** (responsive desktop/tablet/mobile browser + installable shell + optional voice)  
 - Multi-tenant SaaS billing  
 - On-prem deployment  
 - Fine-tuning custom LLMs  
-- **Global HTTPS LB + Cloud Armor** (scheduled later)  
-- Metadata store technology lock (ADR pending)
+- **Global HTTPS LB + Cloud Armor** (scheduled later)
 
 ### Explicit non-goals (until reopened via ADR)
 - Guaranteeing 100% factual correctness of LLM phrasing (we guarantee grounding policy + citations)  
@@ -814,7 +813,7 @@ See [ADR-0005 Security Posture](./adr/0005-security-posture.md) · [OAuth allowl
 5. Core infra is **Terraform-managed** and redeployable (`var.gcp_project_id`); **zero JSON SA keys**.  
 6. Held-out **eval set** exists for quality gates (synthetic/OSS fixtures acceptable initially).  
 7. `/health` and `/ready` expose **version** + **deployed_at**.  
-8. PWA shell meets mobile-first + install path (voice can be Phase 5 stretch relative to text MVP).
+8. Phase 5 PWA: responsive desktop/tablet/mobile browser + install path (voice optional stretch); **no native apps**.
 
 ---
 
