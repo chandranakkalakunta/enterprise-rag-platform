@@ -122,3 +122,25 @@ output "secret_resource_names" {
     oauth_client_secret = google_secret_manager_secret.oauth_client_secret.name
   }
 }
+
+# ── Phase 1.4: application document buckets ──────────────────────────────────
+
+output "docs_bucket_names" {
+  description = "Application document bucket names by environment"
+  value       = { for k, b in google_storage_bucket.docs : k => b.name }
+}
+
+output "docs_bucket_urls" {
+  description = "gs:// URLs for application document buckets"
+  value       = { for k, b in google_storage_bucket.docs : k => "gs://${b.name}" }
+}
+
+output "docs_bucket_prefixes" {
+  description = "Logical prefix convention inside each docs bucket"
+  value       = local.docs_prefixes
+}
+
+output "docs_bucket_kms_key" {
+  description = "CMEK used as default encryption on document buckets"
+  value       = google_kms_crypto_key.gcs.id
+}

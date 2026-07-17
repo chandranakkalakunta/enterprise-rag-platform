@@ -10,10 +10,13 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- Phase 1.4+: auth allowlist, health `version` + `deployed_at` in code, Cloud Run services, Binary Authorization
+- Phase 1.5+: auth allowlist, health `version` + `deployed_at` in code, Cloud Run services, Binary Authorization
+- Remove project-level `roles/storage.admin` from sa-rag-ci once CI confirmed (BL-FND-24)
 - Coordinator: add OAuth secret versions (shells exist)
 
 ### Added
+- **Phase 1.4:** Application buckets `rag-docs-{dev,test,prod}` with CMEK `rag-gcs-key`, versioning, soft-delete 7d, 90-day non-current lifecycle, UBLA + public access prevention
+- **Phase 1.4:** Bucket IAM for sa-rag-ingest / sa-rag-api / sa-rag-ci; Storage service agent KMS grant; runbook `docs/runbooks/gcs-document-buckets.md`
 - **Phase 1.3:** KMS `rag-keyring` + `rag-gcs-key` / `rag-secrets-key` (90-day rotation, ENCRYPT_DECRYPT)
 - **Phase 1.3:** Secret Manager shells `rag-oauth-client-id` / `rag-oauth-client-secret` with CMEK (no versions in TF)
 - **Phase 1.3:** `cryptoKeyEncrypterDecrypter` for four SAs + Secret Manager service agent; runbook `docs/runbooks/secret-manager-cmek.md`
