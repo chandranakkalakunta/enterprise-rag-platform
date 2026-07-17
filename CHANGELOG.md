@@ -10,20 +10,34 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- Phase 2.5+: Embed/index enqueue, move extract/chunk to ingest-worker
+- **Phase 3:** Embeddings, Vertex AI Vector Search, hybrid retrieval + RRF, LangGraph query path, citations, guardrails, 5-star feedback
+- Backlog (not Phase 3 incomplete): async `rag-ingest` worker (BL-ING-10), job visibility (BL-ING-07), real content_admin auth (BL-SEC-10)
 - Atomic index alias swap on publish (BL-ING-06)
 - Coordinator: add OAuth secret versions (shells exist)
-- Binary Authorization implementation (NFR-SEC-14 / BL-SEC-09) — Phase 6+
+- Binary Authorization (NFR-SEC-14 / BL-SEC-09) — Phase 6+
 - detect-secrets in CI (BL-FND-08)
-- Full OAuth + content_admin on upload/publish (replace temp auth)
-- Chunking strategy tuning (size, overlap, separators, evaluation) — BL-ING-03b
+- Chunking strategy tuning (BL-ING-03b)
+- Phase 5: full PWA (desktop/tablet/mobile browser + installable); no native apps
 
 ### Added
-- **Phase 2.4:** `POST .../publish` and `POST .../retire` — strict state machine (ready→published, ready|published→retired); atomic `active_version_id` update; auto-retire previous published version; audit fields; [lifecycle runbook](docs/runbooks/version-lifecycle.md)
-- **Phase 2.3:** Text chunking (~1000/150 overlap); GCS `processed/{doc}/{ver}/full.txt` + `chunks.jsonl`; Firestore pointers only; Cloud Run `lifecycle.ignore_changes` on container image
-- **Phase 2.2:** Firestore Native DB `(default)` in `asia-south1` + `roles/datastore.user` for `sa-rag-api` / `sa-rag-ingest`; pdfminer.six + Markdown extraction; version status `processing` → `ready`|`failed`; [Firestore runbook](docs/runbooks/firestore-metadata.md)
-- **Phase 2.1:** `POST /api/v1/documents/upload` — PDF/Markdown ≤50MB → GCS `raw/{document_id}/{version_id}/{filename}` + Firestore Document/Version; temp Bearer/dev-bypass auth; unit tests; [runbook](docs/runbooks/document-upload-api.md)
-- **Phase 2.0:** [ADR-0006](docs/adr/0006-metadata-store-firestore.md) — Firestore (Native mode) accepted as long-term metadata store (documents, versions, ingest jobs); analytics remain on BigQuery
+- **Phase 2 closure:** [Retrospective](docs/retrospectives/phase-2.md) · [Engineering report](docs/reports/phase-2-engineering-report.md); backlog tidy; Phase 5 PWA scope lock
+
+---
+
+## [2.0.0] — 2026-07-17 — Phase 2: Ingestion MVP Lifecycle (**Complete**)
+
+**PR range:** [#11](https://github.com/chandranakkalakunta/enterprise-rag-platform/pull/11)–[#15](https://github.com/chandranakkalakunta/enterprise-rag-platform/pull/15)  
+**Closure:** [Retrospective](docs/retrospectives/phase-2.md) · [Engineering report](docs/reports/phase-2-engineering-report.md)
+
+### Summary
+MVP document lifecycle: upload → extract → chunk → processed GCS → publish/retire with Firestore metadata and a single active version pointer.
+
+### Added
+- **Phase 2.4:** `POST .../publish` and `POST .../retire` — state machine; atomic `active_version_id`; auto-retire previous published; [lifecycle runbook](docs/runbooks/version-lifecycle.md)
+- **Phase 2.3:** Chunking (~1000/150); GCS `processed/` full.txt + chunks.jsonl; Firestore pointers only; Cloud Run image lifecycle ignore
+- **Phase 2.2:** Firestore Native `(default)` asia-south1 + IAM; Markdown + pdfminer.six; status ready/failed
+- **Phase 2.1:** `POST /api/v1/documents/upload` — PDF/Markdown ≤50MB → GCS raw/ + Firestore
+- **Phase 2.0:** [ADR-0006](docs/adr/0006-metadata-store-firestore.md) — Firestore as long-term metadata store
 
 ---
 

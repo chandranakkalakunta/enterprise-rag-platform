@@ -332,6 +332,17 @@ UI talks only to backend voice endpoints (or approved browser STT for prototype)
 
 ## 7. PWA requirements
 
+### Phase 5 delivery profile (locked at Phase 2 closure)
+
+| In scope | Out of scope |
+|----------|--------------|
+| Responsive web UI on **desktop, tablet, and mobile browsers** | Native iOS App Store apps |
+| **Installable PWA** (manifest + service worker app shell) | Native Android Play Store apps |
+| Optional voice (STT/TTS) inside the PWA | Separate native codebases |
+| Offline **shell** (not full offline RAG) | |
+
+One web stack (Next.js PWA). No dual native product track.
+
 ### 7.1 Manifest (minimum)
 
 | Field | Guidance |
@@ -450,7 +461,7 @@ Example prompts (editable copy):
 
 ## 12. Out of scope (UI)
 
-- Native mobile apps  
+- **Native mobile apps** (iOS/Android store) — Phase 5 is full PWA only (desktop/tablet/mobile browser + installable)  
 - Real-time multi-user co-editing  
 - WYSIWYG document authoring (upload/version only)  
 - Full design-marketing site  
