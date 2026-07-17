@@ -64,9 +64,8 @@ resource "google_kms_crypto_key_iam_member" "secretmanager_service_agent" {
   member        = google_project_service_identity.secretmanager.member
 }
 
-# Future GCS CMEK: Cloud Storage service agent will need encrypter/decrypter on rag-gcs-key
-# when data buckets are created (Phase 1.3+ / later). Documented for follow-up:
-# serviceAccount:service-PROJECT_NUMBER@gs-project-accounts.iam.gserviceaccount.com
+# Cloud Storage service agent KMS grant: see google_project_service_identity.storage
+# and google_kms_crypto_key_iam_member.storage_service_agent_gcs_key in gcs.tf (Phase 1.4).
 
 # Runtime + CI custom SAs — use keys for application encrypt/decrypt operations
 resource "google_kms_crypto_key_iam_member" "sa_gcs_key" {

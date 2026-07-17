@@ -61,4 +61,15 @@ locals {
   ])
 
   runtime_sa_keys = toset(["api", "ingest", "web"])
+
+  # Application document buckets (one per environment)
+  docs_environments = toset(["dev", "test", "prod"])
+
+  # Object prefix convention (logical folders inside each bucket — not separate buckets)
+  docs_prefixes = [
+    "raw/",        # original uploads
+    "versions/",   # immutable published document versions
+    "assets/",     # multimodal assets (images, extracted tables)
+    "processed/",  # parse/chunk pipeline outputs
+  ]
 }

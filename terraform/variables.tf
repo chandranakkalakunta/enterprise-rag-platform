@@ -62,6 +62,18 @@ variable "tfstate_soft_delete_days" {
   default     = 7
 }
 
+variable "docs_soft_delete_days" {
+  description = "Soft-delete retention for application document buckets (days)"
+  type        = number
+  default     = 7
+}
+
+variable "docs_noncurrent_version_days" {
+  description = "Delete non-current object versions after this many days"
+  type        = number
+  default     = 90
+}
+
 variable "github_repository" {
   description = "GitHub org/repo allowed to impersonate sa-rag-ci via WIF (attribute.repository)"
   type        = string
