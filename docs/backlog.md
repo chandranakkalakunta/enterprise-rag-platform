@@ -88,16 +88,14 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Item | Status | Target | Notes |
 |----|------|--------|--------|-------|
-| BL-ING-10 | **Async ingest worker (`rag-ingest`)** | Todo | **Backlog** | Move extract/chunk/embed off API; Cloud Tasks/Pub/Sub per BL-DEC-05 |
+| BL-ING-10 | **Async ingest worker (`rag-ingest`)** | Todo | **Backlog** | Move extract/chunk/embed off API; enqueue per BL-DEC-05 |
 | BL-ING-07 | **Ingest job visibility UI/API** | Todo | **Backlog** | Operator job status; not a Phase 3 gate |
-| BL-SEC-10 | **Real content_admin on ingest endpoints** | Todo | **Backlog** | See Auth table; temp bypass remains |
-| BL-ING-02 | Parse DOCX/HTML (+ full matrix beyond PDF/MD) | Todo | **Backlog** | PDF+MD done in Phase 2.2 |
+| BL-ING-02 | Parse DOCX/HTML (+ full matrix beyond PDF/MD) | Todo | **Backlog** | PDF+MD done in Phase 2.2; real auth on ingest: BL-SEC-10 |
 | BL-ING-03b | **Chunking strategy tuning** | Todo | **Backlog** | Defaults 1000/150; evaluate later |
 | BL-ING-08 | Multimodal table/image extraction | Todo | **Backlog** / Phase 3–4 | US-MM-01 · P1 |
 | BL-ING-09 | Synthetic + OSS fixture corpus | Todo | **Backlog** | Eval fixtures |
 | BL-ING-05 | Embed + index pipeline | Todo | **Phase 3** | With retrieval path |
 | BL-ING-06 | Atomic index alias swap on publish | Todo | **Phase 3+** | After Vector Search wiring |
-| BL-DEC-05 | Ingest enqueue: Cloud Tasks vs Pub/Sub | Todo | **Backlog ADR** | Needed when BL-ING-10 starts |
 
 ## Retrieval & Generation
 
