@@ -10,9 +10,20 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- First real CI run after merge to `main` (Coordinator)
+- Phase 2: Ingestion foundation (upload, parse, versioning state machine)
 - Coordinator: add OAuth secret versions (shells exist)
 - Binary Authorization implementation (NFR-SEC-14 / BL-SEC-09) — Phase 6+
+- detect-secrets in CI (BL-FND-08)
+
+---
+
+## [1.0.0] — 2026-07-17 — Phase 1: GCP Foundation (**Complete**)
+
+**PR range:** [#3](https://github.com/chandranakkalakunta/enterprise-rag-platform/pull/3)–[#9](https://github.com/chandranakkalakunta/enterprise-rag-platform/pull/9)  
+**Closure:** [Retrospective](docs/retrospectives/phase-1.md) · [Engineering report](docs/reports/phase-1-engineering-report.md)
+
+### Summary
+Production-grade keyless GCP foundation: multi-env Terraform, WIF CI, CMEK, document buckets, Cloud Run stubs, health contract, and GitHub Actions deploy to `rag-api`.
 
 ### Added
 - **Phase 1.7:** GitHub Actions CI (test → build → deploy) via WIF; no JSON keys
@@ -22,11 +33,6 @@ Phases map to project delivery, not strictly SemVer until first production relea
 - **Phase 1.6:** NFR-SEC-14 Binary Authorization (future); BL-SEC-09 backlog; OAuth allowlist runbook
 - **Phase 1.5:** `/health` and `/ready` return `status`, `service`, `version`, `deployed_at` from `APP_VERSION` / `DEPLOYED_AT`
 - **Phase 1.5:** pytest coverage for health contract; `.env.example` documents deploy metadata env vars
-
-### Changed
-- **Phase 1.5:** Removed project-level `roles/storage.admin` from `sa-rag-ci` (bucket `objectAdmin` on `rag-docs-*` remains)
-
-### Added (prior)
 - **Phase 1.4:** Application buckets `rag-docs-{dev,test,prod}` with CMEK `rag-gcs-key`, versioning, soft-delete 7d, 90-day non-current lifecycle, UBLA + public access prevention
 - **Phase 1.4:** Bucket IAM for sa-rag-ingest / sa-rag-api / sa-rag-ci; Storage service agent KMS grant; runbook `docs/runbooks/gcs-document-buckets.md`
 - **Phase 1.3:** KMS `rag-keyring` + `rag-gcs-key` / `rag-secrets-key` (90-day rotation, ENCRYPT_DECRYPT)
@@ -41,9 +47,11 @@ Phases map to project delivery, not strictly SemVer until first production relea
 - State buckets: `enterprise-rag-tfstate-dev`, `enterprise-rag-tfstate-test`, `enterprise-rag-tfstate-prod` (versioning, UBLA, soft-delete 7d, labels)
 - Remote state migrated to `gs://enterprise-rag-tfstate-dev` (prefix `terraform/state`)
 - Runbook: `docs/runbooks/terraform-bootstrap.md`
+- Phase 1 retrospective and engineering report
 
 ### Changed
-- Phase 0.1 hotfix: GCP project example/default switched to `enterprise-rag-platform-502711` (project number `642114828076`) via `var.gcp_project_id` / `GCP_PROJECT_ID` — no application hard-coding; old placeholder/dev IDs removed from examples
+- **Phase 1.5:** Removed project-level `roles/storage.admin` from `sa-rag-ci` (bucket `objectAdmin` on `rag-docs-*` remains)
+- Phase 0.1 hotfix: GCP project example/default switched to `enterprise-rag-platform-502711` (project number `642114828076`) via `var.gcp_project_id` / `GCP_PROJECT_ID`
 
 ---
 
@@ -69,9 +77,6 @@ Phases map to project delivery, not strictly SemVer until first production relea
 - Phase 0 retrospective and engineering report
 - `docs/phases.md` living phase index
 - README status: Phase 0 complete
-
-### Fixed
-- Removed hard-coded GCP project IDs; use `var.gcp_project_id` / placeholder only (Phase 0.1)
 
 ### Security
 - Conventions locked: no secrets in git, zero JSON SA keys, Secret Manager for deploy, defence-in-depth (ADR-0005)
