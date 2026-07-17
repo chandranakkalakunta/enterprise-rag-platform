@@ -1,4 +1,4 @@
-"""Document upload API — Phase 2.1–2.2."""
+"""Document upload API — Phase 2.1–2.3."""
 
 from __future__ import annotations
 
@@ -59,8 +59,9 @@ async def upload_document(
     collection: Annotated[str | None, Form()] = None,
 ) -> UploadResponse:
     """
-    Accept multipart upload, write to GCS `raw/`, create Firestore Document + Version,
-    then extract text synchronously (status → ready or failed).
+    Upload → GCS raw/ → extract → chunk → GCS processed/ → Firestore ready|failed.
+
+    Full text is stored in processed/.../full.txt; Firestore keeps pointers + preview.
     """
     try:
         data = await _read_limited(file, settings.max_upload_bytes)
@@ -84,11 +85,11 @@ async def upload_document(
         ) from exc
 
     logger.info(
-        "upload_ok document_id=%s version_id=%s status=%s size_bytes=%s auth_mode=%s",
+        "upload_ok document_id=%s version_id=%s status=%s chunks=%s auth_mode=%s",
         result.document_id,
         result.version_id,
         result.status,
-        result.size_bytes,
+        result.chunk_count,
         auth.auth_mode,
     )
 
@@ -103,6 +104,8 @@ async def upload_document(
         title=result.title,
         collection=result.collection,
         extracted_char_count=result.extracted_char_count,
-        extracted_truncated=result.extracted_truncated,
+        chunk_count=result.chunk_count,
+        processed_gcs_prefix=result.processed_gcs_prefix,
+        text_preview=result.text_preview,
         error_message=result.error_message,
     )

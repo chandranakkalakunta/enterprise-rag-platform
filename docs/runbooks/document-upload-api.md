@@ -1,4 +1,4 @@
-# Runbook: Document Upload API (Phase 2.1–2.2)
+# Runbook: Document Upload API (Phase 2.1–2.3)
 
 **Endpoint:** `POST /api/v1/documents/upload`  
 **Service:** `rag-api`  
@@ -30,7 +30,7 @@
 
 ### Success — `201 Created`
 
-Upload + GCS + Firestore + **synchronous text extraction**. Response includes the **final** status (`ready` or `failed`).
+Pipeline: raw GCS → extract → chunk → processed GCS → Firestore final status.
 
 ```json
 {
@@ -44,19 +44,22 @@ Upload + GCS + Firestore + **synchronous text extraction**. Response includes th
   "title": "optional",
   "collection": "optional",
   "extracted_char_count": 4200,
-  "extracted_truncated": false,
+  "chunk_count": 5,
+  "processed_gcs_prefix": "processed/{document_id}/{version_id}/",
+  "text_preview": "First ~500 characters…",
   "error_message": null
 }
 ```
 
-On extraction failure (still HTTP **201** — object + metadata exist):
+On extraction/chunking failure (still HTTP **201** — raw object + metadata exist):
 
 ```json
 {
   "status": "failed",
   "error_message": "PDF extraction failed: ...",
-  "extracted_char_count": 0,
-  "extracted_truncated": false
+  "chunk_count": 0,
+  "processed_gcs_prefix": null,
+  "text_preview": null
 }
 ```
 
@@ -68,13 +71,16 @@ On extraction failure (still HTTP **201** — object + metadata exist):
 | `401` | Missing/invalid Bearer when `AUTH_DEV_BYPASS=false` |
 | `500` | GCS or Firestore failure (safe message only) |
 
-## Pipeline (Phase 2.2)
+## Pipeline (Phase 2.3)
 
 ```text
 validate → GCS raw/ → Firestore version status=processing
-  → extract text (in-memory; module: app.services.extraction)
-  → success: status=ready + extracted_text
-  → failure: status=failed + error_message
+  → extract text (app.services.extraction)
+  → chunk text (app.services.chunking; ~1000 chars, 150 overlap)
+  → GCS processed/{doc}/{ver}/full.txt
+  → GCS processed/{doc}/{ver}/chunks.jsonl
+  → Firestore status=ready + pointers + text_preview
+  → on failure: status=failed + error_message
   → return 201 with final status
 ```
 
@@ -83,34 +89,50 @@ validate → GCS raw/ → Firestore version status=processing
 | Markdown | UTF-8 decode + light markup strip |
 | PDF | **pdfminer.six** |
 
-- Extraction module has **no** FastAPI / GCS / Firestore imports (ready to move to ingest-worker).
-- `extracted_text` is truncated at **400_000** chars for Firestore 1 MiB safety (`extracted_truncated=true` if cut).
+- Extraction and chunking modules have **no** FastAPI / GCS / Firestore imports (worker-ready).
+- **Full text is not stored in Firestore** (Phase 2.3). Only `text_preview` (~500 chars) + GCS URIs.
 
-## GCS path convention
+## Chunk defaults
 
-```text
-gs://{GCS_DOCS_BUCKET}/raw/{document_id}/{version_id}/{safe_original_filename}
+| Parameter | Default | Notes |
+|-----------|---------|--------|
+| Target size | **1000** characters | Soft; prefers paragraph/sentence boundaries |
+| Overlap | **150** characters | Previous tail re-included |
+| Preview | **500** characters | Firestore `text_preview` |
+
+Tuning (size, overlap, separators, evaluation): backlog **BL-ING-03b**.
+
+### chunks.jsonl line shape
+
+```json
+{"chunk_id":"0","index":0,"text":"...","char_count":980,"start_offset":0,"end_offset":980}
 ```
 
-CMEK is enforced by the bucket default encryption key (`rag-gcs-key`).
-
-## Firestore layout
+## GCS layout
 
 ```text
-documents/{document_id}
-  - document_id, title, collection
-  - active_version_id: null (not published yet)
-  - latest_version_id
-  - created_at, updated_at, created_by
-
-documents/{document_id}/versions/{version_id}
-  - version_id, document_id
-  - status: processing → ready | failed
-  - gcs_uri, gcs_object_key, filename, content_type, size_bytes
-  - extracted_text, extracted_char_count, extracted_truncated
-  - error_message (when failed)
-  - extraction_completed_at, created_at, created_by
+gs://{bucket}/raw/{document_id}/{version_id}/{filename}
+gs://{bucket}/processed/{document_id}/{version_id}/full.txt
+gs://{bucket}/processed/{document_id}/{version_id}/chunks.jsonl
 ```
+
+CMEK via bucket default key `rag-gcs-key`.
+
+## Firestore version fields (ready)
+
+| Field | Purpose |
+|-------|---------|
+| `status` | `ready` \| `failed` |
+| `gcs_uri` / `gcs_object_key` | Raw upload |
+| `processed_gcs_prefix` | `processed/{doc}/{ver}/` |
+| `full_text_gcs_uri` | Pointer to `full.txt` |
+| `chunks_gcs_uri` | Pointer to `chunks.jsonl` |
+| `chunk_count` | Number of chunks |
+| `text_preview` | First ~500 chars |
+| `extracted_char_count` | Full text length |
+| `error_message` | When failed |
+
+**Removed from Firestore:** full `extracted_text` (legacy Phase 2.2 field deleted on ready/failed).
 
 ## Temporary auth (not production)
 
@@ -119,8 +141,6 @@ documents/{document_id}/versions/{version_id}
 | `AUTH_DEV_BYPASS=true` (default) | No Bearer required |
 | `AUTH_DEV_BYPASS=false` | Require `Authorization: Bearer $UPLOAD_BEARER_TOKEN` |
 
-Full OAuth + `content_admin` role: later (BL-SEC-01 / BL-SEC-02).
-
 ## Local tests
 
 ```bash
@@ -128,69 +148,35 @@ cd backend
 source .venv/bin/activate
 pip install -r requirements.txt && pip check
 pytest -q
-# extraction unit tests: pytest -q tests/test_extraction.py
 ```
 
-## Local smoke against live API (optional)
-
-Requires ADC with permission to write `rag-docs-dev` and Firestore (`roles/datastore.user` or broader):
+## Local smoke (optional)
 
 ```bash
 export GCP_PROJECT_ID=enterprise-rag-platform-502711
 export GCS_DOCS_BUCKET=rag-docs-dev
 export AUTH_DEV_BYPASS=true
-# gcloud auth application-default login
 
 cd backend && uvicorn app.main:app --reload --port 8000
 
 curl -sS -X POST "http://localhost:8000/api/v1/documents/upload" \
   -F "file=@./README.md;type=text/markdown" \
-  -F "title=Backend README" \
-  -F "collection=internal" | jq .
+  -F "title=Backend README" | jq .
 
-# Expect status=ready and extracted_char_count > 0
+# Expect status=ready, chunk_count>=1, processed_gcs_prefix set
+# Verify: gsutil cat gs://rag-docs-dev/processed/.../chunks.jsonl | head
 ```
-
-### Verify Firestore record
-
-```bash
-# Console or gcloud (example with REST requires OAuth token)
-# Path: projects/enterprise-rag-platform-502711/databases/(default)/documents/documents/{document_id}/versions/{version_id}
-```
-
-OpenAPI UI: http://localhost:8000/docs
-
-## Environment variables
-
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `GCP_PROJECT_ID` | `enterprise-rag-platform-502711` | Project for GCS/Firestore clients |
-| `GCS_DOCS_BUCKET` | `rag-docs-dev` | Target document bucket |
-| `MAX_UPLOAD_BYTES` | `52428800` (50 MiB) | Size limit |
-| `AUTH_DEV_BYPASS` | `true` | Skip Bearer check |
-| `UPLOAD_BEARER_TOKEN` | empty | Shared secret when bypass off |
-
-## Infrastructure (Phase 2.2)
-
-| Resource | Value |
-|----------|--------|
-| Database | `(default)` Native mode |
-| Location | `asia-south1` |
-| API | `firestore.googleapis.com` |
-| IAM | `roles/datastore.user` on `sa-rag-api`, `sa-rag-ingest` |
-
-Terraform: `terraform/firestore.tf`. Apply with care — full `terraform apply` may also show Cloud Run image drift (CI-managed images). Prefer targeted apply for Firestore-only changes if needed.
 
 ## Residual risks / follow-ups
 
-- Synchronous extraction in API will not scale for large PDFs — move to `rag-ingest` worker (Cloud Tasks/Pub/Sub, BL-DEC-05).
-- Large `extracted_text` stored inline (truncated); later store full text under GCS `processed/` and keep pointer only.
-- Orphan GCS objects if Firestore create fails after upload.
-- Chunking / embed / publish not yet implemented.
-- Terraform Cloud Run still references stub image — lifecycle/ignore or import CI-managed image to avoid accidental rollback on full apply.
+- Sync extract+chunk in API — move to ingest-worker for large PDFs
+- Chunk defaults not evaluated on held-out corpus (BL-ING-03b)
+- Embed/index not yet run on chunks
+- Temp auth still not OAuth/`content_admin`
 
 ## Related
 
 - [ADR-0003 Document Versioning](../adr/0003-document-versioning.md)
 - [ADR-0006 Metadata Store — Firestore](../adr/0006-metadata-store-firestore.md)
 - [GCS document buckets](./gcs-document-buckets.md)
+- [Firestore metadata](./firestore-metadata.md)

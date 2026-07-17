@@ -1,7 +1,9 @@
-"""Document upload orchestration: validate → GCS → Firestore → extract (Phase 2.2).
+"""Document upload orchestration (Phase 2.3).
 
-Extraction runs synchronously in the API for now; logic lives in
-``app.services.extraction`` so it can move to the ingest-worker later.
+Flow: validate → GCS raw/ → Firestore processing → extract → chunk →
+GCS processed/ (full.txt + chunks.jsonl) → Firestore ready|failed.
+
+Extraction and chunking modules are worker-ready (no framework coupling).
 """
 
 from __future__ import annotations
@@ -14,17 +16,25 @@ from typing import Callable
 from google.cloud import firestore, storage
 
 from app.core.config import Settings
-from app.services.extraction import (
-    ExtractionError,
-    extract_text,
-    truncate_extracted_text,
+from app.services.chunking import (
+    DEFAULT_OVERLAP,
+    DEFAULT_TARGET_SIZE,
+    ChunkingError,
+    chunk_text,
+    text_preview,
 )
+from app.services.extraction import ExtractionError, extract_text
 from app.services.firestore_repo import (
     create_document_with_version,
-    update_version_extraction_failure,
-    update_version_extraction_success,
+    update_version_failed,
+    update_version_ready,
 )
-from app.services.gcs_storage import GcsUploadResult, upload_raw_bytes
+from app.services.gcs_storage import (
+    GcsUploadResult,
+    ProcessedArtifacts,
+    upload_raw_bytes,
+    write_processed_artifacts,
+)
 
 logger = logging.getLogger("erp.api.upload")
 
@@ -59,7 +69,7 @@ class UploadStorageError(Exception):
 class UploadResult:
     document_id: str
     version_id: str
-    status: str  # ready | failed (final after extraction); processing only if mid-flight
+    status: str  # ready | failed
     gcs_uri: str
     filename: str
     content_type: str
@@ -67,7 +77,9 @@ class UploadResult:
     title: str | None
     collection: str | None
     extracted_char_count: int | None = None
-    extracted_truncated: bool = False
+    chunk_count: int | None = None
+    processed_gcs_prefix: str | None = None
+    text_preview: str | None = None
     error_message: str | None = None
 
 
@@ -126,32 +138,52 @@ def new_ids() -> tuple[str, str]:
     return str(uuid.uuid4()), str(uuid.uuid4())
 
 
-def _run_extraction_and_update(
-    *,
+def _mark_failed(
     fs_client: firestore.Client,
+    document_id: str,
+    version_id: str,
+    error_message: str,
+) -> tuple[str, None, None, None, str]:
+    try:
+        update_version_failed(
+            fs_client,
+            document_id=document_id,
+            version_id=version_id,
+            error_message=error_message,
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.exception(
+            "firestore_failed_status_update document_id=%s version_id=%s",
+            document_id,
+            version_id,
+        )
+        raise UploadStorageError(
+            "Failed to record processing failure status"
+        ) from exc
+    return "failed", None, None, None, error_message
+
+
+def _run_extract_chunk_store(
+    *,
+    gcs_client: storage.Client,
+    fs_client: firestore.Client,
+    bucket_name: str,
     document_id: str,
     version_id: str,
     content_type: str,
     data: bytes,
-) -> tuple[str, int | None, bool, str | None]:
+    chunk_target_size: int = DEFAULT_TARGET_SIZE,
+    chunk_overlap: int = DEFAULT_OVERLAP,
+) -> tuple[str, int | None, int | None, str | None, str | None, str | None]:
     """
-    Extract text and update version status.
+    Extract → chunk → write processed/ → update Firestore.
 
     Returns:
-        (status, extracted_char_count, extracted_truncated, error_message)
+        (status, extracted_char_count, chunk_count, processed_prefix,
+         preview, error_message)
     """
     try:
         text = extract_text(content_type, data)
-        stored, full_count, truncated = truncate_extracted_text(text)
-        update_version_extraction_success(
-            fs_client,
-            document_id=document_id,
-            version_id=version_id,
-            extracted_text=stored,
-            extracted_char_count=full_count,
-            extracted_truncated=truncated,
-        )
-        return "ready", full_count, truncated, None
     except ExtractionError as exc:
         logger.warning(
             "extraction_failed document_id=%s version_id=%s error=%s",
@@ -159,43 +191,88 @@ def _run_extraction_and_update(
             version_id,
             exc.message,
         )
-        try:
-            update_version_extraction_failure(
-                fs_client,
-                document_id=document_id,
-                version_id=version_id,
-                error_message=exc.message,
-            )
-        except Exception:  # noqa: BLE001
-            logger.exception(
-                "firestore_failed_status_update document_id=%s version_id=%s",
-                document_id,
-                version_id,
-            )
-            raise UploadStorageError(
-                "Failed to record extraction failure status"
-            ) from exc
-        return "failed", 0, False, exc.message
+        status, _, _, _, err = _mark_failed(
+            fs_client, document_id, version_id, exc.message
+        )
+        return status, 0, 0, None, None, err
     except Exception as exc:  # noqa: BLE001
-        # Unexpected extractor crash — still mark failed when possible
         msg = f"Unexpected extraction error: {exc}"
         logger.exception(
             "extraction_unexpected document_id=%s version_id=%s",
             document_id,
             version_id,
         )
-        try:
-            update_version_extraction_failure(
-                fs_client,
-                document_id=document_id,
-                version_id=version_id,
-                error_message=msg,
-            )
-        except Exception:  # noqa: BLE001
-            raise UploadStorageError(
-                "Failed to record extraction failure status"
-            ) from exc
-        return "failed", 0, False, msg
+        status, _, _, _, err = _mark_failed(fs_client, document_id, version_id, msg)
+        return status, 0, 0, None, None, err
+
+    try:
+        chunks = chunk_text(
+            text, target_size=chunk_target_size, overlap=chunk_overlap
+        )
+    except ChunkingError as exc:
+        logger.warning(
+            "chunking_failed document_id=%s version_id=%s error=%s",
+            document_id,
+            version_id,
+            exc.message,
+        )
+        status, _, _, _, err = _mark_failed(
+            fs_client, document_id, version_id, exc.message
+        )
+        return status, len(text), 0, None, None, err
+
+    try:
+        artifacts: ProcessedArtifacts = write_processed_artifacts(
+            client=gcs_client,
+            bucket_name=bucket_name,
+            document_id=document_id,
+            version_id=version_id,
+            full_text=text,
+            chunks=chunks,
+        )
+    except Exception as exc:  # noqa: BLE001
+        msg = "Failed to store processed artifacts in GCS"
+        logger.exception(
+            "gcs_processed_failed document_id=%s version_id=%s",
+            document_id,
+            version_id,
+        )
+        status, _, _, _, err = _mark_failed(
+            fs_client, document_id, version_id, f"{msg}: {exc}"
+        )
+        return status, len(text), 0, None, None, err
+
+    preview = text_preview(text)
+    try:
+        update_version_ready(
+            fs_client,
+            document_id=document_id,
+            version_id=version_id,
+            processed_gcs_prefix=artifacts.prefix,
+            full_text_gcs_uri=artifacts.full_text_gcs_uri,
+            chunks_gcs_uri=artifacts.chunks_gcs_uri,
+            chunk_count=artifacts.chunk_count,
+            text_preview=preview,
+            extracted_char_count=artifacts.full_text_char_count,
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.exception(
+            "firestore_ready_update_failed document_id=%s version_id=%s",
+            document_id,
+            version_id,
+        )
+        raise UploadStorageError(
+            "Failed to record ready status after processing"
+        ) from exc
+
+    return (
+        "ready",
+        artifacts.full_text_char_count,
+        artifacts.chunk_count,
+        artifacts.prefix,
+        preview,
+        None,
+    )
 
 
 def process_upload(
@@ -212,10 +289,7 @@ def process_upload(
     id_factory: Callable[[], tuple[str, str]] | None = None,
 ) -> UploadResult:
     """
-    Validate → GCS raw/ → Firestore (processing) → extract → ready|failed.
-
-    Uses in-memory bytes for extraction (no re-download). Extraction is
-    synchronous in-API for Phase 2.2; module is worker-ready.
+    Validate → GCS raw/ → Firestore processing → extract/chunk/processed → ready|failed.
     """
     validated_type = validate_upload(
         content_type=content_type,
@@ -266,8 +340,17 @@ def process_upload(
         )
         raise UploadStorageError("Failed to record document metadata") from exc
 
-    status, char_count, truncated, error_message = _run_extraction_and_update(
+    (
+        status,
+        char_count,
+        chunk_count,
+        processed_prefix,
+        preview,
+        error_message,
+    ) = _run_extract_chunk_store(
+        gcs_client=gcs_client,
         fs_client=fs_client,
+        bucket_name=settings.gcs_docs_bucket,
         document_id=document_id,
         version_id=version_id,
         content_type=validated_type,
@@ -285,6 +368,8 @@ def process_upload(
         title=title,
         collection=collection,
         extracted_char_count=char_count,
-        extracted_truncated=truncated,
+        chunk_count=chunk_count,
+        processed_gcs_prefix=processed_prefix,
+        text_preview=preview,
         error_message=error_message,
     )
