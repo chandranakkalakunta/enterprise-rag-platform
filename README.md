@@ -3,10 +3,9 @@
 Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
-**Status:** **Phase 0 Complete — Requirements Locked**  
-**PR:** [#1 — Phase 0: Project Foundation](https://github.com/chandranakkalakunta/enterprise-rag-platform/pull/1)  
+**Status:** **Phase 1.1 in progress** — multi-env Terraform foundation applied  
 **GCP project:** set via `var.gcp_project_id` / `GCP_PROJECT_ID` (never hard-coded in app code)  
-**Current dev example:** `enterprise-rag-platform-502711` (project number `642114828076`)  
+**Project ID:** `enterprise-rag-platform-502711` (number `642114828076`)  
 
 **Audience (auth allowlist):** `chandraailabs.com` + `gmail.com`  
 **Stack:** Next.js PWA · shadcn/ui · FastAPI · **LangGraph** · Vertex AI Gemini + **Vector Search** · Terraform · Cloud Run (`api`, `ingest-worker`, `web`)
@@ -18,7 +17,9 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 | Phase | Focus | Status |
 |-------|--------|--------|
 | **0** | Foundation & requirements lock | ✅ **Complete** |
-| **1** | GCP foundation, auth, WIF CI, health metadata | 🔜 Next |
+| **0.1** | GCP project ID switch | ✅ **Complete** |
+| **1.1** | Multi-env Terraform, APIs, state buckets | ✅ **Applied** (this PR) |
+| **1.2+** | SAs, WIF, CMEK, auth, health code | 🔜 Next |
 | **2** | Ingestion & document versioning | Planned |
 | **3** | Hybrid RAG, citations, guardrails, 5-star feedback | Planned |
 | **4** | Multi-turn, ACL depth, safety tuning | Planned |
@@ -114,13 +115,20 @@ cp .env.example .env
 # set GCP_PROJECT_ID and other local values — never commit .env
 ```
 
-### Terraform (skeleton only in Phase 0)
+### Terraform (multi-env — Phase 1.1)
+
+Layout: `terraform/` with `environments/{dev,test,prod}/` (`terraform.tfvars` + `backend.hcl`).
 
 ```bash
 cd terraform
-# copy environments/dev/terraform.tfvars.example → terraform.tfvars (gitignored)
-# terraform init / plan in Phase 1 after APIs and backend state exist
+# After bootstrap (state already in gs://enterprise-rag-tfstate-dev):
+terraform init -reconfigure -backend-config=environments/dev/backend.hcl
+terraform plan  -var-file=environments/dev/terraform.tfvars
+# terraform apply -var-file=environments/dev/terraform.tfvars
 ```
+
+State buckets: `enterprise-rag-tfstate-dev|test|prod` (versioning + uniform access + soft-delete).  
+Full bootstrap / migrate steps: [docs/runbooks/terraform-bootstrap.md](docs/runbooks/terraform-bootstrap.md)
 
 ---
 

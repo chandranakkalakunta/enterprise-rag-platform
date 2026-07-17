@@ -53,6 +53,8 @@ next-env.d.ts
 *.tfstate.*
 *.tfvars
 !*.tfvars.example
+# Non-secret multi-env tfvars (project id, region, labels only) are committed
+!terraform/environments/**/terraform.tfvars
 crash.log
 crash.*.log
 override.tf

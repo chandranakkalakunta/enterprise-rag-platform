@@ -10,7 +10,15 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- Phase 1: GCP API enablement, CMEK, auth allowlist, WIF CI, health `version` + `deployed_at` in code, three Cloud Run services
+- Phase 1.2: custom service accounts + WIF
+- Phase 1.x: CMEK, auth allowlist, health `version` + `deployed_at` in code, Cloud Run services
+
+### Added
+- **Phase 1.1:** Multi-env Terraform foundation (`dev` / `test` / `prod` tfvars + backend.hcl)
+- Required Google APIs enabled via `google_project_service` (minimum set only)
+- State buckets: `enterprise-rag-tfstate-dev`, `enterprise-rag-tfstate-test`, `enterprise-rag-tfstate-prod` (versioning, UBLA, soft-delete 7d, labels)
+- Remote state migrated to `gs://enterprise-rag-tfstate-dev` (prefix `terraform/state`)
+- Runbook: `docs/runbooks/terraform-bootstrap.md`
 
 ### Changed
 - Phase 0.1 hotfix: GCP project example/default switched to `enterprise-rag-platform-502711` (project number `642114828076`) via `var.gcp_project_id` / `GCP_PROJECT_ID` — no application hard-coding; old placeholder/dev IDs removed from examples
