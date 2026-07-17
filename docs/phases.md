@@ -19,7 +19,8 @@ Update when a phase opens or closes.
 | **2.1** | Upload API + GCS write + Firestore | ✅ **Complete** | [Upload runbook](./runbooks/document-upload-api.md) · `POST /api/v1/documents/upload` |
 | **2.2** | Firestore DB + text extraction + status | ✅ **Complete** | [Firestore](./runbooks/firestore-metadata.md) · extraction → ready/failed |
 | **2.3** | Chunking + processed/ storage + CR lifecycle | ✅ **Complete** | processed/full.txt + chunks.jsonl; TF ignore image |
-| **2** | Ingestion & Versioning | 🔄 **In progress** | Embed/index enqueue; version publish/retire; worker |
+| **2.4** | Publish + retire version lifecycle | ✅ **Complete** | [Lifecycle runbook](./runbooks/version-lifecycle.md) |
+| **2** | Ingestion & Versioning | 🔄 **In progress** | Embed/index enqueue; ingest-worker |
 | **3** | Hybrid RAG + Guardrails | Planned | LangGraph path, citations, feedback, metadata filters |
 | **4** | Multi-turn & ACL depth | Planned | Conversations, collections, safety tuning |
 | **5** | Voice + PWA | Planned | STT/TTS, installable shell |

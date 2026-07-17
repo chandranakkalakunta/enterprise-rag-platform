@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-17 (**Phase 2.3** — chunking + processed/ storage + Cloud Run lifecycle)
+Last updated: 2026-07-17 (**Phase 2.4** — publish + retire version lifecycle)
 
 ---
 
@@ -80,7 +80,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-ING-03 | Chunking + processed/ GCS storage | Done | ✓ Done — Phase 2.3 | full.txt + chunks.jsonl; Firestore pointers only |
 | BL-ING-03b | **Chunking strategy tuning** (size, overlap, separators, evaluation) | Todo | Phase 2–3 | Defaults 1000/150; evaluate on held-out corpus later |
 | BL-ING-03c | Cloud Run TF lifecycle ignore (CI-owned images) | Done | ✓ Done — Phase 2.3 | ignore_changes on template containers |
-| BL-ING-04 | Version publish / retire workflow | Todo | Phase 2 | ADR-0003 |
+| BL-ING-04 | Version publish / retire workflow | Done | ✓ Done — Phase 2.4 | publish/retire APIs; auto-retire previous published |
 | BL-ING-05 | Embed + index pipeline on ingest-worker | Todo | Phase 2–3 | |
 | BL-ING-06 | Atomic index alias swap on publish | Todo | Phase 3 | |
 | BL-ING-07 | Ingest job visibility UI/API | Todo | Phase 2 | |
@@ -172,6 +172,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-17** — **Phase 2.4:** Publish + retire endpoints; atomic active_version_id; previous published auto-retired; strict 409 transitions; tests + runbook.
 - **2026-07-17** — **Phase 2.3:** Chunking (1000/150); processed/ full.txt + chunks.jsonl; Firestore preview/pointers only; Cloud Run image lifecycle ignore.
 - **2026-07-17** — **Phase 2.2:** Firestore DB `(default)` asia-south1 + IAM; Markdown/PDF extraction; status `ready`/`failed`; tests + runbooks.
 - **2026-07-17** — **Phase 2.1:** Upload API — multipart PDF/MD ≤50MB to GCS `raw/`, Firestore Document + Version subcollection (`processing`); temp auth; tests + runbook.

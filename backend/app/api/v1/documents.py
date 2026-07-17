@@ -1,4 +1,4 @@
-"""Document upload API — Phase 2.1–2.3."""
+"""Document upload + version lifecycle API (Phase 2.1–2.4)."""
 
 from __future__ import annotations
 
@@ -6,10 +6,19 @@ import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from google.cloud import firestore
 
-from app.core.auth import AuthContext, require_upload_auth
+from app.core.auth import AuthContext, require_content_auth, require_upload_auth
 from app.core.config import Settings, get_settings
-from app.models.documents import UploadResponse
+from app.models.documents import UploadResponse, VersionLifecycleResponse
+from app.services.lifecycle import (
+    ConflictError,
+    InvalidIdError,
+    LifecycleResult,
+    NotFoundError,
+    publish_version,
+    retire_version,
+)
 from app.services.upload import (
     UploadStorageError,
     UploadValidationError,
@@ -38,6 +47,41 @@ async def _read_limited(upload: UploadFile, max_bytes: int) -> bytes:
             )
         chunks.append(chunk)
     return b"".join(chunks)
+
+
+def _lifecycle_http(exc: Exception) -> HTTPException:
+    if isinstance(exc, InvalidIdError):
+        return HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=exc.message
+        )
+    if isinstance(exc, NotFoundError):
+        return HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=exc.message
+        )
+    if isinstance(exc, ConflictError):
+        return HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=exc.message
+        )
+    logger.exception("lifecycle_unexpected")
+    return HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Lifecycle operation failed",
+    )
+
+
+def _to_lifecycle_response(result: LifecycleResult) -> VersionLifecycleResponse:
+    return VersionLifecycleResponse(
+        document_id=result.document_id,
+        version_id=result.version_id,
+        status=result.status,  # type: ignore[arg-type]
+        active_version_id=result.active_version_id,
+        published_at=result.published_at,
+        published_by=result.published_by,
+        retired_at=result.retired_at,
+        retired_by=result.retired_by,
+        previous_published_version_id=result.previous_published_version_id,
+        cleared_active_pointer=result.cleared_active_pointer,
+    )
 
 
 @router.post(
@@ -109,3 +153,94 @@ async def upload_document(
         text_preview=result.text_preview,
         error_message=result.error_message,
     )
+
+
+@router.post(
+    "/{document_id}/versions/{version_id}/publish",
+    response_model=VersionLifecycleResponse,
+    summary="Publish a ready version (retires previous published)",
+    responses={
+        400: {"description": "Malformed document_id or version_id"},
+        401: {"description": "Unauthorized"},
+        404: {"description": "Document or version not found"},
+        409: {"description": "Illegal state transition"},
+        500: {"description": "Firestore failure"},
+    },
+)
+async def publish_document_version(
+    document_id: str,
+    version_id: str,
+    auth: Annotated[AuthContext, Depends(require_content_auth)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> VersionLifecycleResponse:
+    """
+    Transition version ready → published and set document.active_version_id.
+
+    If another version was published (active), it is set to retired atomically.
+    Temporary auth only — content_admin role check comes later.
+    """
+    try:
+        client = firestore.Client(project=settings.gcp_project_id)
+        result = publish_version(
+            client,
+            document_id=document_id,
+            version_id=version_id,
+            actor=auth.subject,
+        )
+    except (InvalidIdError, NotFoundError, ConflictError) as exc:
+        raise _lifecycle_http(exc) from exc
+    except Exception as exc:  # noqa: BLE001
+        logger.exception(
+            "publish_failed document_id=%s version_id=%s", document_id, version_id
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to publish version",
+        ) from exc
+
+    return _to_lifecycle_response(result)
+
+
+@router.post(
+    "/{document_id}/versions/{version_id}/retire",
+    response_model=VersionLifecycleResponse,
+    summary="Retire a ready or published version",
+    responses={
+        400: {"description": "Malformed document_id or version_id"},
+        401: {"description": "Unauthorized"},
+        404: {"description": "Document or version not found"},
+        409: {"description": "Illegal state transition"},
+        500: {"description": "Firestore failure"},
+    },
+)
+async def retire_document_version(
+    document_id: str,
+    version_id: str,
+    auth: Annotated[AuthContext, Depends(require_content_auth)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> VersionLifecycleResponse:
+    """
+    Transition version ready|published → retired. History is retained.
+
+    Clears document.active_version_id when retiring the active version.
+    """
+    try:
+        client = firestore.Client(project=settings.gcp_project_id)
+        result = retire_version(
+            client,
+            document_id=document_id,
+            version_id=version_id,
+            actor=auth.subject,
+        )
+    except (InvalidIdError, NotFoundError, ConflictError) as exc:
+        raise _lifecycle_http(exc) from exc
+    except Exception as exc:  # noqa: BLE001
+        logger.exception(
+            "retire_failed document_id=%s version_id=%s", document_id, version_id
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retire version",
+        ) from exc
+
+    return _to_lifecycle_response(result)
