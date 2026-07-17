@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-17 (**Phase 2.0** — ADR-0006 Firestore accepted)
+Last updated: 2026-07-17 (**Phase 2.1** — Upload API + GCS + Firestore)
 
 ---
 
@@ -73,7 +73,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-ING-01 | Document upload API + GCS storage | Todo | Phase 2 | |
+| BL-ING-01 | Document upload API + GCS storage | Done | ✓ Done — Phase 2.1 | POST /api/v1/documents/upload; Firestore version status=processing |
 | BL-ING-02 | Parse PDF/DOCX/MD/HTML | Todo | Phase 2 | |
 | BL-ING-03 | Chunking strategy + metadata | Todo | Phase 2 | |
 | BL-ING-04 | Version publish / retire workflow | Todo | Phase 2 | ADR-0003 |
@@ -168,6 +168,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-17** — **Phase 2.1:** Upload API — multipart PDF/MD ≤50MB to GCS `raw/`, Firestore Document + Version subcollection (`processing`); temp auth; tests + runbook.
 - **2026-07-17** — **Phase 2.0:** ADR-0006 accepted — Firestore (Native mode) as long-term metadata store.
 - **2026-07-17** — **Phase 1 complete:** retrospective + engineering report; all Phase 1 foundation items Done (PRs #3–#9).
 - **2026-07-17** — **Phase 1.7:** GHA CI + WIF deploy; Artifact Registry `rag-containers`; API Dockerfile; deploy to `rag-api` on main.

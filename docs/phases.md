@@ -16,7 +16,8 @@ Update when a phase opens or closes.
 | **1.6** | Cloud Run stubs + OAuth allowlist prep | ✅ **Complete** — PR #8 | [Cloud Run](./runbooks/cloud-run-services.md) · [OAuth](./runbooks/oauth-domain-allowlist.md) |
 | **1.7** | CI skeleton (GHA + WIF) | ✅ **Complete** — PR #9 | [CI runbook](./runbooks/github-actions-ci.md) |
 | **2.0** | ADR-0006 Metadata store | ✅ **Accepted** | [Firestore Native](./adr/0006-metadata-store-firestore.md) |
-| **2** | Ingestion & Versioning | 🔜 **Next** | Upload, parse, version publish/retire, ingest-worker |
+| **2.1** | Upload API + GCS write + Firestore | ✅ **Complete** | [Upload runbook](./runbooks/document-upload-api.md) · `POST /api/v1/documents/upload` |
+| **2** | Ingestion & Versioning | 🔄 **In progress** | Parse/chunk next; version publish/retire; ingest-worker |
 | **3** | Hybrid RAG + Guardrails | Planned | LangGraph path, citations, feedback, metadata filters |
 | **4** | Multi-turn & ACL depth | Planned | Conversations, collections, safety tuning |
 | **5** | Voice + PWA | Planned | STT/TTS, installable shell |

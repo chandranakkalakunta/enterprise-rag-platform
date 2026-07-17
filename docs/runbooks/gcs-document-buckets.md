@@ -36,7 +36,7 @@ Paths are prefixes inside each bucket (not separate buckets):
 Example object keys:
 
 ```text
-gs://rag-docs-dev/raw/{document_id}/{upload_id}/source.pdf
+gs://rag-docs-dev/raw/{document_id}/{version_id}/source.pdf
 gs://rag-docs-dev/versions/{document_id}/{version_id}/content.pdf
 gs://rag-docs-dev/assets/{document_id}/{version_id}/figures/fig-001.png
 gs://rag-docs-dev/processed/{document_id}/{version_id}/chunks.jsonl

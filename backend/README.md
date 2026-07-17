@@ -16,7 +16,18 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 Health: http://localhost:8000/health  
 Ready: http://localhost:8000/ready  
-OpenAPI: http://localhost:8000/docs
+OpenAPI: http://localhost:8000/docs  
+Upload: `POST /api/v1/documents/upload` (PDF/Markdown ≤50MB)
+
+### Document upload (Phase 2.1)
+
+Multipart form fields: `file` (required), `title`, `collection` (optional).
+
+- Writes to `gs://$GCS_DOCS_BUCKET/raw/{document_id}/{version_id}/{filename}`
+- Creates Firestore `documents/{id}` + `versions/{version_id}` with `status=processing`
+- Temp auth: `AUTH_DEV_BYPASS=true` (default) or Bearer `UPLOAD_BEARER_TOKEN`
+
+See [docs/runbooks/document-upload-api.md](../docs/runbooks/document-upload-api.md).
 
 ### Health contract (Phase 1.5)
 

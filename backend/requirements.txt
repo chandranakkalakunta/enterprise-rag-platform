@@ -8,6 +8,10 @@ pydantic-settings==2.7.0
 httpx==0.28.1
 python-multipart==0.0.20
 
+# GCP clients (Phase 2.1 — upload → GCS + Firestore)
+google-cloud-storage==2.19.0
+google-cloud-firestore==2.19.0
+
 # Test
 pytest==8.3.4
 pytest-cov==6.0.0
