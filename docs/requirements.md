@@ -694,9 +694,10 @@ Stable IDs retained from Phase 0 Alpha/Beta; **new Gamma IDs appended** (never r
 | NFR-SEC-10 | **Zero JSON service-account key files** — never create, download, commit, or mount `*.json` SA keys for runtime or CI |
 | NFR-SEC-11 | **WIF + OIDC** for CI/CD and keyless GCP auth; human users use ADC / gcloud user creds locally |
 | NFR-SEC-12 | **Defence-in-depth**: network (later LB/Armor), identity, AuthZ, guardrails, privacy egress — no single control is sufficient |
-| NFR-SEC-13 | Auth email domain allowlist: `chandraailabs.com`, `gmail.com` |
+| NFR-SEC-13 | Auth email domain allowlist: `chandraailabs.com`, `gmail.com` only (deny all other domains at sign-in) |
+| NFR-SEC-14 | **Binary Authorization (future / deferred):** Cloud Run services **SHALL** eventually be protected by Binary Authorization so that only **signed and attested** container images can run. Requires attestors, KMS signing keys, and a Binary Authorization policy. **Not required for Phase 1 stubs.** Tracked as BL-SEC-09 / BL-FND-26. |
 
-See [ADR-0005 Security Posture](./adr/0005-security-posture.md).
+See [ADR-0005 Security Posture](./adr/0005-security-posture.md) · [OAuth allowlist runbook](./runbooks/oauth-domain-allowlist.md).
 
 ### 6.5 Privacy & compliance
 

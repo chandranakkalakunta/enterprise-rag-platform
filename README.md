@@ -3,7 +3,7 @@
 Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
-**Status:** **Phase 1.5 applied** — health contract + CI storage.admin removed  
+**Status:** **Phase 1.6 applied** — Cloud Run stubs + OAuth allowlist prep  
 **GCP project:** set via `var.gcp_project_id` / `GCP_PROJECT_ID` (never hard-coded in app code)  
 **Project ID:** `enterprise-rag-platform-502711` (number `642114828076`)  
 
@@ -22,8 +22,9 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 | **1.2** | Custom SAs + GitHub WIF | ✅ **Complete** |
 | **1.3** | CMEK + Secret Manager shells | ✅ **Complete** |
 | **1.4** | Application GCS buckets with CMEK | ✅ **Complete** |
-| **1.5** | Health endpoints + CI IAM tighten | ✅ **Applied** (this PR) |
-| **1.6+** | Auth, Cloud Run, Binary Auth (later) | 🔜 Next |
+| **1.5** | Health endpoints + CI IAM tighten | ✅ **Complete** |
+| **1.6** | Cloud Run stubs + OAuth allowlist prep | ✅ **Applied** (this PR) |
+| **1.7+** | CI skeleton, real images, auth; Binary Auth Phase 6+ | 🔜 Next |
 | **2** | Ingestion & document versioning | Planned |
 | **3** | Hybrid RAG, citations, guardrails, 5-star feedback | Planned |
 | **4** | Multi-turn, ACL depth, safety tuning | Planned |

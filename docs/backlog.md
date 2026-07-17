@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-17 (**Phase 1.5** — health + CI IAM tighten)
+Last updated: 2026-07-17 (**Phase 1.6** — Cloud Run stubs)
 
 ---
 
@@ -41,21 +41,22 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-FND-06b | Data GCS buckets with CMEK (`rag-docs-*`) | Done | ✓ Done — Phase 1.4 | versioning, lifecycle 90d, UBLA |
 | BL-FND-07 | Cloud Build/GHA + WIF keyless CI (pool + provider + SA) | Done | ✓ Done — Phase 1.2 | Workflow smoke later |
 | BL-FND-08 | detect-secrets in CI | Todo | Phase 1.5+ | |
-| BL-FND-14 | Three Cloud Run services (api, ingest-worker, web) | Todo | Phase 1–2 | Scaffold |
+| BL-FND-14 | Three Cloud Run services (rag-api, rag-ingest, rag-web) | Done | ✓ Done — Phase 1.6 | Stubs + SAs; real images later |
 | BL-FND-15 | Health returns version + deployed_at | Done | ✓ Done — Phase 1.5 | APP_VERSION / DEPLOYED_AT |
 | BL-FND-16 | HTTPS LB + Cloud Armor | Deferred | Pre-prod | Explicitly later |
 | BL-FND-22 | Custom SAs per service (api/ingest/web/ci) | Done | ✓ Done — Phase 1.2 | ADR-0005 |
 | BL-FND-23 | WIF GitHub OIDC + workloadIdentityUser on sa-rag-ci | Done | ✓ Done — Phase 1.2 | Repo-restricted |
 | BL-FND-24 | Remove project-level storage.admin from sa-rag-ci | Done | ✓ Done — Phase 1.5 | Bucket objectAdmin remains |
 | BL-FND-25 | OAuth secret shells + CMEK | Done | ✓ Done — Phase 1.3 | Empty versions; Coordinator fills |
-| BL-FND-26 | Binary Authorization for Cloud Run images | Todo | Future | Noted Phase 1.3 |
+| BL-FND-26 | Binary Authorization for Cloud Run images | Todo | **P1 / Phase 6+** | Supply-chain hardening; NFR-SEC-14 |
 | BL-FND-27 | Docs prefix convention (raw/versions/assets/processed) | Done | ✓ Done — Phase 1.4 | Documented in runbook |
+| BL-FND-28 | Replace Cloud Run stub images with real app images | Todo | Phase 1.7+ | After CI builds |
 
 ## Auth & Security
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-SEC-01 | Google OAuth + domain allowlist (chandraailabs.com, gmail.com) | Todo | Phase 1 | US-AUTH-01 |
+| BL-SEC-01 | Google OAuth + domain allowlist (chandraailabs.com, gmail.com) | Todo | Phase 1–2 | Spec documented Phase 1.6 |
 | BL-SEC-02 | Role model: user / content_admin / operator | Todo | Phase 1–2 | |
 | BL-SEC-03 | Secret Manager shells + CMEK | Done | ✓ Done — Phase 1.3 | Values via runbook later |
 | BL-SEC-04 | Non-root Docker images (uid 1001) | Todo | Phase 1 | |
@@ -63,6 +64,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-SEC-06 | Admin action audit log | Todo | Phase 2 | |
 | BL-SEC-07 | Custom SAs per service + least privilege | Done | ✓ Done — Phase 1.2 | Baseline roles; tighten storage later |
 | BL-SEC-08 | Enforce zero JSON SA keys (WIF only for CI) | Done | ✓ Done — Phase 1.2 | NFR-SEC-10; verified no user keys |
+| BL-SEC-09 | **Binary Authorization for Cloud Run** | Todo | **P1 / Phase 6+** | Only attested/signed images; attestors + KMS + policy. Deferred until supply-chain hardening. NFR-SEC-14 |
 
 ## Ingestion & Versioning
 
@@ -162,6 +164,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-17** — **Phase 1.6:** Cloud Run stubs `rag-api` / `rag-ingest` / `rag-web`; OAuth allowlist + Binary Auth tracking in requirements/backlog.
 - **2026-07-17** — **Phase 1.5:** `/health` + `/ready` with version/deployed_at; removed project `storage.admin` from sa-rag-ci.
 - **2026-07-17** — **Phase 1.4:** `rag-docs-{dev,test,prod}` with CMEK, lifecycle, bucket IAM; GCS service agent on `rag-gcs-key`.
 - **2026-07-17** — **Phase 1.3:** `rag-keyring` + `rag-gcs-key` / `rag-secrets-key`; OAuth secret shells with CMEK; SM service agent KMS grant.
