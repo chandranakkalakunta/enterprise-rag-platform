@@ -3,7 +3,7 @@
 Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
-**Status:** **Phase 1.6 applied** — Cloud Run stubs + OAuth allowlist prep  
+**Status:** **Phase 1.7 applied** — keyless CI skeleton (GitHub Actions + WIF)  
 **GCP project:** set via `var.gcp_project_id` / `GCP_PROJECT_ID` (never hard-coded in app code)  
 **Project ID:** `enterprise-rag-platform-502711` (number `642114828076`)  
 
@@ -23,8 +23,9 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 | **1.3** | CMEK + Secret Manager shells | ✅ **Complete** |
 | **1.4** | Application GCS buckets with CMEK | ✅ **Complete** |
 | **1.5** | Health endpoints + CI IAM tighten | ✅ **Complete** |
-| **1.6** | Cloud Run stubs + OAuth allowlist prep | ✅ **Applied** (this PR) |
-| **1.7+** | CI skeleton, real images, auth; Binary Auth Phase 6+ | 🔜 Next |
+| **1.6** | Cloud Run stubs + OAuth allowlist prep | ✅ **Complete** |
+| **1.7** | CI skeleton (GHA + WIF deploy) | ✅ **Applied** (this PR) |
+| **2+** | Auth, real ingest/RAG, Binary Auth Phase 6+ | 🔜 Next |
 | **2** | Ingestion & document versioning | Planned |
 | **3** | Hybrid RAG, citations, guardrails, 5-star feedback | Planned |
 | **4** | Multi-turn, ACL depth, safety tuning | Planned |
@@ -154,6 +155,19 @@ Full bootstrap / migrate steps: [docs/runbooks/terraform-bootstrap.md](docs/runb
 - Auth domain allowlist: `chandraailabs.com`, `gmail.com`
 
 ---
+
+## CI / CD
+
+- Workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)  
+- Runbook: [docs/runbooks/github-actions-ci.md](docs/runbooks/github-actions-ci.md)  
+- **Keyless only:** WIF provider  
+  `projects/642114828076/locations/global/workloadIdentityPools/rag-github-pool/providers/github-oidc`  
+- Artifact Registry: `asia-south1-docker.pkg.dev/enterprise-rag-platform-502711/rag-containers`  
+- Deploy target on `main` push: Cloud Run **`rag-api`**
+
+```text
+![CI](https://github.com/chandranakkalakunta/enterprise-rag-platform/actions/workflows/ci.yml/badge.svg)
+```
 
 ## Contributing / protocol
 

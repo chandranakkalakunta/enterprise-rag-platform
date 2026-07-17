@@ -10,11 +10,14 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- Phase 1.7: CI skeleton (GitHub Actions WIF deploy)
+- First real CI run after merge to `main` (Coordinator)
 - Coordinator: add OAuth secret versions (shells exist)
 - Binary Authorization implementation (NFR-SEC-14 / BL-SEC-09) — Phase 6+
 
 ### Added
+- **Phase 1.7:** GitHub Actions CI (test → build → deploy) via WIF; no JSON keys
+- **Phase 1.7:** Artifact Registry `rag-containers` (asia-south1); `backend/Dockerfile` (Python 3.12, non-root 1001)
+- **Phase 1.7:** Runbook `docs/runbooks/github-actions-ci.md`
 - **Phase 1.6:** Cloud Run stubs `rag-api`, `rag-ingest`, `rag-web` with sa-rag-* SAs, scale-to-zero, `APP_VERSION`/`DEPLOYED_AT`
 - **Phase 1.6:** NFR-SEC-14 Binary Authorization (future); BL-SEC-09 backlog; OAuth allowlist runbook
 - **Phase 1.5:** `/health` and `/ready` return `status`, `service`, `version`, `deployed_at` from `APP_VERSION` / `DEPLOYED_AT`

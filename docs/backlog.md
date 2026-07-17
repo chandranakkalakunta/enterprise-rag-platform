@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-17 (**Phase 1.6** — Cloud Run stubs)
+Last updated: 2026-07-17 (**Phase 1.7** — CI skeleton)
 
 ---
 
@@ -39,9 +39,9 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-FND-21 | Remote state migration to GCS (dev backend) | Done | ✓ Done — Phase 1.1 | gs://enterprise-rag-tfstate-dev |
 | BL-FND-06 | CMEK keyring + crypto keys (gcs + secrets) | Done | ✓ Done — Phase 1.3 | rag-keyring / rag-*-key |
 | BL-FND-06b | Data GCS buckets with CMEK (`rag-docs-*`) | Done | ✓ Done — Phase 1.4 | versioning, lifecycle 90d, UBLA |
-| BL-FND-07 | Cloud Build/GHA + WIF keyless CI (pool + provider + SA) | Done | ✓ Done — Phase 1.2 | Workflow smoke later |
-| BL-FND-08 | detect-secrets in CI | Todo | Phase 1.5+ | |
-| BL-FND-14 | Three Cloud Run services (rag-api, rag-ingest, rag-web) | Done | ✓ Done — Phase 1.6 | Stubs + SAs; real images later |
+| BL-FND-07 | Cloud Build/GHA + WIF keyless CI (pool + provider + SA) | Done | ✓ Done — Phase 1.2 | Identity foundation |
+| BL-FND-08 | detect-secrets in CI | Todo | Phase 2+ | |
+| BL-FND-14 | Three Cloud Run services (rag-api, rag-ingest, rag-web) | Done | ✓ Done — Phase 1.6 | Stubs + SAs |
 | BL-FND-15 | Health returns version + deployed_at | Done | ✓ Done — Phase 1.5 | APP_VERSION / DEPLOYED_AT |
 | BL-FND-16 | HTTPS LB + Cloud Armor | Deferred | Pre-prod | Explicitly later |
 | BL-FND-22 | Custom SAs per service (api/ingest/web/ci) | Done | ✓ Done — Phase 1.2 | ADR-0005 |
@@ -50,7 +50,9 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-FND-25 | OAuth secret shells + CMEK | Done | ✓ Done — Phase 1.3 | Empty versions; Coordinator fills |
 | BL-FND-26 | Binary Authorization for Cloud Run images | Todo | **P1 / Phase 6+** | Supply-chain hardening; NFR-SEC-14 |
 | BL-FND-27 | Docs prefix convention (raw/versions/assets/processed) | Done | ✓ Done — Phase 1.4 | Documented in runbook |
-| BL-FND-28 | Replace Cloud Run stub images with real app images | Todo | Phase 1.7+ | After CI builds |
+| BL-FND-28 | Replace Cloud Run stub images with real app images | Done | ✓ Done — Phase 1.7 | CI deploys rag-api image |
+| BL-FND-29 | GitHub Actions CI workflow (test → build → deploy) | Done | ✓ Done — Phase 1.7 | `.github/workflows/ci.yml` |
+| BL-FND-30 | Artifact Registry `rag-containers` | Done | ✓ Done — Phase 1.7 | asia-south1 DOCKER |
 
 ## Auth & Security
 
@@ -164,6 +166,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-17** — **Phase 1.7:** GHA CI + WIF deploy; Artifact Registry `rag-containers`; API Dockerfile; deploy to `rag-api` on main.
 - **2026-07-17** — **Phase 1.6:** Cloud Run stubs `rag-api` / `rag-ingest` / `rag-web`; OAuth allowlist + Binary Auth tracking in requirements/backlog.
 - **2026-07-17** — **Phase 1.5:** `/health` + `/ready` with version/deployed_at; removed project `storage.admin` from sa-rag-ci.
 - **2026-07-17** — **Phase 1.4:** `rag-docs-{dev,test,prod}` with CMEK, lifecycle, bucket IAM; GCS service agent on `rag-gcs-key`.

@@ -1,0 +1,127 @@
+# Enterprise RAG Platform — CI (Phase 1.7)
+# Keyless GCP auth via Workload Identity Federation only.
+# NEVER use JSON service-account keys in this workflow.
+#
+# Project: enterprise-rag-platform-502711
+# WIF provider: projects/642114828076/locations/global/workloadIdentityPools/rag-github-pool/providers/github-oidc
+# CI SA: sa-rag-ci@enterprise-rag-platform-502711.iam.gserviceaccount.com
+# Repo restriction: chandranakkalakunta/enterprise-rag-platform only (WIF attribute_condition)
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: enterprise-rag-platform-502711
+  REGION: asia-south1
+  SERVICE: rag-api
+  REPOSITORY: rag-containers
+  # Full WIF provider resource name (must match Terraform wif.tf)
+  WIF_PROVIDER: projects/642114828076/locations/global/workloadIdentityPools/rag-github-pool/providers/github-oidc
+  WIF_SERVICE_ACCOUNT: sa-rag-ci@enterprise-rag-platform-502711.iam.gserviceaccount.com
+
+jobs:
+  # ── Job 1: unit tests (every PR + push) ─────────────────────────────────────
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies (pinned requirements.txt only)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip check
+
+      - name: Run pytest
+        run: pytest -q
+
+  # ── Job 2: build + push + deploy (main push only) ───────────────────────────
+  # Runs only after test succeeds. Uses WIF (id-token) — no JSON keys.
+  build-and-deploy:
+    name: build-and-deploy
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # required for Workload Identity Federation / OIDC
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Authenticate to GCP via WIF — exchanges GitHub OIDC token for short-lived credentials
+      - name: Authenticate to Google Cloud (WIF)
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Set image metadata
+        id: meta
+        run: |
+          SHA_SHORT="${GITHUB_SHA::12}"
+          IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/rag-api"
+          DEPLOYED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "sha_short=${SHA_SHORT}" >> "$GITHUB_OUTPUT"
+          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+          echo "tag=${SHA_SHORT}" >> "$GITHUB_OUTPUT"
+          echo "deployed_at=${DEPLOYED_AT}" >> "$GITHUB_OUTPUT"
+          echo "Building ${IMAGE}:${SHA_SHORT}"
+
+      - name: Build Docker image
+        working-directory: backend
+        run: |
+          docker build \
+            --build-arg APP_VERSION="${{ steps.meta.outputs.tag }}" \
+            --build-arg DEPLOYED_AT="${{ steps.meta.outputs.deployed_at }}" \
+            -t "${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}" \
+            -t "${{ steps.meta.outputs.image }}:latest" \
+            .
+
+      - name: Push Docker image
+        run: |
+          docker push "${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}"
+          docker push "${{ steps.meta.outputs.image }}:latest"
+
+      - name: Deploy to Cloud Run (rag-api)
+        # Runtime identity = sa-rag-api (CI SA deploys via run.admin + serviceAccountUser).
+        # Prefer service status.url for smoke tests (never status.traffic alone).
+        run: |
+          gcloud run services update "${SERVICE}" \
+            --project="${PROJECT_ID}" \
+            --region="${REGION}" \
+            --image="${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}" \
+            --service-account="sa-rag-api@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --set-env-vars="APP_VERSION=${{ steps.meta.outputs.tag }},DEPLOYED_AT=${{ steps.meta.outputs.deployed_at }},SERVICE_NAME=rag-api,GCP_PROJECT_ID=${PROJECT_ID}" \
+            --quiet
+
+          URL="$(gcloud run services describe "${SERVICE}" \
+            --project="${PROJECT_ID}" \
+            --region="${REGION}" \
+            --format='value(status.url)')"
+          echo "Deployed ${SERVICE} → ${URL}"

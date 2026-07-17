@@ -12,8 +12,9 @@ Update when a phase opens or closes.
 | **1.3** | CMEK + Secret Manager shells | ✅ **Complete** | [CMEK runbook](./runbooks/secret-manager-cmek.md) |
 | **1.4** | Application GCS buckets with CMEK | ✅ **Complete** | [GCS runbook](./runbooks/gcs-document-buckets.md) |
 | **1.5** | Health endpoints + CI storage.admin removal | ✅ **Complete** | NFR-REL-03a; BL-FND-24 |
-| **1.6** | Cloud Run stubs + OAuth allowlist prep | ✅ **Applied** | [Cloud Run](./runbooks/cloud-run-services.md) · [OAuth](./runbooks/oauth-domain-allowlist.md) |
-| **1.7+** | CI skeleton, real images, auth | 🔜 Next | Binary Auth Phase 6+ (NFR-SEC-14) |
+| **1.6** | Cloud Run stubs + OAuth allowlist prep | ✅ **Complete** | [Cloud Run](./runbooks/cloud-run-services.md) · [OAuth](./runbooks/oauth-domain-allowlist.md) |
+| **1.7** | CI skeleton (GHA + WIF) | ✅ **Applied** | [CI runbook](./runbooks/github-actions-ci.md) |
+| **2+** | Auth, RAG features | 🔜 Next | Binary Auth Phase 6+ (NFR-SEC-14) |
 | **2** | Ingestion & Versioning | Planned | Upload, parse, version publish/retire, ingest-worker |
 | **3** | Hybrid RAG + Guardrails | Planned | LangGraph path, citations, feedback, metadata filters |
 | **4** | Multi-turn & ACL depth | Planned | Conversations, collections, safety tuning |
