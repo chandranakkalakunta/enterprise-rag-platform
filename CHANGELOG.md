@@ -10,10 +10,13 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- Phase 1.6+: auth allowlist, Cloud Run services, Binary Authorization
+- Phase 1.7: CI skeleton (GitHub Actions WIF deploy)
 - Coordinator: add OAuth secret versions (shells exist)
+- Binary Authorization implementation (NFR-SEC-14 / BL-SEC-09) — Phase 6+
 
 ### Added
+- **Phase 1.6:** Cloud Run stubs `rag-api`, `rag-ingest`, `rag-web` with sa-rag-* SAs, scale-to-zero, `APP_VERSION`/`DEPLOYED_AT`
+- **Phase 1.6:** NFR-SEC-14 Binary Authorization (future); BL-SEC-09 backlog; OAuth allowlist runbook
 - **Phase 1.5:** `/health` and `/ready` return `status`, `service`, `version`, `deployed_at` from `APP_VERSION` / `DEPLOYED_AT`
 - **Phase 1.5:** pytest coverage for health contract; `.env.example` documents deploy metadata env vars
 

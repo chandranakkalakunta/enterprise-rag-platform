@@ -144,3 +144,23 @@ output "docs_bucket_kms_key" {
   description = "CMEK used as default encryption on document buckets"
   value       = google_kms_crypto_key.gcs.id
 }
+
+# ── Phase 1.6: Cloud Run stubs ───────────────────────────────────────────────
+
+output "cloud_run_service_names" {
+  description = "Cloud Run service names by key"
+  value       = { for k, s in google_cloud_run_v2_service.rag : k => s.name }
+}
+
+output "cloud_run_service_urls" {
+  description = "Cloud Run service URIs (use status.url equivalent — uri field)"
+  value       = { for k, s in google_cloud_run_v2_service.rag : k => s.uri }
+}
+
+output "cloud_run_service_accounts" {
+  description = "Runtime SA email attached to each Cloud Run service"
+  value = {
+    for k, s in local.cloud_run_services :
+    k => google_service_account.rag[s.sa_key].email
+  }
+}
