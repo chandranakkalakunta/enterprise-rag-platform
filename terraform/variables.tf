@@ -61,3 +61,21 @@ variable "tfstate_soft_delete_days" {
   type        = number
   default     = 7
 }
+
+variable "github_repository" {
+  description = "GitHub org/repo allowed to impersonate sa-rag-ci via WIF (attribute.repository)"
+  type        = string
+  default     = "chandranakkalakunta/enterprise-rag-platform"
+}
+
+variable "wif_pool_id" {
+  description = "Workload Identity Pool ID (global)"
+  type        = string
+  default     = "rag-github-pool"
+}
+
+variable "wif_provider_id" {
+  description = "Workload Identity Pool Provider ID for GitHub OIDC"
+  type        = string
+  default     = "github-oidc"
+}
