@@ -3,7 +3,7 @@
 Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
-**Status:** **Phase 1.1 in progress** — multi-env Terraform foundation applied  
+**Status:** **Phase 1.2 applied** — custom SAs + GitHub WIF (zero JSON keys)  
 **GCP project:** set via `var.gcp_project_id` / `GCP_PROJECT_ID` (never hard-coded in app code)  
 **Project ID:** `enterprise-rag-platform-502711` (number `642114828076`)  
 
@@ -18,8 +18,9 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 |-------|--------|--------|
 | **0** | Foundation & requirements lock | ✅ **Complete** |
 | **0.1** | GCP project ID switch | ✅ **Complete** |
-| **1.1** | Multi-env Terraform, APIs, state buckets | ✅ **Applied** (this PR) |
-| **1.2+** | SAs, WIF, CMEK, auth, health code | 🔜 Next |
+| **1.1** | Multi-env Terraform, APIs, state buckets | ✅ **Complete** |
+| **1.2** | Custom SAs + GitHub WIF | ✅ **Applied** (this PR) |
+| **1.3+** | CMEK, secrets, auth, health code, Cloud Run | 🔜 Next |
 | **2** | Ingestion & document versioning | Planned |
 | **3** | Hybrid RAG, citations, guardrails, 5-star feedback | Planned |
 | **4** | Multi-turn, ACL depth, safety tuning | Planned |
@@ -134,10 +135,14 @@ Full bootstrap / migrate steps: [docs/runbooks/terraform-bootstrap.md](docs/runb
 
 ## Security highlights
 
-- **Zero JSON service-account keys** — WIF/OIDC for CI; runtime uses attached Cloud Run SAs ([ADR-0005](docs/adr/0005-security-posture.md))
+- **Zero JSON service-account keys** — forever; CI uses GitHub OIDC + WIF only  
+  - SAs: `sa-rag-api`, `sa-rag-ingest`, `sa-rag-web`, `sa-rag-ci`  
+  - Pool: `rag-github-pool` · Provider: `github-oidc`  
+  - Runbook: [docs/runbooks/github-actions-wif.md](docs/runbooks/github-actions-wif.md)  
+  - ADR: [docs/adr/0005-security-posture.md](docs/adr/0005-security-posture.md)
 - Secrets in **Secret Manager** only; `.env` gitignored
-- Least-privilege **custom SAs** per service (`api`, `ingest-worker`, `web`)
-- CMEK on data stores (from foundation phase)
+- Least-privilege **custom SAs** (CI vs runtime); tighten storage.admin on CI later
+- CMEK on data stores (Phase 1.3+)
 - Non-root containers (uid/gid **1001**)
 - No PII in logs/analytics by default (hashed subject IDs)
 - Auth domain allowlist: `chandraailabs.com`, `gmail.com`

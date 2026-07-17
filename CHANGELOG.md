@@ -10,10 +10,14 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- Phase 1.2: custom service accounts + WIF
-- Phase 1.x: CMEK, auth allowlist, health `version` + `deployed_at` in code, Cloud Run services
+- Phase 1.3: CMEK + Secret Manager wiring
+- Phase 1.x: auth allowlist, health `version` + `deployed_at` in code, Cloud Run services
 
 ### Added
+- **Phase 1.2:** Custom service accounts `sa-rag-api`, `sa-rag-ingest`, `sa-rag-web`, `sa-rag-ci`
+- **Phase 1.2:** Workload Identity Pool `rag-github-pool` + GitHub OIDC provider `github-oidc` (repo-restricted)
+- **Phase 1.2:** WIF binding `roles/iam.workloadIdentityUser` on `sa-rag-ci` for `chandranakkalakunta/enterprise-rag-platform`
+- **Phase 1.2:** Baseline IAM (documented in `terraform/iam.tf`); runbook `docs/runbooks/github-actions-wif.md`
 - **Phase 1.1:** Multi-env Terraform foundation (`dev` / `test` / `prod` tfvars + backend.hcl)
 - Required Google APIs enabled via `google_project_service` (minimum set only)
 - State buckets: `enterprise-rag-tfstate-dev`, `enterprise-rag-tfstate-test`, `enterprise-rag-tfstate-prod` (versioning, UBLA, soft-delete 7d, labels)
