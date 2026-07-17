@@ -236,14 +236,17 @@ api generate/UI:
 See [ADR-0003](../adr/0003-document-versioning.md).
 
 ```text
-Upload (api) → GCS → Version=DRAFT
-  → enqueue ingest-worker
+Upload (api) → GCS raw/{document_id}/{version_id}/{filename}
+  → Firestore Document + Version status=processing  (Phase 2.1 ✓)
+  → enqueue ingest-worker  (later)
   → parse / multimodal / chunk / embed / index (staging)
-  → Version=READY
-  → Publish → atomic activate → PUBLISHED (active)
+  → Version=ready
+  → Publish → atomic activate → published (active)
   → invalidate semantic cache fingerprint for scope
   → Retire → remove from active retrieval
 ```
+
+**Phase 2.1:** `POST /api/v1/documents/upload` only (no parse/enqueue yet). See [document-upload-api runbook](../runbooks/document-upload-api.md).
 
 ---
 

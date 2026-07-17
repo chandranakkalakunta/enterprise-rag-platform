@@ -10,6 +10,8 @@ from typing import Any, AsyncIterator
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1.router import api_v1_router
+
 logging.basicConfig(
     level=logging.INFO,
     format='{"severity":"%(levelname)s","message":"%(message)s","logger":"%(name)s"}',
@@ -51,7 +53,10 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title="Enterprise RAG Platform API",
-    description="Production-grade Enterprise RAG API",
+    description=(
+        "Production-grade Enterprise RAG API. "
+        "Phase 2.1: POST /api/v1/documents/upload (PDF/Markdown → GCS + Firestore)."
+    ),
     version=_app_version(),
     docs_url="/docs",
     redoc_url="/redoc",
@@ -65,6 +70,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(api_v1_router)
 
 
 @app.get("/health")
@@ -89,4 +96,5 @@ async def root() -> dict[str, str]:
         "docs": "/docs",
         "health": "/health",
         "ready": "/ready",
+        "upload": "/api/v1/documents/upload",
     }

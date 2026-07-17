@@ -10,12 +10,14 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- Phase 2.1+: Ingestion foundation (upload, parse, versioning state machine, Firestore models)
+- Phase 2.2+: Parse/chunk pipeline, version state transitions, ingest-worker enqueue
 - Coordinator: add OAuth secret versions (shells exist)
 - Binary Authorization implementation (NFR-SEC-14 / BL-SEC-09) — Phase 6+
 - detect-secrets in CI (BL-FND-08)
+- Full OAuth + content_admin on upload (replace Phase 2.1 temp auth)
 
 ### Added
+- **Phase 2.1:** `POST /api/v1/documents/upload` — PDF/Markdown ≤50MB → GCS `raw/{document_id}/{version_id}/{filename}` + Firestore Document/Version (`status=processing`); temp Bearer/dev-bypass auth; unit tests; [runbook](docs/runbooks/document-upload-api.md)
 - **Phase 2.0:** [ADR-0006](docs/adr/0006-metadata-store-firestore.md) — Firestore (Native mode) accepted as long-term metadata store (documents, versions, ingest jobs); analytics remain on BigQuery
 
 ---
