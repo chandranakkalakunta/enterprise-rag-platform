@@ -58,7 +58,7 @@ Phase 0 must lock a coherent stack for the Enterprise RAG Platform before featur
 | Item | Choice |
 |------|--------|
 | Object storage | GCS (CMEK) |
-| Metadata store | **Open** — Firestore vs Cloud SQL deferred (BL-DEC-01 / future ADR) |
+| Metadata store | **Firestore (Native mode)** — [ADR-0006](./0006-metadata-store-firestore.md) |
 | Analytics | BigQuery (hashed user IDs, metadata only; star ratings aggregates) |
 | Secrets | Secret Manager |
 | Auth (v1) | Google OAuth; allowlist `chandraailabs.com` + `gmail.com` |

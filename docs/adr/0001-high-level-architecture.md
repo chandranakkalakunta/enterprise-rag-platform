@@ -60,7 +60,7 @@ Selection criteria (priority order):
 | Concern | Service |
 |---------|---------|
 | Raw docs & versions | Cloud Storage (CMEK) |
-| Document / chunk metadata | Firestore or Cloud SQL (decision refined in later ADR) |
+| Document / chunk metadata | **Firestore (Native mode)** — [ADR-0006](./0006-metadata-store-firestore.md) |
 | Dense vectors | Vertex AI Vector Search (or matching managed index) |
 | Sparse index | In-process BM25 for v1; evaluate managed search later |
 | Secrets | Secret Manager |
@@ -122,6 +122,7 @@ Selection criteria (priority order):
 - [ADR-0003 Document Versioning](./0003-document-versioning.md)
 - [ADR-0004 Guardrails Architecture](./0004-guardrails-architecture.md)
 - [ADR-0005 Security Posture](./0005-security-posture.md)
+- [ADR-0006 Metadata Store — Firestore](./0006-metadata-store-firestore.md)
 - [Architecture overview (diagrams & components)](../architecture/overview.md)
 - [Requirements](../requirements.md) · [UI specs](../ui-specs.md)
 - Enterprise HR RAG production patterns (hybrid + RRF + PII-free BigQuery)
