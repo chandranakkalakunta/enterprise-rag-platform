@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-17 (**Phase 1.2** — SAs + WIF applied)
+Last updated: 2026-07-17 (**Phase 1.3** — CMEK + Secret Manager applied)
 
 ---
 
@@ -37,15 +37,18 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-FND-19 | Multi-env Terraform layout (dev/test/prod) | Done | ✓ Done — Phase 1.1 | tfvars + backend.hcl |
 | BL-FND-20 | State buckets enterprise-rag-tfstate-{dev,test,prod} | Done | ✓ Done — Phase 1.1 | versioning, UBLA, soft-delete 7d |
 | BL-FND-21 | Remote state migration to GCS (dev backend) | Done | ✓ Done — Phase 1.1 | gs://enterprise-rag-tfstate-dev |
-| BL-FND-06 | CMEK keys + data GCS buckets | Todo | Phase 1.3 | Not state buckets |
+| BL-FND-06 | CMEK keyring + crypto keys (gcs + secrets) | Done | ✓ Done — Phase 1.3 | rag-keyring / rag-*-key |
+| BL-FND-06b | Data GCS buckets with CMEK | Todo | Phase 1.4+ | Use rag-gcs-key + storage agent |
 | BL-FND-07 | Cloud Build/GHA + WIF keyless CI (pool + provider + SA) | Done | ✓ Done — Phase 1.2 | Workflow smoke later |
-| BL-FND-08 | detect-secrets in CI | Todo | Phase 1.3+ | |
+| BL-FND-08 | detect-secrets in CI | Todo | Phase 1.4+ | |
 | BL-FND-14 | Three Cloud Run services (api, ingest-worker, web) | Todo | Phase 1–2 | Scaffold |
 | BL-FND-15 | Health returns version + deployed_at | Todo | Phase 1 | NFR-REL-03a; **code** |
 | BL-FND-16 | HTTPS LB + Cloud Armor | Deferred | Pre-prod | Explicitly later |
 | BL-FND-22 | Custom SAs per service (api/ingest/web/ci) | Done | ✓ Done — Phase 1.2 | ADR-0005 |
 | BL-FND-23 | WIF GitHub OIDC + workloadIdentityUser on sa-rag-ci | Done | ✓ Done — Phase 1.2 | Repo-restricted |
-| BL-FND-24 | Tighten CI roles/storage.admin → bucket IAM | Todo | Phase 1.3+ | Residual risk |
+| BL-FND-24 | Tighten CI roles/storage.admin → bucket IAM | Todo | Phase 1.4+ | Residual risk |
+| BL-FND-25 | OAuth secret shells + CMEK | Done | ✓ Done — Phase 1.3 | Empty versions; Coordinator fills |
+| BL-FND-26 | Binary Authorization for Cloud Run images | Todo | Future | Noted Phase 1.3 |
 
 ## Auth & Security
 
@@ -53,7 +56,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 |----|------|--------|------------|-------|
 | BL-SEC-01 | Google OAuth + domain allowlist (chandraailabs.com, gmail.com) | Todo | Phase 1 | US-AUTH-01 |
 | BL-SEC-02 | Role model: user / content_admin / operator | Todo | Phase 1–2 | |
-| BL-SEC-03 | Secret Manager wiring | Todo | Phase 1 | |
+| BL-SEC-03 | Secret Manager shells + CMEK | Done | ✓ Done — Phase 1.3 | Values via runbook later |
 | BL-SEC-04 | Non-root Docker images (uid 1001) | Todo | Phase 1 | |
 | BL-SEC-05 | PII-free structured logging | Todo | Phase 1 | |
 | BL-SEC-06 | Admin action audit log | Todo | Phase 2 | |
@@ -158,6 +161,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-17** — **Phase 1.3:** `rag-keyring` + `rag-gcs-key` / `rag-secrets-key`; OAuth secret shells with CMEK; SM service agent KMS grant.
 - **2026-07-17** — **Phase 1.2:** `sa-rag-{api,ingest,web,ci}` + WIF pool `rag-github-pool` / provider `github-oidc`; zero user-managed keys verified.
 - **2026-07-17** — **Phase 1.1:** multi-env Terraform, required APIs, state buckets `enterprise-rag-tfstate-{dev,test,prod}`, remote state on dev backend; billing linked as apply prerequisite.
 - **2026-07-17** — Phase 0.1: GCP project example/default → `enterprise-rag-platform-502711` (number `642114828076`); Terraform, `.env.example`, docs.
