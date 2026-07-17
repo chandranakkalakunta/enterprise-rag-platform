@@ -1,5 +1,8 @@
 # Runbook: Document Upload API (Phase 2.1–2.3)
 
+> **Publish / retire:** after status=`ready`, use [version-lifecycle.md](./version-lifecycle.md)  
+> (`POST .../publish`, `POST .../retire`).
+
 **Endpoint:** `POST /api/v1/documents/upload`  
 **Service:** `rag-api`  
 **Bucket (dev):** `gs://rag-docs-dev`  

@@ -31,7 +31,10 @@ async def require_upload_auth(
     settings: Annotated[Settings, Depends(get_settings)],
     authorization: Annotated[str | None, Header()] = None,
 ) -> AuthContext:
-    """Protect upload routes with temporary Bearer-or-bypass gate."""
+    """Protect content routes with temporary Bearer-or-bypass gate.
+
+    Used for upload, publish, and retire until OAuth + content_admin (BL-SEC-01/02).
+    """
     if settings.auth_dev_bypass:
         return AuthContext(subject="dev-bypass", auth_mode="dev_bypass")
 
@@ -52,3 +55,7 @@ async def require_upload_auth(
         )
 
     return AuthContext(subject="bearer-token", auth_mode="bearer_token")
+
+
+# Alias for non-upload content-admin paths (same temporary gate)
+require_content_auth = require_upload_auth

@@ -240,14 +240,14 @@ Upload (api) → GCS raw/{document_id}/{version_id}/{filename}
   → Firestore Document + Version status=processing
   → extract text → chunk (~1000/150) → GCS processed/.../full.txt + chunks.jsonl
   → Firestore ready (pointers + text_preview) | failed  (Phase 2.3 ✓)
+  → Publish (api) → published + active_version_id; previous published → retired  (Phase 2.4 ✓)
+  → Retire (api) → retired; clear active pointer if needed  (Phase 2.4 ✓)
   → enqueue ingest-worker for embed/index  (later)
-  → multimodal / embed / index (staging)
-  → Publish → atomic activate → published (active)
+  → multimodal / embed / index (staging) + alias swap on publish (later)
   → invalidate semantic cache fingerprint for scope
-  → Retire → remove from active retrieval
 ```
 
-**Phase 2.1–2.3:** Upload + extract + chunk + processed storage. See [document-upload-api](../runbooks/document-upload-api.md).
+**Phase 2.1–2.4:** Upload through version lifecycle. See [document-upload-api](../runbooks/document-upload-api.md) · [version-lifecycle](../runbooks/version-lifecycle.md).
 
 ---
 

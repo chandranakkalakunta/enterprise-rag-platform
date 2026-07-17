@@ -1,12 +1,15 @@
-"""Pydantic models for document upload (Phase 2.1–2.3)."""
+"""Pydantic models for document upload and version lifecycle (Phase 2.1–2.4)."""
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
 
-VersionStatus = Literal["processing", "ready", "failed"]
+VersionStatus = Literal[
+    "processing", "ready", "failed", "published", "retired"
+]
 
 
 class UploadResponse(BaseModel):
@@ -44,6 +47,30 @@ class UploadResponse(BaseModel):
     error_message: str | None = Field(
         default=None,
         description="Present when status=failed (safe, bounded message)",
+    )
+
+
+class VersionLifecycleResponse(BaseModel):
+    """Response for publish / retire endpoints."""
+
+    document_id: str
+    version_id: str
+    status: Literal["published", "retired"]
+    active_version_id: str | None = Field(
+        default=None,
+        description="Document active (published) version pointer after the operation",
+    )
+    published_at: datetime | None = None
+    published_by: str | None = None
+    retired_at: datetime | None = None
+    retired_by: str | None = None
+    previous_published_version_id: str | None = Field(
+        default=None,
+        description="Set on publish when a prior published version was retired",
+    )
+    cleared_active_pointer: bool = Field(
+        default=False,
+        description="True on retire when this version was the active pointer",
     )
 
 

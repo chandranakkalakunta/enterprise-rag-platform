@@ -31,6 +31,13 @@ Multipart form fields: `file` (required), `title`, `collection` (optional).
 
 See [docs/runbooks/document-upload-api.md](../docs/runbooks/document-upload-api.md).
 
+### Version lifecycle (Phase 2.4)
+
+- `POST /api/v1/documents/{document_id}/versions/{version_id}/publish` — ready → published; previous published auto-retired
+- `POST /api/v1/documents/{document_id}/versions/{version_id}/retire` — ready|published → retired
+
+See [docs/runbooks/version-lifecycle.md](../docs/runbooks/version-lifecycle.md).
+
 ### Health contract (Phase 1.5)
 
 Both `/health` (liveness) and `/ready` (readiness) return JSON:
