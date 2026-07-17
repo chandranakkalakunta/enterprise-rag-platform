@@ -8,8 +8,9 @@ Update when a phase opens or closes.
 | **0** | Foundation & Requirements Lock | ✅ **Complete** — [PR #1](https://github.com/chandranakkalakunta/enterprise-rag-platform/pull/1) | [requirements](./requirements.md) · [ui-specs](./ui-specs.md) · [architecture](./architecture/overview.md) · [ADRs](./adr/) · [retro](./retrospectives/phase-0.md) · [report](./reports/phase-0-engineering-report.md) |
 | **0.1** | GCP project ID switch | ✅ **Complete** | Example/default `enterprise-rag-platform-502711` |
 | **1.1** | Multi-env Terraform + APIs + state buckets | ✅ **Complete** | [bootstrap runbook](./runbooks/terraform-bootstrap.md) |
-| **1.2** | Custom SAs + GitHub WIF | ✅ **Applied** | [WIF runbook](./runbooks/github-actions-wif.md) |
-| **1.3+** | CMEK, secrets, auth, health code, Cloud Run | 🔜 Next | Remainder of Phase 1 |
+| **1.2** | Custom SAs + GitHub WIF | ✅ **Complete** | [WIF runbook](./runbooks/github-actions-wif.md) |
+| **1.3** | CMEK + Secret Manager shells | ✅ **Applied** | [CMEK runbook](./runbooks/secret-manager-cmek.md) |
+| **1.4+** | Auth, health code, Cloud Run; Binary Auth later | 🔜 Next | Remainder of Phase 1 |
 | **2** | Ingestion & Versioning | Planned | Upload, parse, version publish/retire, ingest-worker |
 | **3** | Hybrid RAG + Guardrails | Planned | LangGraph path, citations, feedback, metadata filters |
 | **4** | Multi-turn & ACL depth | Planned | Conversations, collections, safety tuning |

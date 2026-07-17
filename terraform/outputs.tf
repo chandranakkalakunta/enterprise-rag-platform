@@ -84,3 +84,41 @@ output "github_actions_service_account" {
   description = "Value for GitHub Actions google-github-actions/auth service_account input"
   value       = google_service_account.rag["ci"].email
 }
+
+# ── Phase 1.3: CMEK + secrets ────────────────────────────────────────────────
+
+output "kms_key_ring_id" {
+  description = "KMS key ring resource ID"
+  value       = google_kms_key_ring.rag.id
+}
+
+output "kms_key_ring_name" {
+  description = "KMS key ring short name"
+  value       = google_kms_key_ring.rag.name
+}
+
+output "kms_crypto_key_gcs_id" {
+  description = "Full resource name of rag-gcs-key (future GCS CMEK)"
+  value       = google_kms_crypto_key.gcs.id
+}
+
+output "kms_crypto_key_secrets_id" {
+  description = "Full resource name of rag-secrets-key (Secret Manager CMEK)"
+  value       = google_kms_crypto_key.secrets.id
+}
+
+output "secret_ids" {
+  description = "Secret Manager secret IDs (no versions/values in Terraform)"
+  value = {
+    oauth_client_id     = google_secret_manager_secret.oauth_client_id.secret_id
+    oauth_client_secret = google_secret_manager_secret.oauth_client_secret.secret_id
+  }
+}
+
+output "secret_resource_names" {
+  description = "Fully qualified secret resource names"
+  value = {
+    oauth_client_id     = google_secret_manager_secret.oauth_client_id.name
+    oauth_client_secret = google_secret_manager_secret.oauth_client_secret.name
+  }
+}
