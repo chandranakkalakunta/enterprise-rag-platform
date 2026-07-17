@@ -4,7 +4,7 @@
 **Date:** 2026-07-16  
 **Status:** Requirements-locked pre-implementation view  
 
-Governing ADRs: [0001](../adr/0001-high-level-architecture.md) · [0002](../adr/0002-tech-stack.md) · [0003](../adr/0003-document-versioning.md) · [0004](../adr/0004-guardrails-architecture.md) · [0005](../adr/0005-security-posture.md)
+Governing ADRs: [0001](../adr/0001-high-level-architecture.md) · [0002](../adr/0002-tech-stack.md) · [0003](../adr/0003-document-versioning.md) · [0004](../adr/0004-guardrails-architecture.md) · [0005](../adr/0005-security-posture.md) · [0006](../adr/0006-metadata-store-firestore.md)
 
 ---
 
@@ -133,7 +133,7 @@ Enqueue mechanism (Cloud Tasks vs Pub/Sub) remains a small open decision; **work
 | Store | Data | Notes |
 |-------|------|-------|
 | **GCS (CMEK)** | Raw files + multimodal assets per version | Immutable keys |
-| **Metadata DB** | Docs, versions, ACL, jobs, sessions, feedback | **Technology open** (BL-DEC-01) |
+| **Metadata DB** | Docs, versions, ACL, jobs, sessions, feedback | **Firestore (Native mode)** — [ADR-0006](../adr/0006-metadata-store-firestore.md) |
 | **Sparse index** | BM25 corpus per active set | Filter-aware |
 | **Dense index** | **Vertex AI Vector Search** | Metadata filters locked requirement |
 | **Semantic cache** | Query→response entries | Redis/Memorystore or equivalent TBD with Phase 3 design; can start in-process only for dev |
@@ -312,7 +312,7 @@ Environments supply `gcp_project_id` via tfvars (not committed secrets).
 
 | Topic | Tracking | Target |
 |-------|----------|--------|
-| Firestore vs Cloud SQL for metadata | BL-DEC-01 | ADR-0006 |
+| ~~Firestore vs Cloud SQL for metadata~~ | **Resolved** | [ADR-0006](../adr/0006-metadata-store-firestore.md) — Firestore Native |
 | Exact embedding model + dimensions | BL-DEC-02 | ADR-0007 |
 | Vector Search index topology (shards, filters schema) | BL-DEC-03 | ADR-0007 |
 | Semantic cache store (Memorystore vs other) | BL-DEC-06 | Phase 3 design |

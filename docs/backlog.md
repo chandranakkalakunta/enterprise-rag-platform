@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-17 (**Phase 1 complete** — foundation closed)
+Last updated: 2026-07-17 (**Phase 2.0** — ADR-0006 Firestore accepted)
 
 ---
 
@@ -154,19 +154,21 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Decision | Status | Target ADR |
 |----|----------|--------|------------|
-| BL-DEC-01 | Firestore vs Cloud SQL for metadata | Todo | ADR-0006 |
+| BL-DEC-01 | Firestore vs Cloud SQL for metadata | Done | ✓ Done — Phase 2.0 / ADR-0006 | **Firestore Native** (Accepted) |
 | BL-DEC-02 | Exact embedding model + dimensions | Todo | ADR-0007 |
 | BL-DEC-03 | Vector Search index topology / filter schema | Todo | ADR-0007 |
 | BL-DEC-04 | STT/TTS provider selection | Deferred | Phase 5 ADR |
 | BL-DEC-05 | Ingest enqueue: Cloud Tasks vs Pub/Sub | Todo | Phase 2 ADR |
 | BL-DEC-06 | Semantic cache backing store | Todo | Phase 3 |
 
-**Resolved in Phase 0–1:** LangGraph; Vertex AI Vector Search; Cloud Run service split; zero JSON keys + WIF; audience allowlist; CMEK secrets/docs; CI deploy path.
+**Resolved in Phase 0–1:** LangGraph; Vertex AI Vector Search; Cloud Run service split; zero JSON keys + WIF; audience allowlist; CMEK secrets/docs; CI deploy path.  
+**Resolved in Phase 2.0:** Metadata store = **Firestore Native** (ADR-0006).
 
 ---
 
 ## Recently completed
 
+- **2026-07-17** — **Phase 2.0:** ADR-0006 accepted — Firestore (Native mode) as long-term metadata store.
 - **2026-07-17** — **Phase 1 complete:** retrospective + engineering report; all Phase 1 foundation items Done (PRs #3–#9).
 - **2026-07-17** — **Phase 1.7:** GHA CI + WIF deploy; Artifact Registry `rag-containers`; API Dockerfile; deploy to `rag-api` on main.
 - **2026-07-17** — **Phase 1.6:** Cloud Run stubs; OAuth allowlist + Binary Auth tracking.

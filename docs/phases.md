@@ -15,6 +15,7 @@ Update when a phase opens or closes.
 | **1.5** | Health endpoints + CI storage.admin removal | ✅ **Complete** — PR #7 | NFR-REL-03a; BL-FND-24 |
 | **1.6** | Cloud Run stubs + OAuth allowlist prep | ✅ **Complete** — PR #8 | [Cloud Run](./runbooks/cloud-run-services.md) · [OAuth](./runbooks/oauth-domain-allowlist.md) |
 | **1.7** | CI skeleton (GHA + WIF) | ✅ **Complete** — PR #9 | [CI runbook](./runbooks/github-actions-ci.md) |
+| **2.0** | ADR-0006 Metadata store | ✅ **Accepted** | [Firestore Native](./adr/0006-metadata-store-firestore.md) |
 | **2** | Ingestion & Versioning | 🔜 **Next** | Upload, parse, version publish/retire, ingest-worker |
 | **3** | Hybrid RAG + Guardrails | Planned | LangGraph path, citations, feedback, metadata filters |
 | **4** | Multi-turn & ACL depth | Planned | Conversations, collections, safety tuning |

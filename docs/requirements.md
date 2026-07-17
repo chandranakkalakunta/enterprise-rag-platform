@@ -82,7 +82,7 @@ No production customer PII corpora are required for Phase 0–3 development. Pro
 | Orchestration | **LangGraph** (query path graph) |
 | Vector index | **Vertex AI Vector Search** (confirmed) |
 | Cloud Run services | **`api`**, **`ingest-worker`**, **`web`** |
-| Metadata store | **Open** — ADR later (BL-DEC-01) |
+| Metadata store | **Firestore (Native mode)** — [ADR-0006](./adr/0006-metadata-store-firestore.md) |
 | Load balancer + Cloud Armor | **Later** (not Phase 1 blockers) |
 
 ---

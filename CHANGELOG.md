@@ -10,10 +10,13 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- Phase 2: Ingestion foundation (upload, parse, versioning state machine)
+- Phase 2.1+: Ingestion foundation (upload, parse, versioning state machine, Firestore models)
 - Coordinator: add OAuth secret versions (shells exist)
 - Binary Authorization implementation (NFR-SEC-14 / BL-SEC-09) — Phase 6+
 - detect-secrets in CI (BL-FND-08)
+
+### Added
+- **Phase 2.0:** [ADR-0006](docs/adr/0006-metadata-store-firestore.md) — Firestore (Native mode) accepted as long-term metadata store (documents, versions, ingest jobs); analytics remain on BigQuery
 
 ---
 
