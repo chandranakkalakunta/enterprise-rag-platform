@@ -181,3 +181,33 @@ output "artifact_registry_docker_base" {
   description = "Base path for docker push/pull (without image name/tag)"
   value       = "${var.region}-docker.pkg.dev/${var.gcp_project_id}/${google_artifact_registry_repository.containers.repository_id}"
 }
+
+# ── Phase 2.2: Firestore metadata ────────────────────────────────────────────
+
+output "firestore_database_name" {
+  description = "Firestore database ID"
+  value       = google_firestore_database.metadata.name
+}
+
+output "firestore_database_id" {
+  description = "Full Firestore database resource ID"
+  value       = google_firestore_database.metadata.id
+}
+
+output "firestore_location_id" {
+  description = "Firestore location"
+  value       = google_firestore_database.metadata.location_id
+}
+
+output "firestore_type" {
+  description = "Firestore database type (expect FIRESTORE_NATIVE)"
+  value       = google_firestore_database.metadata.type
+}
+
+output "firestore_data_plane_members" {
+  description = "Principals granted roles/datastore.user for metadata R/W"
+  value = [
+    for k in ["api", "ingest"] :
+    google_service_account.rag[k].email
+  ]
+}

@@ -12,6 +12,9 @@ python-multipart==0.0.20
 google-cloud-storage==2.19.0
 google-cloud-firestore==2.19.0
 
+# Text extraction (Phase 2.2 — isolated for future ingest-worker move)
+pdfminer.six==20250327
+
 # Test
 pytest==8.3.4
 pytest-cov==6.0.0

@@ -47,7 +47,20 @@ variable "required_apis" {
     "logging.googleapis.com",
     "monitoring.googleapis.com",
     "aiplatform.googleapis.com",
+    "firestore.googleapis.com",
   ]
+}
+
+variable "firestore_database_name" {
+  description = "Firestore database ID (use (default) for the default database)"
+  type        = string
+  default     = "(default)"
+}
+
+variable "firestore_location_id" {
+  description = "Firestore multi-region or region location (must match product choice)"
+  type        = string
+  default     = "asia-south1"
 }
 
 variable "tfstate_environments" {
