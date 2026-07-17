@@ -17,7 +17,8 @@ Update when a phase opens or closes.
 | **1.7** | CI skeleton (GHA + WIF) | ✅ **Complete** — PR #9 | [CI runbook](./runbooks/github-actions-ci.md) |
 | **2.0** | ADR-0006 Metadata store | ✅ **Accepted** | [Firestore Native](./adr/0006-metadata-store-firestore.md) |
 | **2.1** | Upload API + GCS write + Firestore | ✅ **Complete** | [Upload runbook](./runbooks/document-upload-api.md) · `POST /api/v1/documents/upload` |
-| **2** | Ingestion & Versioning | 🔄 **In progress** | Parse/chunk next; version publish/retire; ingest-worker |
+| **2.2** | Firestore DB + text extraction + status | ✅ **Complete** | [Firestore](./runbooks/firestore-metadata.md) · extraction → ready/failed |
+| **2** | Ingestion & Versioning | 🔄 **In progress** | Chunk next; version publish/retire; ingest-worker |
 | **3** | Hybrid RAG + Guardrails | Planned | LangGraph path, citations, feedback, metadata filters |
 | **4** | Multi-turn & ACL depth | Planned | Conversations, collections, safety tuning |
 | **5** | Voice + PWA | Planned | STT/TTS, installable shell |

@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-17 (**Phase 2.1** — Upload API + GCS + Firestore)
+Last updated: 2026-07-17 (**Phase 2.2** — Firestore DB + text extraction + status transitions)
 
 ---
 
@@ -73,8 +73,10 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-ING-01 | Document upload API + GCS storage | Done | ✓ Done — Phase 2.1 | POST /api/v1/documents/upload; Firestore version status=processing |
-| BL-ING-02 | Parse PDF/DOCX/MD/HTML | Todo | Phase 2 | |
+| BL-ING-01 | Document upload API + GCS storage | Done | ✓ Done — Phase 2.1 | POST /api/v1/documents/upload |
+| BL-ING-02 | Parse PDF/DOCX/MD/HTML | In Progress | Phase 2.2 partial | PDF+MD text extraction (pdfminer); DOCX/HTML later |
+| BL-ING-02a | Firestore Native DB + IAM (api/ingest) | Done | ✓ Done — Phase 2.2 | asia-south1; roles/datastore.user |
+| BL-ING-02b | Version status processing→ready/failed + extracted_text | Done | ✓ Done — Phase 2.2 | Sync extraction in API; module worker-ready |
 | BL-ING-03 | Chunking strategy + metadata | Todo | Phase 2 | |
 | BL-ING-04 | Version publish / retire workflow | Todo | Phase 2 | ADR-0003 |
 | BL-ING-05 | Embed + index pipeline on ingest-worker | Todo | Phase 2–3 | |
@@ -168,6 +170,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-17** — **Phase 2.2:** Firestore DB `(default)` asia-south1 + IAM; Markdown/PDF extraction; status `ready`/`failed`; tests + runbooks.
 - **2026-07-17** — **Phase 2.1:** Upload API — multipart PDF/MD ≤50MB to GCS `raw/`, Firestore Document + Version subcollection (`processing`); temp auth; tests + runbook.
 - **2026-07-17** — **Phase 2.0:** ADR-0006 accepted — Firestore (Native mode) as long-term metadata store.
 - **2026-07-17** — **Phase 1 complete:** retrospective + engineering report; all Phase 1 foundation items Done (PRs #3–#9).

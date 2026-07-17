@@ -19,12 +19,13 @@ Ready: http://localhost:8000/ready
 OpenAPI: http://localhost:8000/docs  
 Upload: `POST /api/v1/documents/upload` (PDF/Markdown ≤50MB)
 
-### Document upload (Phase 2.1)
+### Document upload (Phase 2.1–2.2)
 
 Multipart form fields: `file` (required), `title`, `collection` (optional).
 
 - Writes to `gs://$GCS_DOCS_BUCKET/raw/{document_id}/{version_id}/{filename}`
-- Creates Firestore `documents/{id}` + `versions/{version_id}` with `status=processing`
+- Creates Firestore `documents/{id}` + `versions/{version_id}` then extracts text
+- Final status in response: **`ready`** or **`failed`** (PDF via pdfminer.six; Markdown plain text)
 - Temp auth: `AUTH_DEV_BYPASS=true` (default) or Bearer `UPLOAD_BEARER_TOKEN`
 
 See [docs/runbooks/document-upload-api.md](../docs/runbooks/document-upload-api.md).

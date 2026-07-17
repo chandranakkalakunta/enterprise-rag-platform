@@ -1,4 +1,8 @@
-"""Document upload orchestration: validate → GCS → Firestore (Phase 2.1)."""
+"""Document upload orchestration: validate → GCS → Firestore → extract (Phase 2.2).
+
+Extraction runs synchronously in the API for now; logic lives in
+``app.services.extraction`` so it can move to the ingest-worker later.
+"""
 
 from __future__ import annotations
 
@@ -10,12 +14,20 @@ from typing import Callable
 from google.cloud import firestore, storage
 
 from app.core.config import Settings
-from app.services.firestore_repo import create_document_with_version
+from app.services.extraction import (
+    ExtractionError,
+    extract_text,
+    truncate_extracted_text,
+)
+from app.services.firestore_repo import (
+    create_document_with_version,
+    update_version_extraction_failure,
+    update_version_extraction_success,
+)
 from app.services.gcs_storage import GcsUploadResult, upload_raw_bytes
 
 logger = logging.getLogger("erp.api.upload")
 
-# Allowed content types (PDF + Markdown only for Phase 2.1)
 ALLOWED_CONTENT_TYPES: frozenset[str] = frozenset(
     {
         "application/pdf",
@@ -47,19 +59,21 @@ class UploadStorageError(Exception):
 class UploadResult:
     document_id: str
     version_id: str
-    status: str
+    status: str  # ready | failed (final after extraction); processing only if mid-flight
     gcs_uri: str
     filename: str
     content_type: str
     size_bytes: int
     title: str | None
     collection: str | None
+    extracted_char_count: int | None = None
+    extracted_truncated: bool = False
+    error_message: str | None = None
 
 
 def _normalize_content_type(content_type: str | None) -> str:
     if not content_type:
         return ""
-    # Drop parameters e.g. charset
     return content_type.split(";")[0].strip().lower()
 
 
@@ -89,7 +103,6 @@ def validate_upload(
     ext = _extension(filename)
 
     if normalized in ALLOWED_CONTENT_TYPES:
-        # Guard against mismatched extension when provided
         if ext and ext not in ALLOWED_EXTENSIONS:
             raise UploadValidationError(
                 f"Unsupported file extension '{ext}' "
@@ -97,7 +110,6 @@ def validate_upload(
             )
         return normalized
 
-    # Browsers sometimes send octet-stream / empty for .md — allow only with extension
     if normalized in ("", "application/octet-stream") and ext in ALLOWED_EXTENSIONS:
         if ext == ".pdf":
             return "application/pdf"
@@ -114,6 +126,78 @@ def new_ids() -> tuple[str, str]:
     return str(uuid.uuid4()), str(uuid.uuid4())
 
 
+def _run_extraction_and_update(
+    *,
+    fs_client: firestore.Client,
+    document_id: str,
+    version_id: str,
+    content_type: str,
+    data: bytes,
+) -> tuple[str, int | None, bool, str | None]:
+    """
+    Extract text and update version status.
+
+    Returns:
+        (status, extracted_char_count, extracted_truncated, error_message)
+    """
+    try:
+        text = extract_text(content_type, data)
+        stored, full_count, truncated = truncate_extracted_text(text)
+        update_version_extraction_success(
+            fs_client,
+            document_id=document_id,
+            version_id=version_id,
+            extracted_text=stored,
+            extracted_char_count=full_count,
+            extracted_truncated=truncated,
+        )
+        return "ready", full_count, truncated, None
+    except ExtractionError as exc:
+        logger.warning(
+            "extraction_failed document_id=%s version_id=%s error=%s",
+            document_id,
+            version_id,
+            exc.message,
+        )
+        try:
+            update_version_extraction_failure(
+                fs_client,
+                document_id=document_id,
+                version_id=version_id,
+                error_message=exc.message,
+            )
+        except Exception:  # noqa: BLE001
+            logger.exception(
+                "firestore_failed_status_update document_id=%s version_id=%s",
+                document_id,
+                version_id,
+            )
+            raise UploadStorageError(
+                "Failed to record extraction failure status"
+            ) from exc
+        return "failed", 0, False, exc.message
+    except Exception as exc:  # noqa: BLE001
+        # Unexpected extractor crash — still mark failed when possible
+        msg = f"Unexpected extraction error: {exc}"
+        logger.exception(
+            "extraction_unexpected document_id=%s version_id=%s",
+            document_id,
+            version_id,
+        )
+        try:
+            update_version_extraction_failure(
+                fs_client,
+                document_id=document_id,
+                version_id=version_id,
+                error_message=msg,
+            )
+        except Exception:  # noqa: BLE001
+            raise UploadStorageError(
+                "Failed to record extraction failure status"
+            ) from exc
+        return "failed", 0, False, msg
+
+
 def process_upload(
     *,
     settings: Settings,
@@ -128,11 +212,10 @@ def process_upload(
     id_factory: Callable[[], tuple[str, str]] | None = None,
 ) -> UploadResult:
     """
-    Validate, write raw object to GCS, create Firestore document + version.
+    Validate → GCS raw/ → Firestore (processing) → extract → ready|failed.
 
-    Order: validate → IDs → GCS → Firestore.
-    On Firestore failure after GCS write, raises UploadStorageError; orphan raw
-    object may exist (cleanup deferred to later ops tooling).
+    Uses in-memory bytes for extraction (no re-download). Extraction is
+    synchronous in-API for Phase 2.2; module is worker-ready.
     """
     validated_type = validate_upload(
         content_type=content_type,
@@ -156,7 +239,7 @@ def process_upload(
         )
     except UploadValidationError:
         raise
-    except Exception as exc:  # noqa: BLE001 — map to safe 500
+    except Exception as exc:  # noqa: BLE001
         logger.exception("gcs_upload_failed")
         raise UploadStorageError("Failed to store document in GCS") from exc
 
@@ -183,14 +266,25 @@ def process_upload(
         )
         raise UploadStorageError("Failed to record document metadata") from exc
 
+    status, char_count, truncated, error_message = _run_extraction_and_update(
+        fs_client=fs_client,
+        document_id=document_id,
+        version_id=version_id,
+        content_type=validated_type,
+        data=data,
+    )
+
     return UploadResult(
         document_id=document_id,
         version_id=version_id,
-        status="processing",
+        status=status,
         gcs_uri=gcs_result.gcs_uri,
         filename=gcs_result.filename,
         content_type=gcs_result.content_type,
         size_bytes=gcs_result.size_bytes,
         title=title,
         collection=collection,
+        extracted_char_count=char_count,
+        extracted_truncated=truncated,
+        error_message=error_message,
     )
