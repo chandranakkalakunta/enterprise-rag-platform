@@ -10,15 +10,16 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- Phase 2.3+: Chunking, embed/index enqueue, move extraction to ingest-worker
+- Phase 2.4+: Embed/index enqueue, move extract/chunk to ingest-worker
 - Coordinator: add OAuth secret versions (shells exist)
 - Binary Authorization implementation (NFR-SEC-14 / BL-SEC-09) — Phase 6+
 - detect-secrets in CI (BL-FND-08)
 - Full OAuth + content_admin on upload (replace Phase 2.1 temp auth)
-- Terraform lifecycle for CI-managed Cloud Run images (avoid stub rollback on full apply)
+- Chunking strategy tuning (size, overlap, separators, evaluation) — BL-ING-03b
 
 ### Added
-- **Phase 2.2:** Firestore Native DB `(default)` in `asia-south1` + `roles/datastore.user` for `sa-rag-api` / `sa-rag-ingest`; pdfminer.six + Markdown extraction; version status `processing` → `ready`|`failed` with `extracted_text` / `error_message`; [Firestore runbook](docs/runbooks/firestore-metadata.md)
+- **Phase 2.3:** Text chunking (~1000/150 overlap); GCS `processed/{doc}/{ver}/full.txt` + `chunks.jsonl`; Firestore pointers only (`chunk_count`, `processed_gcs_prefix`, `text_preview`); Cloud Run `lifecycle.ignore_changes` on container image so CI owns deploys
+- **Phase 2.2:** Firestore Native DB `(default)` in `asia-south1` + `roles/datastore.user` for `sa-rag-api` / `sa-rag-ingest`; pdfminer.six + Markdown extraction; version status `processing` → `ready`|`failed`; [Firestore runbook](docs/runbooks/firestore-metadata.md)
 - **Phase 2.1:** `POST /api/v1/documents/upload` — PDF/Markdown ≤50MB → GCS `raw/{document_id}/{version_id}/{filename}` + Firestore Document/Version; temp Bearer/dev-bypass auth; unit tests; [runbook](docs/runbooks/document-upload-api.md)
 - **Phase 2.0:** [ADR-0006](docs/adr/0006-metadata-store-firestore.md) — Firestore (Native mode) accepted as long-term metadata store (documents, versions, ingest jobs); analytics remain on BigQuery
 

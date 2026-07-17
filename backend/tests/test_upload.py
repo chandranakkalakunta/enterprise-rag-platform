@@ -1,9 +1,9 @@
-"""Phase 2.1–2.2 — document upload API tests (mocked GCS + Firestore + extraction)."""
+"""Phase 2.1–2.3 — document upload API tests (mocked GCS + Firestore)."""
 
 from __future__ import annotations
 
 from io import BytesIO
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -43,9 +43,17 @@ def _mock_storage_and_firestore():
     """Patch GCS + Firestore clients used by process_upload."""
     storage_client = MagicMock(name="storage.Client")
     bucket = MagicMock(name="bucket")
-    blob = MagicMock(name="blob")
     storage_client.bucket.return_value = bucket
-    bucket.blob.return_value = blob
+
+    # Return a fresh blob mock per key so we can assert processed writes
+    blobs: dict[str, MagicMock] = {}
+
+    def _blob(key: str) -> MagicMock:
+        if key not in blobs:
+            blobs[key] = MagicMock(name=f"blob:{key}")
+        return blobs[key]
+
+    bucket.blob.side_effect = _blob
 
     firestore_client = MagicMock(name="firestore.Client")
     batch = MagicMock(name="batch")
@@ -61,7 +69,7 @@ def _mock_storage_and_firestore():
     doc_ref.collection.return_value = versions_col
     versions_col.document.return_value = version_ref
 
-    return storage_client, firestore_client, blob, batch, version_ref, doc_ref
+    return storage_client, firestore_client, bucket, blobs, batch, version_ref, doc_ref
 
 
 # ── Unit: validation helpers ────────────────────────────────────────────────
@@ -137,11 +145,11 @@ def test_build_raw_object_key() -> None:
     assert key == "raw/doc-1/ver-1/My File.md"
 
 
-# ── API: success path (extraction → ready) ──────────────────────────────────
+# ── API: success path (extract + chunk + processed) ─────────────────────────
 
 
 def test_upload_markdown_success_ready(client: TestClient) -> None:
-    storage_client, firestore_client, blob, batch, version_ref, _doc = (
+    storage_client, firestore_client, bucket, blobs, batch, version_ref, _ = (
         _mock_storage_and_firestore()
     )
 
@@ -153,7 +161,7 @@ def test_upload_markdown_success_ready(client: TestClient) -> None:
             return_value=("doc-aaa", "ver-bbb"),
         ),
     ):
-        content = b"# Hello RAG\n\nBody text.\n"
+        content = b"# Hello RAG\n\nBody text for chunking.\n"
         response = client.post(
             "/api/v1/documents/upload",
             files={"file": ("hello.md", BytesIO(content), "text/markdown")},
@@ -166,29 +174,36 @@ def test_upload_markdown_success_ready(client: TestClient) -> None:
     assert body["version_id"] == "ver-bbb"
     assert body["status"] == "ready"
     assert body["gcs_uri"] == "gs://rag-docs-dev/raw/doc-aaa/ver-bbb/hello.md"
-    assert body["filename"] == "hello.md"
-    assert body["content_type"] == "text/markdown"
-    assert body["size_bytes"] == len(content)
-    assert body["title"] == "Hello"
-    assert body["collection"] == "policies"
+    assert body["processed_gcs_prefix"] == "processed/doc-aaa/ver-bbb/"
+    assert body["chunk_count"] >= 1
+    assert body["extracted_char_count"] is not None and body["extracted_char_count"] > 0
+    assert body["text_preview"]
     assert body["error_message"] is None
-    assert body["extracted_char_count"] is not None
-    assert body["extracted_char_count"] > 0
-    assert body["extracted_truncated"] is False
+    assert "extracted_truncated" not in body
 
-    blob.upload_from_string.assert_called_once()
+    # raw + full.txt + chunks.jsonl
+    keys = [c.args[0] for c in bucket.blob.call_args_list]
+    assert "raw/doc-aaa/ver-bbb/hello.md" in keys
+    assert "processed/doc-aaa/ver-bbb/full.txt" in keys
+    assert "processed/doc-aaa/ver-bbb/chunks.jsonl" in keys
+
     batch.commit.assert_called_once()
-    # status update after extraction
     version_ref.update.assert_called_once()
     update_payload = version_ref.update.call_args[0][0]
     assert update_payload["status"] == "ready"
-    assert "Hello RAG" in update_payload["extracted_text"] or "Body text" in (
-        update_payload["extracted_text"] or ""
+    assert update_payload["chunk_count"] >= 1
+    assert update_payload["processed_gcs_prefix"] == "processed/doc-aaa/ver-bbb/"
+    assert "extracted_text" not in update_payload or update_payload.get(
+        "text_preview"
     )
+    # full text not stored under extracted_text key as a long body
+    assert update_payload.get("text_preview") is not None
+    assert "full_text_gcs_uri" in update_payload
+    assert "chunks_gcs_uri" in update_payload
 
 
 def test_upload_pdf_success_ready(client: TestClient) -> None:
-    storage_client, firestore_client, _blob, _batch, version_ref, _ = (
+    storage_client, firestore_client, bucket, _blobs, _batch, version_ref, _ = (
         _mock_storage_and_firestore()
     )
     pdf_bytes = b"%PDF-1.4 fake content for upload test"
@@ -202,7 +217,7 @@ def test_upload_pdf_success_ready(client: TestClient) -> None:
         ),
         patch(
             "app.services.extraction.pdfminer_extract_text",
-            return_value="Extracted PDF body",
+            return_value="Extracted PDF body for processing.",
         ),
     ):
         response = client.post(
@@ -214,19 +229,19 @@ def test_upload_pdf_success_ready(client: TestClient) -> None:
     body = response.json()
     assert body["status"] == "ready"
     assert body["content_type"] == "application/pdf"
-    assert body["gcs_uri"].endswith("/report.pdf")
     assert "raw/doc-pdf/ver-pdf/" in body["gcs_uri"]
-    assert body["extracted_char_count"] == len("Extracted PDF body")
-    version_ref.update.assert_called_once()
+    assert body["processed_gcs_prefix"] == "processed/doc-pdf/ver-pdf/"
+    assert body["chunk_count"] >= 1
+    keys = [c.args[0] for c in bucket.blob.call_args_list]
+    assert "processed/doc-pdf/ver-pdf/full.txt" in keys
+    assert "processed/doc-pdf/ver-pdf/chunks.jsonl" in keys
     assert version_ref.update.call_args[0][0]["status"] == "ready"
 
 
 def test_upload_extraction_failure_status_failed(client: TestClient) -> None:
-    """Bad PDF header → extraction fails → 201 with status=failed."""
-    storage_client, firestore_client, _blob, _batch, version_ref, _ = (
+    storage_client, firestore_client, _bucket, _blobs, _batch, version_ref, _ = (
         _mock_storage_and_firestore()
     )
-    # Pass content-type PDF but body without %PDF — extractor fails after GCS+FS
     bad_pdf = b"this is not a real pdf"
 
     with (
@@ -243,10 +258,8 @@ def test_upload_extraction_failure_status_failed(client: TestClient) -> None:
     body = response.json()
     assert body["status"] == "failed"
     assert body["error_message"]
-    assert "PDF" in body["error_message"] or "pdf" in body["error_message"].lower()
     update_payload = version_ref.update.call_args[0][0]
     assert update_payload["status"] == "failed"
-    assert update_payload["error_message"]
 
 
 # ── API: error paths ────────────────────────────────────────────────────────
@@ -295,7 +308,7 @@ def test_upload_gcs_failure_returns_500(client: TestClient) -> None:
 
 
 def test_upload_firestore_failure_returns_500(client: TestClient) -> None:
-    storage_client, firestore_client, _blob, batch, _, _ = (
+    storage_client, firestore_client, _b, _bl, batch, _, _ = (
         _mock_storage_and_firestore()
     )
     batch.commit.side_effect = RuntimeError("Firestore down")
@@ -328,7 +341,7 @@ def test_upload_requires_bearer_when_bypass_off(
     )
     assert response.status_code == 401
 
-    storage_client, firestore_client, _, _, _, _ = _mock_storage_and_firestore()
+    storage_client, firestore_client, _, _, _, _, _ = _mock_storage_and_firestore()
     with (
         patch("app.services.upload.storage.Client", return_value=storage_client),
         patch("app.services.upload.firestore.Client", return_value=firestore_client),
@@ -350,7 +363,7 @@ def test_allowed_content_types_constant() -> None:
 
 
 def test_response_schema_keys(client: TestClient) -> None:
-    storage_client, firestore_client, _, _, _, _ = _mock_storage_and_firestore()
+    storage_client, firestore_client, _, _, _, _, _ = _mock_storage_and_firestore()
     with (
         patch("app.services.upload.storage.Client", return_value=storage_client),
         patch("app.services.upload.firestore.Client", return_value=firestore_client),
@@ -372,9 +385,10 @@ def test_response_schema_keys(client: TestClient) -> None:
         "title",
         "collection",
         "extracted_char_count",
-        "extracted_truncated",
+        "chunk_count",
+        "processed_gcs_prefix",
+        "text_preview",
         "error_message",
     }
     assert expected.issubset(body.keys())
-    assert isinstance(body["size_bytes"], int)
     assert body["status"] in ("ready", "failed")

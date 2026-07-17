@@ -7,7 +7,8 @@ Root-cause first; no silent workarounds (see protocol § root-cause).
 |------|------|---------|------------|-----|---------------|
 | 2026-07-16 | Phase 0 | Empty workspace; no prior git history | Greenfield project | Full foundation scaffold on `phase-0-initialization` | Remote/PR depends on GitHub repo create |
 | 2026-07-16 | Backend | `pip install -r requirements.txt` failed on default `python3` (3.14) | System default is 3.14; pinned pydantic-core builds against PyO3 max 3.13 | Use Python 3.12 per ADR-0002 (`python3.12 -m venv`); document in backend README | Local shells using bare `python3` may still hit 3.14 |
-| 2026-07-17 | Terraform / Phase 2.2 | Full `terraform plan` wanted to roll `rag-api` image back to Cloud Run hello stub | TF still pins stub image; CI/WIF deploys real Artifact Registry image outside TF | Targeted apply for Firestore only (`-target` firestore + IAM); document in firestore runbook | Full apply still dangerous until Cloud Run lifecycle ignore or TF tracks CI image |
+| 2026-07-17 | Terraform / Phase 2.2 | Full `terraform plan` wanted to roll `rag-api` image back to Cloud Run hello stub | TF still pins stub image; CI/WIF deploys real Artifact Registry image outside TF | Targeted apply for Firestore only (`-target` firestore + IAM); document in firestore runbook | Mitigated Phase 2.3: lifecycle.ignore_changes on template containers |
+| 2026-07-17 | Phase 2.3 | Full text in Firestore risked 1 MiB limit and denormalized bulk | Phase 2.2 stored extracted_text inline | Store full.txt + chunks.jsonl under processed/; Firestore keeps preview + pointers | Sync extract/chunk still in API until worker move |
 
 ---
 

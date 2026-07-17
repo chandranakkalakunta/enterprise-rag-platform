@@ -1,4 +1,4 @@
-"""Pydantic models for document upload (Phase 2.1–2.2)."""
+"""Pydantic models for document upload (Phase 2.1–2.3)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,6 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-# Final statuses returned after Phase 2.2 extraction (processing is internal).
 VersionStatus = Literal["processing", "ready", "failed"]
 
 
@@ -17,7 +16,7 @@ class UploadResponse(BaseModel):
     version_id: str = Field(..., description="Immutable version snapshot id")
     status: VersionStatus = Field(
         ...,
-        description="Final version status after extraction: ready or failed",
+        description="Final version status after processing: ready or failed",
     )
     gcs_uri: str = Field(..., description="gs:// URI of the raw upload object")
     filename: str = Field(..., description="Sanitized original filename")
@@ -29,11 +28,18 @@ class UploadResponse(BaseModel):
     )
     extracted_char_count: int | None = Field(
         default=None,
-        description="Character count of extracted text (full length before truncate)",
+        description="Character count of full extracted text (stored in GCS)",
     )
-    extracted_truncated: bool = Field(
-        default=False,
-        description="True if extracted text was truncated for Firestore size limits",
+    chunk_count: int | None = Field(
+        default=None, description="Number of chunks written to chunks.jsonl"
+    )
+    processed_gcs_prefix: str | None = Field(
+        default=None,
+        description="GCS prefix processed/{document_id}/{version_id}/",
+    )
+    text_preview: str | None = Field(
+        default=None,
+        description="First ~500 characters of extracted text (Firestore metadata)",
     )
     error_message: str | None = Field(
         default=None,

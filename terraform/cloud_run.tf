@@ -1,31 +1,32 @@
-# Phase 1.6 — Cloud Run service stubs
-# Placeholder public image only; real app images land in later phases.
+# Phase 1.6 — Cloud Run services (bootstrap image + SA/scaling owned by Terraform)
+# Phase 2.3 — lifecycle ignore so CI (WIF) owns container image / deploy metadata.
 # Runtime SAs: sa-rag-api / sa-rag-ingest / sa-rag-web (no JSON keys).
 # Invoker: not public (allUsers) — verify via gcloud describe / authenticated smoke later.
 
 locals {
-  # Stub image: Google-maintained Cloud Run sample (not application code)
+  # Bootstrap / fallback image only. Real images are deployed by GitHub Actions CI.
+  # Do NOT remove lifecycle.ignore_changes on image — full apply would roll back CI tags.
   cloud_run_stub_image = "us-docker.pkg.dev/cloudrun/container/hello"
 
   cloud_run_services = {
     api = {
       name        = "rag-api"
       sa_key      = "api"
-      description = "Query API stub — replace image with FastAPI app in later phase"
+      description = "Query API — image managed by CI after bootstrap"
     }
     ingest = {
       name        = "rag-ingest"
       sa_key      = "ingest"
-      description = "Ingest worker stub — replace with async pipeline image later"
+      description = "Ingest worker — image managed by CI after bootstrap"
     }
     web = {
       name        = "rag-web"
       sa_key      = "web"
-      description = "Web/PWA stub — replace with Next.js image later"
+      description = "Web/PWA — image managed by CI after bootstrap"
     }
   }
 
-  # Static deploy metadata for stubs (avoid terraform timestamp() plan churn)
+  # Bootstrap deploy metadata (ignored after first CI deploy via lifecycle)
   stub_app_version = "phase-1-6-stub"
   stub_deployed_at = "2026-07-17T12:00:00Z"
 }
@@ -42,7 +43,7 @@ resource "google_cloud_run_v2_service" "rag" {
     environment = var.environment
     managed_by  = "terraform"
     service     = each.value.name
-    purpose     = "stub"
+    purpose     = "runtime"
   }
 
   template {
@@ -82,7 +83,19 @@ resource "google_cloud_run_v2_service" "rag" {
     }
   }
 
-depends_on = [
+  # CI owns image + revision deploy metadata (APP_VERSION / DEPLOYED_AT).
+  # Without this, terraform apply reverts Artifact Registry tags to the hello stub
+  # (see docs/issues_log.md Phase 2.2).
+  lifecycle {
+    ignore_changes = [
+      client,
+      client_version,
+      template[0].containers,
+      labels["purpose"],
+    ]
+  }
+
+  depends_on = [
     google_project_service.required,
     google_service_account.rag,
   ]

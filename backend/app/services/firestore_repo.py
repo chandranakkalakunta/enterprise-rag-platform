@@ -1,8 +1,10 @@
-"""Firestore repository for Document + Version metadata (Phase 2.1–2.2).
+"""Firestore repository for Document + Version metadata (Phase 2.1–2.3).
 
 Collection layout (ADR-0006):
   documents/{document_id}
   documents/{document_id}/versions/{version_id}
+
+Full extracted text lives in GCS processed/; Firestore keeps pointers + preview only.
 """
 
 from __future__ import annotations
@@ -39,73 +41,6 @@ def version_ref(
         .collection(VERSIONS_SUBCOLLECTION)
         .document(version_id)
     )
-
-
-def create_document(
-    client: firestore.Client,
-    *,
-    document_id: str,
-    title: str | None,
-    collection: str | None,
-    latest_version_id: str,
-    created_by: str,
-) -> dict[str, Any]:
-    """Create the parent document entity. Returns the stored dict."""
-    now = _utc_now()
-    data: dict[str, Any] = {
-        "document_id": document_id,
-        "title": title or "Untitled",
-        "collection": collection,
-        "active_version_id": None,
-        "latest_version_id": latest_version_id,
-        "created_at": now,
-        "updated_at": now,
-        "created_by": created_by,
-    }
-    client.collection(DOCUMENTS_COLLECTION).document(document_id).set(data)
-    logger.info("firestore_document_created document_id=%s", document_id)
-    return data
-
-
-def create_version(
-    client: firestore.Client,
-    *,
-    document_id: str,
-    version_id: str,
-    status: str = INITIAL_VERSION_STATUS,
-    gcs_uri: str,
-    gcs_object_key: str,
-    filename: str,
-    content_type: str,
-    size_bytes: int,
-    created_by: str,
-) -> dict[str, Any]:
-    """Create version under documents/{id}/versions/{version_id}."""
-    now = _utc_now()
-    data: dict[str, Any] = {
-        "version_id": version_id,
-        "document_id": document_id,
-        "status": status,
-        "gcs_uri": gcs_uri,
-        "gcs_object_key": gcs_object_key,
-        "filename": filename,
-        "content_type": content_type,
-        "size_bytes": size_bytes,
-        "created_at": now,
-        "created_by": created_by,
-        "extracted_text": None,
-        "extracted_char_count": None,
-        "extracted_truncated": False,
-        "error_message": None,
-    }
-    version_ref(client, document_id, version_id).set(data)
-    logger.info(
-        "firestore_version_created document_id=%s version_id=%s status=%s",
-        document_id,
-        version_id,
-        status,
-    )
-    return data
 
 
 def create_document_with_version(
@@ -150,9 +85,12 @@ def create_document_with_version(
         "size_bytes": size_bytes,
         "created_at": now,
         "created_by": created_by,
-        "extracted_text": None,
+        "processed_gcs_prefix": None,
+        "full_text_gcs_uri": None,
+        "chunks_gcs_uri": None,
+        "chunk_count": None,
+        "text_preview": None,
         "extracted_char_count": None,
-        "extracted_truncated": False,
         "error_message": None,
     }
 
@@ -168,42 +106,56 @@ def create_document_with_version(
     return doc_data, version_data
 
 
-def update_version_extraction_success(
+def update_version_ready(
     client: firestore.Client,
     *,
     document_id: str,
     version_id: str,
-    extracted_text: str,
+    processed_gcs_prefix: str,
+    full_text_gcs_uri: str,
+    chunks_gcs_uri: str,
+    chunk_count: int,
+    text_preview: str,
     extracted_char_count: int,
-    extracted_truncated: bool,
 ) -> dict[str, Any]:
-    """Transition version processing → ready and store extracted text."""
+    """
+    Transition version processing → ready.
+
+    Stores GCS pointers + short text_preview only (no full extracted_text).
+    Clears legacy extracted_text field if present (Phase 2.2 → 2.3).
+    """
     now = _utc_now()
     patch: dict[str, Any] = {
         "status": STATUS_READY,
-        "extracted_text": extracted_text,
+        "processed_gcs_prefix": processed_gcs_prefix,
+        "full_text_gcs_uri": full_text_gcs_uri,
+        "chunks_gcs_uri": chunks_gcs_uri,
+        "chunk_count": chunk_count,
+        "text_preview": text_preview,
         "extracted_char_count": extracted_char_count,
-        "extracted_truncated": extracted_truncated,
         "error_message": None,
+        "extracted_text": firestore.DELETE_FIELD,
+        "extracted_truncated": firestore.DELETE_FIELD,
         "extraction_completed_at": now,
         "updated_at": now,
     }
     version_ref(client, document_id, version_id).update(patch)
-    # Touch parent document updated_at
     client.collection(DOCUMENTS_COLLECTION).document(document_id).update(
         {"updated_at": now}
     )
     logger.info(
-        "firestore_version_ready document_id=%s version_id=%s chars=%s truncated=%s",
+        "firestore_version_ready document_id=%s version_id=%s chunks=%s chars=%s",
         document_id,
         version_id,
+        chunk_count,
         extracted_char_count,
-        extracted_truncated,
     )
-    return patch
+    return {
+        k: v for k, v in patch.items() if v is not firestore.DELETE_FIELD
+    }
 
 
-def update_version_extraction_failure(
+def update_version_failed(
     client: firestore.Client,
     *,
     document_id: str,
@@ -212,14 +164,18 @@ def update_version_extraction_failure(
 ) -> dict[str, Any]:
     """Transition version processing → failed and store error message."""
     now = _utc_now()
-    # Keep error messages bounded for API/logs (no full stack traces)
-    safe_error = (error_message or "Extraction failed")[:2000]
+    safe_error = (error_message or "Processing failed")[:2000]
     patch: dict[str, Any] = {
         "status": STATUS_FAILED,
         "error_message": safe_error,
-        "extracted_text": None,
+        "chunk_count": 0,
+        "text_preview": None,
+        "processed_gcs_prefix": None,
+        "full_text_gcs_uri": None,
+        "chunks_gcs_uri": None,
         "extracted_char_count": 0,
-        "extracted_truncated": False,
+        "extracted_text": firestore.DELETE_FIELD,
+        "extracted_truncated": firestore.DELETE_FIELD,
         "extraction_completed_at": now,
         "updated_at": now,
     }
@@ -232,4 +188,6 @@ def update_version_extraction_failure(
         document_id,
         version_id,
     )
-    return patch
+    return {
+        k: v for k, v in patch.items() if v is not firestore.DELETE_FIELD
+    }

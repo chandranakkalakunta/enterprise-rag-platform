@@ -238,15 +238,16 @@ See [ADR-0003](../adr/0003-document-versioning.md).
 ```text
 Upload (api) → GCS raw/{document_id}/{version_id}/{filename}
   → Firestore Document + Version status=processing
-  → extract text (sync in API for now) → ready | failed  (Phase 2.2 ✓)
-  → enqueue ingest-worker for chunk/embed  (later)
-  → chunk / multimodal / embed / index (staging)
+  → extract text → chunk (~1000/150) → GCS processed/.../full.txt + chunks.jsonl
+  → Firestore ready (pointers + text_preview) | failed  (Phase 2.3 ✓)
+  → enqueue ingest-worker for embed/index  (later)
+  → multimodal / embed / index (staging)
   → Publish → atomic activate → published (active)
   → invalidate semantic cache fingerprint for scope
   → Retire → remove from active retrieval
 ```
 
-**Phase 2.1–2.2:** Upload + extraction. See [document-upload-api](../runbooks/document-upload-api.md) · [firestore-metadata](../runbooks/firestore-metadata.md).
+**Phase 2.1–2.3:** Upload + extract + chunk + processed storage. See [document-upload-api](../runbooks/document-upload-api.md).
 
 ---
 
