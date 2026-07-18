@@ -111,12 +111,36 @@ Tuning (size, overlap, separators, evaluation): backlog **BL-ING-03b**.
 {"chunk_id":"0","index":0,"text":"...","char_count":980,"start_offset":0,"end_offset":980}
 ```
 
+### embeddings.jsonl line shape (Phase 3.1)
+
+Written **after** content reaches `status=ready` (ADR-0007: embed on ready).
+
+```json
+{
+  "chunk_id": "0",
+  "index": 0,
+  "embedding": [0.01, -0.02, "..."],
+  "char_count": 980,
+  "document_id": "...",
+  "version_id": "..."
+}
+```
+
+| Config | Default |
+|--------|---------|
+| `EMBEDDING_MODEL_ID` | `text-embedding-005` |
+| `EMBEDDING_BATCH_SIZE` | `32` |
+| `VERTEX_LOCATION` | `asia-south1` |
+
+**Note:** Vector Search **upsert** is Phase **3.2**. This phase only persists the durable embedding artifact.
+
 ## GCS layout
 
 ```text
 gs://{bucket}/raw/{document_id}/{version_id}/{filename}
 gs://{bucket}/processed/{document_id}/{version_id}/full.txt
 gs://{bucket}/processed/{document_id}/{version_id}/chunks.jsonl
+gs://{bucket}/processed/{document_id}/{version_id}/embeddings.jsonl
 ```
 
 CMEK via bucket default key `rag-gcs-key`.
@@ -125,7 +149,7 @@ CMEK via bucket default key `rag-gcs-key`.
 
 | Field | Purpose |
 |-------|---------|
-| `status` | `ready` \| `failed` |
+| `status` | Content lifecycle: `ready` \| `failed` (extract+chunk) |
 | `gcs_uri` / `gcs_object_key` | Raw upload |
 | `processed_gcs_prefix` | `processed/{doc}/{ver}/` |
 | `full_text_gcs_uri` | Pointer to `full.txt` |
@@ -133,7 +157,14 @@ CMEK via bucket default key `rag-gcs-key`.
 | `chunk_count` | Number of chunks |
 | `text_preview` | First ~500 chars |
 | `extracted_char_count` | Full text length |
-| `error_message` | When failed |
+| `error_message` | When content `status=failed` |
+| `embeddings_status` | **`ready` \| `failed`** (independent of content status) |
+| `embedding_model_id` | Model used for this version |
+| `embedded_chunk_count` | Vectors written |
+| `embeddings_gcs_uri` | Pointer to `embeddings.jsonl` |
+| `embeddings_error` | When embeddings_status=failed |
+
+If extract+chunk succeed but Vertex embedding fails: **`status` remains `ready`**, `embeddings_status=failed` (text/chunks not corrupted).
 
 **Removed from Firestore:** full `extracted_text` (legacy Phase 2.2 field deleted on ready/failed).
 

@@ -1,4 +1,4 @@
-"""GCS write helpers for raw uploads and processed artifacts (Phase 2.1–2.3)."""
+"""GCS write helpers for raw uploads and processed artifacts (Phase 2.1–3.1)."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from typing import Protocol, Sequence
 from google.cloud import storage
 
 from app.services.chunking import Chunk
+from app.services.embeddings import EmbeddingRecord
 
 logger = logging.getLogger("erp.api.gcs")
 
@@ -83,6 +84,10 @@ def build_full_text_object_key(document_id: str, version_id: str) -> str:
 
 def build_chunks_object_key(document_id: str, version_id: str) -> str:
     return f"{build_processed_prefix(document_id, version_id)}chunks.jsonl"
+
+
+def build_embeddings_object_key(document_id: str, version_id: str) -> str:
+    return f"{build_processed_prefix(document_id, version_id)}embeddings.jsonl"
 
 
 def upload_raw_bytes(
@@ -171,4 +176,52 @@ def write_processed_artifacts(
         chunks_gcs_uri=chunks_uri,
         chunk_count=len(chunks),
         full_text_char_count=len(full_text),
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class EmbeddingsArtifact:
+    """Pointer to embeddings.jsonl under processed/."""
+
+    bucket: str
+    object_key: str
+    gcs_uri: str
+    embedded_chunk_count: int
+    embedding_model_id: str
+
+
+def write_embeddings_jsonl(
+    *,
+    client: storage.Client,
+    bucket_name: str,
+    document_id: str,
+    version_id: str,
+    records: Sequence[EmbeddingRecord],
+    embedding_model_id: str,
+) -> EmbeddingsArtifact:
+    """Write embeddings.jsonl under processed/{document_id}/{version_id}/."""
+    object_key = build_embeddings_object_key(document_id, version_id)
+    lines = [json.dumps(r.to_jsonl_dict(), ensure_ascii=False) for r in records]
+    payload = "\n".join(lines) + ("\n" if lines else "")
+
+    bucket = client.bucket(bucket_name)
+    blob = bucket.blob(object_key)
+    blob.upload_from_string(
+        payload.encode("utf-8"),
+        content_type="application/x-ndjson; charset=utf-8",
+    )
+    gcs_uri = f"gs://{bucket_name}/{object_key}"
+    logger.info(
+        "gcs_embeddings_ok bucket=%s key=%s count=%s model=%s",
+        bucket_name,
+        object_key,
+        len(records),
+        embedding_model_id,
+    )
+    return EmbeddingsArtifact(
+        bucket=bucket_name,
+        object_key=object_key,
+        gcs_uri=gcs_uri,
+        embedded_chunk_count=len(records),
+        embedding_model_id=embedding_model_id,
     )

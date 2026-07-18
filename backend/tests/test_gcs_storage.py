@@ -55,6 +55,9 @@ def test_object_key_convention() -> None:
     assert build_processed_prefix("a", "b") == "processed/a/b/"
     assert build_full_text_object_key("a", "b") == "processed/a/b/full.txt"
     assert build_chunks_object_key("a", "b") == "processed/a/b/chunks.jsonl"
+    from app.services.gcs_storage import build_embeddings_object_key
+
+    assert build_embeddings_object_key("a", "b") == "processed/a/b/embeddings.jsonl"
 
 
 def test_write_processed_artifacts() -> None:

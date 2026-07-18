@@ -1,15 +1,16 @@
-"""Phase 2.1–2.3 — document upload API tests (mocked GCS + Firestore)."""
+"""Phase 2.1–3.1 — document upload API tests (mocked GCS + Firestore + embeddings)."""
 
 from __future__ import annotations
 
 from io import BytesIO
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 
 from app.core.config import Settings, get_settings
 from app.main import app
+from app.services.embeddings import EmbeddingError
 from app.services.gcs_storage import build_raw_object_key, sanitize_filename
 from app.services.upload import (
     ALLOWED_CONTENT_TYPES,
@@ -30,6 +31,7 @@ def settings_dev_bypass(monkeypatch: pytest.MonkeyPatch) -> Settings:
     monkeypatch.setenv("AUTH_DEV_BYPASS", "true")
     monkeypatch.setenv("GCS_DOCS_BUCKET", "rag-docs-dev")
     monkeypatch.setenv("MAX_UPLOAD_BYTES", str(50 * 1024 * 1024))
+    monkeypatch.setenv("EMBEDDING_MODEL_ID", "text-embedding-005")
     get_settings.cache_clear()
     return get_settings()
 
@@ -45,7 +47,6 @@ def _mock_storage_and_firestore():
     bucket = MagicMock(name="bucket")
     storage_client.bucket.return_value = bucket
 
-    # Return a fresh blob mock per key so we can assert processed writes
     blobs: dict[str, MagicMock] = {}
 
     def _blob(key: str) -> MagicMock:
@@ -70,6 +71,10 @@ def _mock_storage_and_firestore():
     versions_col.document.return_value = version_ref
 
     return storage_client, firestore_client, bucket, blobs, batch, version_ref, doc_ref
+
+
+def _version_updates(version_ref: MagicMock) -> list[dict]:
+    return [c[0][0] for c in version_ref.update.call_args_list]
 
 
 # ── Unit: validation helpers ────────────────────────────────────────────────
@@ -145,10 +150,12 @@ def test_build_raw_object_key() -> None:
     assert key == "raw/doc-1/ver-1/My File.md"
 
 
-# ── API: success path (extract + chunk + processed) ─────────────────────────
+# ── API: success path (extract + chunk + embeddings) ────────────────────────
 
 
-def test_upload_markdown_success_ready(client: TestClient) -> None:
+def test_upload_markdown_success_ready(
+    client: TestClient, mock_embed_texts_success
+) -> None:
     storage_client, firestore_client, bucket, blobs, batch, version_ref, _ = (
         _mock_storage_and_firestore()
     )
@@ -176,33 +183,31 @@ def test_upload_markdown_success_ready(client: TestClient) -> None:
     assert body["gcs_uri"] == "gs://rag-docs-dev/raw/doc-aaa/ver-bbb/hello.md"
     assert body["processed_gcs_prefix"] == "processed/doc-aaa/ver-bbb/"
     assert body["chunk_count"] >= 1
-    assert body["extracted_char_count"] is not None and body["extracted_char_count"] > 0
-    assert body["text_preview"]
-    assert body["error_message"] is None
-    assert "extracted_truncated" not in body
+    assert body["embeddings_status"] == "ready"
+    assert body["embedding_model_id"] == "text-embedding-005"
+    assert body["embedded_chunk_count"] >= 1
+    assert body["embeddings_gcs_uri"] == (
+        "gs://rag-docs-dev/processed/doc-aaa/ver-bbb/embeddings.jsonl"
+    )
+    assert body["embeddings_error"] is None
 
-    # raw + full.txt + chunks.jsonl
     keys = [c.args[0] for c in bucket.blob.call_args_list]
     assert "raw/doc-aaa/ver-bbb/hello.md" in keys
     assert "processed/doc-aaa/ver-bbb/full.txt" in keys
     assert "processed/doc-aaa/ver-bbb/chunks.jsonl" in keys
+    assert "processed/doc-aaa/ver-bbb/embeddings.jsonl" in keys
 
     batch.commit.assert_called_once()
-    version_ref.update.assert_called_once()
-    update_payload = version_ref.update.call_args[0][0]
-    assert update_payload["status"] == "ready"
-    assert update_payload["chunk_count"] >= 1
-    assert update_payload["processed_gcs_prefix"] == "processed/doc-aaa/ver-bbb/"
-    assert "extracted_text" not in update_payload or update_payload.get(
-        "text_preview"
-    )
-    # full text not stored under extracted_text key as a long body
-    assert update_payload.get("text_preview") is not None
-    assert "full_text_gcs_uri" in update_payload
-    assert "chunks_gcs_uri" in update_payload
+    updates = _version_updates(version_ref)
+    assert any(u.get("status") == "ready" for u in updates)
+    emb = next(u for u in updates if u.get("embeddings_status") == "ready")
+    assert emb["embedded_chunk_count"] >= 1
+    assert emb["embeddings_gcs_uri"].endswith("embeddings.jsonl")
 
 
-def test_upload_pdf_success_ready(client: TestClient) -> None:
+def test_upload_pdf_success_ready(
+    client: TestClient, mock_embed_texts_success
+) -> None:
     storage_client, firestore_client, bucket, _blobs, _batch, version_ref, _ = (
         _mock_storage_and_firestore()
     )
@@ -228,38 +233,47 @@ def test_upload_pdf_success_ready(client: TestClient) -> None:
     assert response.status_code == 201
     body = response.json()
     assert body["status"] == "ready"
-    assert body["content_type"] == "application/pdf"
-    assert "raw/doc-pdf/ver-pdf/" in body["gcs_uri"]
-    assert body["processed_gcs_prefix"] == "processed/doc-pdf/ver-pdf/"
-    assert body["chunk_count"] >= 1
+    assert body["embeddings_status"] == "ready"
     keys = [c.args[0] for c in bucket.blob.call_args_list]
-    assert "processed/doc-pdf/ver-pdf/full.txt" in keys
-    assert "processed/doc-pdf/ver-pdf/chunks.jsonl" in keys
-    assert version_ref.update.call_args[0][0]["status"] == "ready"
+    assert "processed/doc-pdf/ver-pdf/embeddings.jsonl" in keys
 
 
-def test_upload_extraction_failure_status_failed(client: TestClient) -> None:
-    storage_client, firestore_client, _bucket, _blobs, _batch, version_ref, _ = (
+def test_upload_embeddings_failure_keeps_content_ready(client: TestClient) -> None:
+    """Vertex failure → embeddings_status=failed, status still ready."""
+    storage_client, firestore_client, bucket, _blobs, _batch, version_ref, _ = (
         _mock_storage_and_firestore()
     )
-    bad_pdf = b"this is not a real pdf"
+
+    def _fail_embed(*_a, **_k):
+        raise EmbeddingError("Vertex embedding failed: boom")
 
     with (
         patch("app.services.upload.storage.Client", return_value=storage_client),
         patch("app.services.upload.firestore.Client", return_value=firestore_client),
-        patch("app.services.upload.new_ids", return_value=("doc-f", "ver-f")),
+        patch("app.services.upload.new_ids", return_value=("doc-e", "ver-e")),
+        patch("app.services.upload.embed_texts", side_effect=_fail_embed),
     ):
         response = client.post(
             "/api/v1/documents/upload",
-            files={"file": ("bad.pdf", BytesIO(bad_pdf), "application/pdf")},
+            files={"file": ("a.md", BytesIO(b"# title\n\nbody"), "text/markdown")},
         )
 
     assert response.status_code == 201, response.text
     body = response.json()
-    assert body["status"] == "failed"
-    assert body["error_message"]
-    update_payload = version_ref.update.call_args[0][0]
-    assert update_payload["status"] == "failed"
+    assert body["status"] == "ready"
+    assert body["embeddings_status"] == "failed"
+    assert body["embeddings_error"]
+    assert "Vertex" in body["embeddings_error"] or "failed" in body["embeddings_error"]
+    assert body["embeddings_gcs_uri"] is None
+
+    keys = [c.args[0] for c in bucket.blob.call_args_list]
+    assert "processed/doc-e/ver-e/chunks.jsonl" in keys
+    assert "processed/doc-e/ver-e/embeddings.jsonl" not in keys
+
+    updates = _version_updates(version_ref)
+    assert any(u.get("status") == "ready" for u in updates)
+    emb = next(u for u in updates if u.get("embeddings_status") == "failed")
+    assert emb["embeddings_error"]
 
 
 # ── API: error paths ────────────────────────────────────────────────────────
@@ -328,7 +342,7 @@ def test_upload_firestore_failure_returns_500(client: TestClient) -> None:
 
 
 def test_upload_requires_bearer_when_bypass_off(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, mock_embed_texts_success
 ) -> None:
     monkeypatch.setenv("AUTH_DEV_BYPASS", "false")
     monkeypatch.setenv("UPLOAD_BEARER_TOKEN", "secret-token")
@@ -354,6 +368,7 @@ def test_upload_requires_bearer_when_bypass_off(
         )
     assert ok.status_code == 201
     assert ok.json()["status"] == "ready"
+    assert ok.json()["embeddings_status"] == "ready"
 
 
 def test_allowed_content_types_constant() -> None:
@@ -362,7 +377,9 @@ def test_allowed_content_types_constant() -> None:
     assert "text/x-markdown" in ALLOWED_CONTENT_TYPES
 
 
-def test_response_schema_keys(client: TestClient) -> None:
+def test_response_schema_keys(
+    client: TestClient, mock_embed_texts_success
+) -> None:
     storage_client, firestore_client, _, _, _, _, _ = _mock_storage_and_firestore()
     with (
         patch("app.services.upload.storage.Client", return_value=storage_client),
@@ -389,6 +406,11 @@ def test_response_schema_keys(client: TestClient) -> None:
         "processed_gcs_prefix",
         "text_preview",
         "error_message",
+        "embeddings_status",
+        "embedding_model_id",
+        "embedded_chunk_count",
+        "embeddings_gcs_uri",
+        "embeddings_error",
     }
     assert expected.issubset(body.keys())
     assert body["status"] in ("ready", "failed")

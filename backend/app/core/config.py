@@ -53,6 +53,20 @@ class Settings(BaseSettings):
     environment: str = Field(default="local", description="local | dev | test | prod")
     log_level: str = Field(default="INFO")
 
+    # Vertex embeddings (Phase 3.1 / ADR-0007)
+    embedding_model_id: str = Field(
+        default="text-embedding-005",
+        description="Vertex text embedding model id (EMBEDDING_MODEL_ID)",
+    )
+    embedding_batch_size: int = Field(
+        default=32,
+        description="Max texts per Vertex embedding API call",
+    )
+    vertex_location: str = Field(
+        default="asia-south1",
+        description="Vertex AI location (VERTEX_LOCATION)",
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:

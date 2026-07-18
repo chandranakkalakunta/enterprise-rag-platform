@@ -1,9 +1,10 @@
-"""Document upload orchestration (Phase 2.3).
+"""Document upload orchestration (Phase 2.3–3.1).
 
 Flow: validate → GCS raw/ → Firestore processing → extract → chunk →
-GCS processed/ (full.txt + chunks.jsonl) → Firestore ready|failed.
+GCS processed/ (full.txt + chunks.jsonl) → Firestore ready|failed →
+embed chunks → embeddings.jsonl → embeddings_status ready|failed.
 
-Extraction and chunking modules are worker-ready (no framework coupling).
+Content status (ready) is independent of embeddings_status (ADR-0007).
 """
 
 from __future__ import annotations
@@ -19,13 +20,22 @@ from app.core.config import Settings
 from app.services.chunking import (
     DEFAULT_OVERLAP,
     DEFAULT_TARGET_SIZE,
+    Chunk,
     ChunkingError,
     chunk_text,
     text_preview,
 )
+from app.services.embeddings import (
+    EmbeddingError,
+    TextEmbedder,
+    build_embedding_records,
+    embed_texts,
+)
 from app.services.extraction import ExtractionError, extract_text
 from app.services.firestore_repo import (
     create_document_with_version,
+    update_version_embeddings_failed,
+    update_version_embeddings_ready,
     update_version_failed,
     update_version_ready,
 )
@@ -33,6 +43,7 @@ from app.services.gcs_storage import (
     GcsUploadResult,
     ProcessedArtifacts,
     upload_raw_bytes,
+    write_embeddings_jsonl,
     write_processed_artifacts,
 )
 
@@ -81,6 +92,11 @@ class UploadResult:
     processed_gcs_prefix: str | None = None
     text_preview: str | None = None
     error_message: str | None = None
+    embeddings_status: str | None = None  # ready | failed | None
+    embedding_model_id: str | None = None
+    embedded_chunk_count: int | None = None
+    embeddings_gcs_uri: str | None = None
+    embeddings_error: str | None = None
 
 
 def _normalize_content_type(content_type: str | None) -> str:
@@ -163,8 +179,111 @@ def _mark_failed(
     return "failed", None, None, None, error_message
 
 
+def _embed_and_store(
+    *,
+    settings: Settings,
+    gcs_client: storage.Client,
+    fs_client: firestore.Client,
+    document_id: str,
+    version_id: str,
+    chunks: list[Chunk],
+    embedder: TextEmbedder | None = None,
+) -> tuple[str, str | None, int | None, str | None, str | None]:
+    """
+    Embed chunks and write embeddings.jsonl.
+
+    Returns:
+        (embeddings_status, model_id, embedded_count, gcs_uri, error)
+    """
+    model_id = settings.embedding_model_id
+    try:
+        texts = [c.text for c in chunks]
+        vectors = embed_texts(
+            texts,
+            model_id=model_id,
+            project_id=settings.gcp_project_id,
+            location=settings.vertex_location,
+            batch_size=settings.embedding_batch_size,
+            embedder=embedder,
+        )
+        records = build_embedding_records(
+            chunks=chunks,
+            vectors=vectors,
+            document_id=document_id,
+            version_id=version_id,
+        )
+        artifact = write_embeddings_jsonl(
+            client=gcs_client,
+            bucket_name=settings.gcs_docs_bucket,
+            document_id=document_id,
+            version_id=version_id,
+            records=records,
+            embedding_model_id=model_id,
+        )
+        update_version_embeddings_ready(
+            fs_client,
+            document_id=document_id,
+            version_id=version_id,
+            embedding_model_id=model_id,
+            embedded_chunk_count=artifact.embedded_chunk_count,
+            embeddings_gcs_uri=artifact.gcs_uri,
+        )
+        return (
+            "ready",
+            model_id,
+            artifact.embedded_chunk_count,
+            artifact.gcs_uri,
+            None,
+        )
+    except EmbeddingError as exc:
+        logger.warning(
+            "embeddings_failed document_id=%s version_id=%s error=%s",
+            document_id,
+            version_id,
+            exc.message,
+        )
+        try:
+            update_version_embeddings_failed(
+                fs_client,
+                document_id=document_id,
+                version_id=version_id,
+                embedding_model_id=model_id,
+                error_message=exc.message,
+            )
+        except Exception:  # noqa: BLE001
+            logger.exception(
+                "firestore_embeddings_failed_update document_id=%s version_id=%s",
+                document_id,
+                version_id,
+            )
+        return "failed", model_id, 0, None, exc.message
+    except Exception as exc:  # noqa: BLE001
+        msg = f"Unexpected embedding error: {exc}"
+        logger.exception(
+            "embeddings_unexpected document_id=%s version_id=%s",
+            document_id,
+            version_id,
+        )
+        try:
+            update_version_embeddings_failed(
+                fs_client,
+                document_id=document_id,
+                version_id=version_id,
+                embedding_model_id=model_id,
+                error_message=msg,
+            )
+        except Exception:  # noqa: BLE001
+            logger.exception(
+                "firestore_embeddings_failed_update document_id=%s version_id=%s",
+                document_id,
+                version_id,
+            )
+        return "failed", model_id, 0, None, msg
+
+
 def _run_extract_chunk_store(
     *,
+    settings: Settings,
     gcs_client: storage.Client,
     fs_client: firestore.Client,
     bucket_name: str,
@@ -174,13 +293,27 @@ def _run_extract_chunk_store(
     data: bytes,
     chunk_target_size: int = DEFAULT_TARGET_SIZE,
     chunk_overlap: int = DEFAULT_OVERLAP,
-) -> tuple[str, int | None, int | None, str | None, str | None, str | None]:
+    embedder: TextEmbedder | None = None,
+) -> tuple[
+    str,
+    int | None,
+    int | None,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+    int | None,
+    str | None,
+    str | None,
+]:
     """
-    Extract → chunk → write processed/ → update Firestore.
+    Extract → chunk → processed/ → ready → embed → embeddings.jsonl.
 
     Returns:
-        (status, extracted_char_count, chunk_count, processed_prefix,
-         preview, error_message)
+        (status, extracted_char_count, chunk_count, processed_prefix, preview,
+         error_message, embeddings_status, embedding_model_id,
+         embedded_chunk_count, embeddings_gcs_uri, embeddings_error)
     """
     try:
         text = extract_text(content_type, data)
@@ -194,7 +327,7 @@ def _run_extract_chunk_store(
         status, _, _, _, err = _mark_failed(
             fs_client, document_id, version_id, exc.message
         )
-        return status, 0, 0, None, None, err
+        return status, 0, 0, None, None, err, None, None, None, None, None
     except Exception as exc:  # noqa: BLE001
         msg = f"Unexpected extraction error: {exc}"
         logger.exception(
@@ -203,7 +336,7 @@ def _run_extract_chunk_store(
             version_id,
         )
         status, _, _, _, err = _mark_failed(fs_client, document_id, version_id, msg)
-        return status, 0, 0, None, None, err
+        return status, 0, 0, None, None, err, None, None, None, None, None
 
     try:
         chunks = chunk_text(
@@ -219,7 +352,7 @@ def _run_extract_chunk_store(
         status, _, _, _, err = _mark_failed(
             fs_client, document_id, version_id, exc.message
         )
-        return status, len(text), 0, None, None, err
+        return status, len(text), 0, None, None, err, None, None, None, None, None
 
     try:
         artifacts: ProcessedArtifacts = write_processed_artifacts(
@@ -240,7 +373,7 @@ def _run_extract_chunk_store(
         status, _, _, _, err = _mark_failed(
             fs_client, document_id, version_id, f"{msg}: {exc}"
         )
-        return status, len(text), 0, None, None, err
+        return status, len(text), 0, None, None, err, None, None, None, None, None
 
     preview = text_preview(text)
     try:
@@ -265,6 +398,16 @@ def _run_extract_chunk_store(
             "Failed to record ready status after processing"
         ) from exc
 
+    emb_status, emb_model, emb_count, emb_uri, emb_err = _embed_and_store(
+        settings=settings,
+        gcs_client=gcs_client,
+        fs_client=fs_client,
+        document_id=document_id,
+        version_id=version_id,
+        chunks=list(chunks),
+        embedder=embedder,
+    )
+
     return (
         "ready",
         artifacts.full_text_char_count,
@@ -272,6 +415,11 @@ def _run_extract_chunk_store(
         artifacts.prefix,
         preview,
         None,
+        emb_status,
+        emb_model,
+        emb_count,
+        emb_uri,
+        emb_err,
     )
 
 
@@ -287,9 +435,10 @@ def process_upload(
     storage_client: storage.Client | None = None,
     firestore_client: firestore.Client | None = None,
     id_factory: Callable[[], tuple[str, str]] | None = None,
+    embedder: TextEmbedder | None = None,
 ) -> UploadResult:
     """
-    Validate → GCS raw/ → Firestore processing → extract/chunk/processed → ready|failed.
+    Validate → GCS raw/ → extract/chunk/processed → ready → embeddings.
     """
     validated_type = validate_upload(
         content_type=content_type,
@@ -347,7 +496,13 @@ def process_upload(
         processed_prefix,
         preview,
         error_message,
+        emb_status,
+        emb_model,
+        emb_count,
+        emb_uri,
+        emb_err,
     ) = _run_extract_chunk_store(
+        settings=settings,
         gcs_client=gcs_client,
         fs_client=fs_client,
         bucket_name=settings.gcs_docs_bucket,
@@ -355,6 +510,7 @@ def process_upload(
         version_id=version_id,
         content_type=validated_type,
         data=data,
+        embedder=embedder,
     )
 
     return UploadResult(
@@ -372,4 +528,9 @@ def process_upload(
         processed_gcs_prefix=processed_prefix,
         text_preview=preview,
         error_message=error_message,
+        embeddings_status=emb_status,
+        embedding_model_id=emb_model,
+        embedded_chunk_count=emb_count,
+        embeddings_gcs_uri=emb_uri,
+        embeddings_error=emb_err,
     )
