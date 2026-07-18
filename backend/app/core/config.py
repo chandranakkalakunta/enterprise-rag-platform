@@ -67,6 +67,32 @@ class Settings(BaseSettings):
         description="Vertex AI location (VERTEX_LOCATION)",
     )
 
+    # Vector Search (Phase 3.2 / ADR-0007) — leave empty to skip upsert locally
+    vector_search_enabled: bool = Field(
+        default=False,
+        description="When true, upsert/activate vectors (VECTOR_SEARCH_ENABLED)",
+    )
+    vector_search_index_id: str = Field(
+        default="",
+        description="Index id or full resource name (VECTOR_SEARCH_INDEX_ID)",
+    )
+    vector_search_endpoint_id: str = Field(
+        default="",
+        description="Endpoint id for queries (VECTOR_SEARCH_ENDPOINT_ID)",
+    )
+    vector_search_deployed_index_id: str = Field(
+        default="",
+        description="Deployed index id for FindNeighbors (VECTOR_SEARCH_DEPLOYED_INDEX_ID)",
+    )
+    vector_search_region: str = Field(
+        default="asia-south1",
+        description="Vector Search region (VECTOR_SEARCH_REGION)",
+    )
+    vector_search_dimensions: int = Field(
+        default=768,
+        description="Expected embedding dimensions (text-embedding-005 default)",
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:

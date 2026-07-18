@@ -157,6 +157,7 @@ async def upload_document(
         embedded_chunk_count=result.embedded_chunk_count,
         embeddings_gcs_uri=result.embeddings_gcs_uri,
         embeddings_error=result.embeddings_error,
+        vector_status=result.vector_status,
     )
 
 
@@ -192,6 +193,43 @@ async def publish_document_version(
             version_id=version_id,
             actor=auth.subject,
         )
+        # Vector Search: activate published version; deactivate previous (no re-embed)
+        from google.cloud import storage as gcs_storage
+
+        from app.services.vector_ops import (
+            activate_version_vectors,
+            deactivate_version_vectors,
+            version_meta_from_firestore,
+        )
+
+        gcs_client = gcs_storage.Client(project=settings.gcp_project_id)
+        doc_snap = client.collection("documents").document(document_id).get()
+        doc_data = doc_snap.to_dict() or {} if doc_snap.exists else {}
+        meta = version_meta_from_firestore(client, document_id, version_id)
+        activate_version_vectors(
+            settings=settings,
+            gcs_client=gcs_client,
+            fs_client=client,
+            document_id=document_id,
+            version_id=version_id,
+            collection=doc_data.get("collection"),
+            title=doc_data.get("title"),
+            filename=meta.get("filename"),
+        )
+        if result.previous_published_version_id:
+            prev_meta = version_meta_from_firestore(
+                client, document_id, result.previous_published_version_id
+            )
+            deactivate_version_vectors(
+                settings=settings,
+                gcs_client=gcs_client,
+                fs_client=client,
+                document_id=document_id,
+                version_id=result.previous_published_version_id,
+                collection=doc_data.get("collection"),
+                title=doc_data.get("title"),
+                filename=prev_meta.get("filename"),
+            )
     except (InvalidIdError, NotFoundError, ConflictError) as exc:
         raise _lifecycle_http(exc) from exc
     except Exception as exc:  # noqa: BLE001
@@ -236,6 +274,27 @@ async def retire_document_version(
             document_id=document_id,
             version_id=version_id,
             actor=auth.subject,
+        )
+        from google.cloud import storage as gcs_storage
+
+        from app.services.vector_ops import (
+            deactivate_version_vectors,
+            version_meta_from_firestore,
+        )
+
+        gcs_client = gcs_storage.Client(project=settings.gcp_project_id)
+        doc_snap = client.collection("documents").document(document_id).get()
+        doc_data = doc_snap.to_dict() or {} if doc_snap.exists else {}
+        meta = version_meta_from_firestore(client, document_id, version_id)
+        deactivate_version_vectors(
+            settings=settings,
+            gcs_client=gcs_client,
+            fs_client=client,
+            document_id=document_id,
+            version_id=version_id,
+            collection=doc_data.get("collection"),
+            title=doc_data.get("title"),
+            filename=meta.get("filename"),
         )
     except (InvalidIdError, NotFoundError, ConflictError) as exc:
         raise _lifecycle_http(exc) from exc

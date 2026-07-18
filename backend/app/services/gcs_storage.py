@@ -190,6 +190,18 @@ class EmbeddingsArtifact:
     embedding_model_id: str
 
 
+def read_object_bytes(
+    *,
+    client: storage.Client,
+    bucket_name: str,
+    object_key: str,
+) -> bytes:
+    """Download a GCS object as bytes."""
+    bucket = client.bucket(bucket_name)
+    blob = bucket.blob(object_key)
+    return blob.download_as_bytes()
+
+
 def write_embeddings_jsonl(
     *,
     client: storage.Client,

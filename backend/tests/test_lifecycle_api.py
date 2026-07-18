@@ -44,6 +44,11 @@ def test_publish_ready_success(client: TestClient) -> None:
     with (
         patch("app.api.v1.documents.firestore.Client", return_value=MagicMock()),
         patch("app.api.v1.documents.publish_version", return_value=result) as pub,
+        patch("google.cloud.storage.Client", return_value=MagicMock()),
+        patch(
+            "app.services.vector_ops.activate_version_vectors",
+            return_value="activated",
+        ) as act,
     ):
         response = client.post("/api/v1/documents/doc-1/versions/ver-1/publish")
 
@@ -56,6 +61,7 @@ def test_publish_ready_success(client: TestClient) -> None:
     assert body["published_by"] == "dev-bypass"
     assert body["previous_published_version_id"] is None
     pub.assert_called_once()
+    act.assert_called_once()
     kwargs = pub.call_args.kwargs
     assert kwargs["document_id"] == "doc-1"
     assert kwargs["version_id"] == "ver-1"
@@ -75,12 +81,24 @@ def test_publish_supersedes_previous(client: TestClient) -> None:
     with (
         patch("app.api.v1.documents.firestore.Client", return_value=MagicMock()),
         patch("app.api.v1.documents.publish_version", return_value=result),
+        patch("google.cloud.storage.Client", return_value=MagicMock()),
+        patch(
+            "app.services.vector_ops.activate_version_vectors",
+            return_value="activated",
+        ) as act,
+        patch(
+            "app.services.vector_ops.deactivate_version_vectors",
+            return_value="deactivated",
+        ) as deact,
     ):
         body = client.post("/api/v1/documents/doc-1/versions/ver-2/publish").json()
 
     assert body["status"] == "published"
     assert body["previous_published_version_id"] == "ver-1"
     assert body["active_version_id"] == "ver-2"
+    act.assert_called_once()
+    deact.assert_called_once()
+    assert deact.call_args.kwargs["version_id"] == "ver-1"
 
 
 def test_retire_published_clears_pointer(client: TestClient) -> None:
@@ -96,6 +114,11 @@ def test_retire_published_clears_pointer(client: TestClient) -> None:
     with (
         patch("app.api.v1.documents.firestore.Client", return_value=MagicMock()),
         patch("app.api.v1.documents.retire_version", return_value=result),
+        patch("google.cloud.storage.Client", return_value=MagicMock()),
+        patch(
+            "app.services.vector_ops.deactivate_version_vectors",
+            return_value="deactivated",
+        ) as deact,
     ):
         response = client.post("/api/v1/documents/doc-1/versions/ver-1/retire")
 
@@ -105,6 +128,7 @@ def test_retire_published_clears_pointer(client: TestClient) -> None:
     assert body["active_version_id"] is None
     assert body["cleared_active_pointer"] is True
     assert body["retired_by"] == "dev-bypass"
+    deact.assert_called_once()
 
 
 def test_publish_illegal_transition_409(client: TestClient) -> None:
@@ -202,6 +226,11 @@ def test_publish_requires_auth_when_bypass_off(
     with (
         patch("app.api.v1.documents.firestore.Client", return_value=MagicMock()),
         patch("app.api.v1.documents.publish_version", return_value=result) as pub,
+        patch("google.cloud.storage.Client", return_value=MagicMock()),
+        patch(
+            "app.services.vector_ops.activate_version_vectors",
+            return_value="skipped",
+        ),
     ):
         ok = local.post(
             "/api/v1/documents/d1/versions/v1/publish",

@@ -10,14 +10,14 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- **Phase 3.2:** Vector Search index upsert (activate on publish / deactivate on retire)
-- **Phase 3.2+:** LangGraph query API, citations, minimal refusal
+- **Phase 3.3:** LangGraph query / Search API, citations, minimal refusal
 - Later 3.x / Phase 4: hybrid BM25 + RRF, semantic cache, full guardrail stack
-- Backlog: async `rag-ingest` (BL-ING-10), job visibility (BL-ING-07), real content_admin (BL-SEC-10)
+- Backlog: inactive vector hard-delete (BL-RAG-16); async worker; content_admin auth
 - Coordinator: OAuth secret versions; Binary Auth (Phase 6+); detect-secrets (BL-FND-08)
 - Phase 5: full PWA (desktop/tablet/mobile browser + installable); no native apps
 
 ### Added
+- **Phase 3.2:** Vertex Vector Search (STREAM_UPDATE, SHARD_SIZE_SMALL, public endpoint); upsert on ready (`active=false`); activate on publish / deactivate on retire; metadata filters `active|collection|document_id|version_id`; [vector-search runbook](docs/runbooks/vector-search.md)
 - **Phase 3.1:** Vertex embedding pipeline on version ready — `embeddings.jsonl` under `processed/`; Firestore `embeddings_status` / model / URI; content `status=ready` independent of embed failure; default `EMBEDDING_MODEL_ID=text-embedding-005`
 - **Phase 3.0:** [ADR-0007](docs/adr/0007-embedding-and-vector-search.md) — Vertex embeddings + Vector Search; embed on ready / activate on publish / deactivate on retire; chunk text in datapoint; `EMBEDDING_MODEL_ID`, `RETRIEVAL_TOP_K` (default 5)
 - **Phase 3.0:** [ADR-0008](docs/adr/0008-retrieval-and-grounded-generation.md) — LangGraph MVP retrieve → evidence check → Gemini generate; published-only; `GENERATION_MODEL_ID`, temperature default 0.2; hybrid/RRF and full guards deferred

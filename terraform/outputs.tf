@@ -211,3 +211,53 @@ output "firestore_data_plane_members" {
     google_service_account.rag[k].email
   ]
 }
+
+# ── Phase 3.2: Vector Search ─────────────────────────────────────────────────
+
+output "vector_search_enabled" {
+  description = "Whether Vector Search resources are managed"
+  value       = var.enable_vector_search
+}
+
+output "vector_search_region" {
+  description = "Region of Vector Search resources"
+  value       = var.vector_search_region
+}
+
+output "vector_search_dimensions" {
+  description = "Index embedding dimensions"
+  value       = var.vector_search_dimensions
+}
+
+output "vector_search_index_id" {
+  description = "Short Vector Search index id (empty if disabled)"
+  value       = var.enable_vector_search ? google_vertex_ai_index.rag_docs[0].name : ""
+}
+
+output "vector_search_index_resource_name" {
+  description = "Full resource name of the Vector Search index"
+  value       = var.enable_vector_search ? google_vertex_ai_index.rag_docs[0].id : ""
+}
+
+output "vector_search_endpoint_id" {
+  description = "Short index endpoint id"
+  value       = var.enable_vector_search ? google_vertex_ai_index_endpoint.rag_docs[0].name : ""
+}
+
+output "vector_search_endpoint_resource_name" {
+  description = "Full resource name of the index endpoint"
+  value       = var.enable_vector_search ? google_vertex_ai_index_endpoint.rag_docs[0].id : ""
+}
+
+output "vector_search_deployed_index_id" {
+  description = "Deployed index id used in FindNeighbors / query clients"
+  value       = var.enable_vector_search ? google_vertex_ai_index_endpoint_deployed_index.rag_docs[0].deployed_index_id : ""
+}
+
+output "vector_search_public_endpoint_domain" {
+  description = "Public endpoint domain name when public_endpoint_enabled"
+  value = var.enable_vector_search ? try(
+    google_vertex_ai_index_endpoint.rag_docs[0].public_endpoint_domain_name,
+    ""
+  ) : ""
+}

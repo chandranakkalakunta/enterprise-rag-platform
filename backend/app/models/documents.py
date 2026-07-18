@@ -56,6 +56,10 @@ class UploadResponse(BaseModel):
     embedded_chunk_count: int | None = None
     embeddings_gcs_uri: str | None = None
     embeddings_error: str | None = None
+    vector_status: str | None = Field(
+        default=None,
+        description="Vector Search: upserted | skipped | failed (Phase 3.2)",
+    )
 
 
 class VersionLifecycleResponse(BaseModel):

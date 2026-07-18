@@ -243,14 +243,14 @@ Upload (api) → GCS raw/{document_id}/{version_id}/{filename}
   → Firestore ready (pointers + text_preview) | failed  (Phase 2.3 ✓)
   → Publish (api) → published + active_version_id; previous published → retired  (Phase 2.4 ✓)
   → Retire (api) → retired; clear active pointer if needed  (Phase 2.4 ✓)
-  → On ready: embed chunks → Vector Search (staging/non-active)   (ADR-0007)
-  → On publish: activate searchable set for version
-  → On retire: deactivate from active searchable set
+  → On ready: embed → embeddings.jsonl → Vector Search upsert active=false  (3.1–3.2 ✓)
+  → On publish: re-upsert active=true; previous active=false  (3.2 ✓)
+  → On retire: re-upsert active=false  (3.2 ✓; hard-delete BL-RAG-16 later)
   → multimodal / hybrid BM25+RRF / semantic cache  (later)
 ```
 
 **Phase 2.1–2.4:** Upload through version lifecycle.  
-**Phase 3.0:** Index + query contracts — [ADR-0007](../adr/0007-embedding-and-vector-search.md) · [ADR-0008](../adr/0008-retrieval-and-grounded-generation.md).
+**Phase 3.0–3.2:** [ADR-0007](../adr/0007-embedding-and-vector-search.md) · [ADR-0008](../adr/0008-retrieval-and-grounded-generation.md) · [vector-search runbook](../runbooks/vector-search.md).
 
 ---
 

@@ -3,7 +3,7 @@
 Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
-**Status:** **Phase 3.1 complete** — embeddings on ready; **Phase 3.2 next** (Vector Search upsert)  
+**Status:** **Phase 3.2 complete** — Vector Search upsert + activate/deactivate; **Phase 3.3 next** (query API)  
 **GCP project:** set via `var.gcp_project_id` / `GCP_PROJECT_ID` (never hard-coded in app code)  
 **Project ID:** `enterprise-rag-platform-502711` (number `642114828076`)  
 
@@ -24,7 +24,8 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 | **3** | Retrieval foundation + grounded Q&A | 🔄 **In progress** |
 | **3.0** | ADR-0007 embeddings/VS + ADR-0008 retrieval/gen | ✅ **Accepted** |
 | **3.1** | Embedding pipeline (`embeddings.jsonl` on ready) | ✅ **Complete** |
-| **3.2** | Vector Search upsert + publish activate | 🔜 **Next** |
+| **3.2** | Vector Search upsert + activate/deactivate | ✅ **Complete** |
+| **3.3** | Search / query API (LangGraph dense path) | 🔜 **Next** |
 | **4** | Multi-turn, ACL depth, hybrid/RRF stretch | Planned |
 | **5** | Voice + **full PWA** (desktop/tablet/mobile browser + installable) | Planned — **no native apps** |
 | **6** | Analytics, eval gates, cost dashboards | Planned |
