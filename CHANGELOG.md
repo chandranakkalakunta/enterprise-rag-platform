@@ -10,16 +10,15 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- **Phase 3:** Embeddings, Vertex AI Vector Search, hybrid retrieval + RRF, LangGraph query path, citations, guardrails, 5-star feedback
-- Backlog (not Phase 3 incomplete): async `rag-ingest` worker (BL-ING-10), job visibility (BL-ING-07), real content_admin auth (BL-SEC-10)
-- Atomic index alias swap on publish (BL-ING-06)
-- Coordinator: add OAuth secret versions (shells exist)
-- Binary Authorization (NFR-SEC-14 / BL-SEC-09) — Phase 6+
-- detect-secrets in CI (BL-FND-08)
-- Chunking strategy tuning (BL-ING-03b)
+- **Phase 3.1+:** Embed pipeline, Vector Search wiring, LangGraph query API, citations, minimal refusal
+- Later 3.x / Phase 4: hybrid BM25 + RRF, semantic cache, full guardrail stack
+- Backlog: async `rag-ingest` (BL-ING-10), job visibility (BL-ING-07), real content_admin (BL-SEC-10)
+- Coordinator: OAuth secret versions; Binary Auth (Phase 6+); detect-secrets (BL-FND-08)
 - Phase 5: full PWA (desktop/tablet/mobile browser + installable); no native apps
 
 ### Added
+- **Phase 3.0:** [ADR-0007](docs/adr/0007-embedding-and-vector-search.md) — Vertex embeddings + Vector Search; embed on ready / activate on publish / deactivate on retire; chunk text in datapoint; `EMBEDDING_MODEL_ID`, `RETRIEVAL_TOP_K` (default 5)
+- **Phase 3.0:** [ADR-0008](docs/adr/0008-retrieval-and-grounded-generation.md) — LangGraph MVP retrieve → evidence check → Gemini generate; published-only; `GENERATION_MODEL_ID`, temperature default 0.2; hybrid/RRF and full guards deferred
 - **Phase 2 closure:** [Retrospective](docs/retrospectives/phase-2.md) · [Engineering report](docs/reports/phase-2-engineering-report.md); backlog tidy; Phase 5 PWA scope lock
 
 ---

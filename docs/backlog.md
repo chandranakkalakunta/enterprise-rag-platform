@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-17 (**Phase 2 Complete** — closure; residual ingest items → backlog; Phase 5 = full PWA)
+Last updated: 2026-07-18 (**Phase 3.0** — ADR-0007 + ADR-0008 retrieval foundation accepted)
 
 ---
 
@@ -101,18 +101,21 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-RAG-01 | Hybrid BM25 + dense retrieval | Todo | Phase 3 | |
-| BL-RAG-02 | RRF fusion | Todo | Phase 3 | |
-| BL-RAG-03 | Gemini generation with citations | Todo | Phase 3 | |
-| BL-RAG-04 | Insufficient-evidence refusal | Todo | Phase 3 | |
-| BL-RAG-05 | ACL-aware retrieval | Todo | Phase 3 | |
+| BL-RAG-13 | **ADR-0007 + ADR-0008** retrieval foundation decisions | Done | ✓ Done — Phase 3.0 | Embed/VS lifecycle + LangGraph MVP flow |
+| BL-RAG-14 | Embed on ready + activate on publish / deactivate on retire | Todo | **Phase 3.1** | ADR-0007 |
+| BL-RAG-12 | Vertex AI Vector Search index + endpoint wiring | Todo | **Phase 3.1** | ADR-0007 |
+| BL-RAG-09 | LangGraph query orchestration (simple graph) | Todo | **Phase 3.1–3.2** | ADR-0008 |
+| BL-RAG-03 | Gemini generation with citations | Todo | **Phase 3.2** | `GENERATION_MODEL_ID`, temp 0.2 |
+| BL-RAG-04 | Insufficient-evidence refusal (minimal) | Todo | **Phase 3.2** | ADR-0008 evidence_check |
+| BL-RAG-10 | Metadata filtering at index (published/active) | Todo | **Phase 3.1–3.2** | Active version only |
+| BL-RAG-15 | Query API `POST /api/v1/query` (or equivalent) | Todo | **Phase 3.2** | Answer + citations |
+| BL-RAG-01 | Hybrid BM25 + dense retrieval | Todo | **Later 3.x / Phase 4** | Deferred by ADR-0008 |
+| BL-RAG-02 | RRF fusion | Todo | **Later 3.x / Phase 4** | Deferred by ADR-0008 |
+| BL-RAG-05 | ACL-aware retrieval (deep) | Todo | Phase 3–4 | Beyond published-only |
 | BL-RAG-06 | Multi-turn conversation memory | Deferred | Phase 4 | |
 | BL-RAG-07 | Collection / filter scope (UX) | Deferred | Phase 4 | US-QA-05 |
 | BL-RAG-08 | Optional token streaming to client | Deferred | Phase 3+ | |
-| BL-RAG-09 | LangGraph query orchestration | Todo | Phase 3 | P0 · ADR-0002 |
-| BL-RAG-10 | Metadata filtering at index query | Todo | Phase 3 | P0 · US-QA-08 |
-| BL-RAG-11 | Semantic caching | Todo | Phase 3–4 | P1 · US-QA-07 |
-| BL-RAG-12 | Vertex AI Vector Search index wiring | Todo | Phase 3 | Locked product choice |
+| BL-RAG-11 | Semantic caching | Todo | Later 3.x / Phase 4 | P1 · BL-DEC-06 |
 
 ## Feedback
 
@@ -126,10 +129,10 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-GRD-01 | Prompt-injection defenses | Todo | Phase 3–4 | Spec locked Phase 0 |
-| BL-GRD-02 | Output grounding / citation checks | Todo | Phase 3–4 | |
+| BL-GRD-01 | Prompt-injection defenses | Todo | Later 3.x / Phase 4 | Full stack deferred; MVP = minimal evidence gate |
+| BL-GRD-02 | Output grounding / citation checks | Todo | Later 3.x / Phase 4 | |
 | BL-GRD-03 | Configurable safety policies | Deferred | Phase 4 | |
-| BL-GRD-04 | Guardrail metrics counters | Todo | Phase 3 | |
+| BL-GRD-04 | Guardrail metrics counters | Todo | Phase 3+ | |
 
 ## Voice & PWA (Phase 5 = full PWA; no native apps)
 
@@ -171,21 +174,24 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Decision | Status | Target ADR |
 |----|----------|--------|------------|
-| BL-DEC-01 | Firestore vs Cloud SQL for metadata | Done | ✓ Done — Phase 2.0 / ADR-0006 | **Firestore Native** (Accepted) |
-| BL-DEC-02 | Exact embedding model + dimensions | Todo | ADR-0007 |
-| BL-DEC-03 | Vector Search index topology / filter schema | Todo | ADR-0007 |
-| BL-DEC-04 | STT/TTS provider selection | Deferred | Phase 5 ADR |
-| BL-DEC-05 | Ingest enqueue: Cloud Tasks vs Pub/Sub | Todo | Backlog ADR (with BL-ING-10) |
-| BL-DEC-06 | Semantic cache backing store | Todo | Phase 3 |
+| BL-DEC-01 | Firestore vs Cloud SQL for metadata | Done | ✓ Done — Phase 2.0 / ADR-0006 | **Firestore Native** |
+| BL-DEC-02 | Embedding provider + model config + lifecycle | Done | ✓ Done — Phase 3.0 / ADR-0007 | Vertex; `EMBEDDING_MODEL_ID`; embed on ready |
+| BL-DEC-03 | Vector Search index + chunk payload + filters | Done | ✓ Done — Phase 3.0 / ADR-0007 | Vertex AI Vector Search |
+| BL-DEC-07 | Retrieval/gen flow + knobs (top_k, temperature) | Done | ✓ Done — Phase 3.0 / ADR-0008 | LangGraph MVP; temp 0.2; top_k 5 |
+| BL-DEC-04 | STT/TTS provider selection | Deferred | Phase 5 ADR | |
+| BL-DEC-05 | Ingest enqueue: Cloud Tasks vs Pub/Sub | Todo | Backlog ADR (with BL-ING-10) | |
+| BL-DEC-06 | Semantic cache backing store | Todo | Later 3.x / Phase 4 | Deferred with hybrid/cache |
 
-**Resolved in Phase 0–1:** LangGraph; Vertex AI Vector Search; Cloud Run service split; zero JSON keys + WIF; audience allowlist; CMEK secrets/docs; CI deploy path.  
-**Resolved in Phase 2:** Metadata store = Firestore Native (ADR-0006); MVP ingest lifecycle complete; residual worker/auth/jobs → backlog (not Phase 3 incomplete).  
+**Resolved in Phase 0–1:** LangGraph; Vertex AI Vector Search product; Cloud Run split; zero JSON keys + WIF; audience allowlist; CMEK; CI.  
+**Resolved in Phase 2:** Firestore metadata; MVP ingest lifecycle.  
+**Resolved in Phase 3.0:** ADR-0007 + ADR-0008 — embed/VS lifecycle; dense LangGraph query; hybrid/RRF/full guards deferred.  
 **Phase 5 scope:** Full PWA only — no native apps.
 
 ---
 
 ## Recently completed
 
+- **2026-07-18** — **Phase 3.0:** ADR-0007 (embeddings + Vector Search) + ADR-0008 (retrieval + grounded generation) accepted.
 - **2026-07-17** — **Phase 2 complete:** retrospective + engineering report; residual items moved to backlog; Phase 5 PWA scope clarified.
 - **2026-07-17** — **Phase 2.4:** Publish + retire endpoints; atomic active_version_id; previous published auto-retired; strict 409 transitions; tests + runbook.
 - **2026-07-17** — **Phase 2.3:** Chunking (1000/150); processed/ full.txt + chunks.jsonl; Firestore preview/pointers only; Cloud Run image lifecycle ignore.
