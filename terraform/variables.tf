@@ -63,6 +63,32 @@ variable "firestore_location_id" {
   default     = "asia-south1"
 }
 
+# ── Phase 3.2: Vertex AI Vector Search ───────────────────────────────────────
+
+variable "enable_vector_search" {
+  description = "Provision Vertex AI Vector Search index + endpoint (dev cost; can disable for local-only workspaces)"
+  type        = bool
+  default     = true
+}
+
+variable "vector_search_region" {
+  description = "Region for Vector Search index/endpoint (prefer asia-south1; override if unsupported)"
+  type        = string
+  default     = "asia-south1"
+}
+
+variable "vector_search_dimensions" {
+  description = "Embedding dimensions (text-embedding-005 default output = 768)"
+  type        = number
+  default     = 768
+}
+
+variable "vector_search_approximate_neighbors_count" {
+  description = "ANN approximate neighbors count for index config"
+  type        = number
+  default     = 10
+}
+
 variable "tfstate_environments" {
   description = "Environments for which remote state buckets are created (all envs, once per project)"
   type        = list(string)

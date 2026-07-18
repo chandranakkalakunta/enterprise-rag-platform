@@ -46,6 +46,11 @@ from app.services.gcs_storage import (
     write_embeddings_jsonl,
     write_processed_artifacts,
 )
+from app.services.vector_ops import upsert_inactive_after_embed
+from app.services.vector_search import (
+    ChunkEmbeddingInput,
+    VectorIndexClient,
+)
 
 logger = logging.getLogger("erp.api.upload")
 
@@ -97,6 +102,7 @@ class UploadResult:
     embedded_chunk_count: int | None = None
     embeddings_gcs_uri: str | None = None
     embeddings_error: str | None = None
+    vector_status: str | None = None  # upserted | skipped | failed | None
 
 
 def _normalize_content_type(content_type: str | None) -> str:
@@ -187,13 +193,17 @@ def _embed_and_store(
     document_id: str,
     version_id: str,
     chunks: list[Chunk],
+    collection: str | None = None,
+    title: str | None = None,
+    filename: str | None = None,
     embedder: TextEmbedder | None = None,
-) -> tuple[str, str | None, int | None, str | None, str | None]:
+    vector_client: VectorIndexClient | None = None,
+) -> tuple[str, str | None, int | None, str | None, str | None, str | None]:
     """
-    Embed chunks and write embeddings.jsonl.
+    Embed chunks, write embeddings.jsonl, upsert to Vector Search (active=false).
 
     Returns:
-        (embeddings_status, model_id, embedded_count, gcs_uri, error)
+        (embeddings_status, model_id, embedded_count, gcs_uri, error, vector_status)
     """
     model_id = settings.embedding_model_id
     try:
@@ -228,12 +238,34 @@ def _embed_and_store(
             embedded_chunk_count=artifact.embedded_chunk_count,
             embeddings_gcs_uri=artifact.gcs_uri,
         )
+        items = [
+            ChunkEmbeddingInput(
+                index=c.index,
+                text=c.text,
+                char_count=c.char_count,
+                embedding=list(v),
+            )
+            for c, v in zip(chunks, vectors, strict=True)
+        ]
+        vector_status = upsert_inactive_after_embed(
+            settings=settings,
+            gcs_client=gcs_client,
+            fs_client=fs_client,
+            document_id=document_id,
+            version_id=version_id,
+            collection=collection,
+            title=title,
+            filename=filename,
+            items=items,
+            index_client=vector_client,
+        )
         return (
             "ready",
             model_id,
             artifact.embedded_chunk_count,
             artifact.gcs_uri,
             None,
+            vector_status,
         )
     except EmbeddingError as exc:
         logger.warning(
@@ -256,7 +288,7 @@ def _embed_and_store(
                 document_id,
                 version_id,
             )
-        return "failed", model_id, 0, None, exc.message
+        return "failed", model_id, 0, None, exc.message, None
     except Exception as exc:  # noqa: BLE001
         msg = f"Unexpected embedding error: {exc}"
         logger.exception(
@@ -278,7 +310,7 @@ def _embed_and_store(
                 document_id,
                 version_id,
             )
-        return "failed", model_id, 0, None, msg
+        return "failed", model_id, 0, None, msg, None
 
 
 def _run_extract_chunk_store(
@@ -294,6 +326,10 @@ def _run_extract_chunk_store(
     chunk_target_size: int = DEFAULT_TARGET_SIZE,
     chunk_overlap: int = DEFAULT_OVERLAP,
     embedder: TextEmbedder | None = None,
+    vector_client: VectorIndexClient | None = None,
+    collection: str | None = None,
+    title: str | None = None,
+    filename: str | None = None,
 ) -> tuple[
     str,
     int | None,
@@ -306,14 +342,15 @@ def _run_extract_chunk_store(
     int | None,
     str | None,
     str | None,
+    str | None,
 ]:
     """
-    Extract → chunk → processed/ → ready → embed → embeddings.jsonl.
+    Extract → chunk → processed/ → ready → embed → embeddings.jsonl → vector upsert.
 
     Returns:
         (status, extracted_char_count, chunk_count, processed_prefix, preview,
          error_message, embeddings_status, embedding_model_id,
-         embedded_chunk_count, embeddings_gcs_uri, embeddings_error)
+         embedded_chunk_count, embeddings_gcs_uri, embeddings_error, vector_status)
     """
     try:
         text = extract_text(content_type, data)
@@ -327,7 +364,7 @@ def _run_extract_chunk_store(
         status, _, _, _, err = _mark_failed(
             fs_client, document_id, version_id, exc.message
         )
-        return status, 0, 0, None, None, err, None, None, None, None, None
+        return status, 0, 0, None, None, err, None, None, None, None, None, None
     except Exception as exc:  # noqa: BLE001
         msg = f"Unexpected extraction error: {exc}"
         logger.exception(
@@ -336,7 +373,7 @@ def _run_extract_chunk_store(
             version_id,
         )
         status, _, _, _, err = _mark_failed(fs_client, document_id, version_id, msg)
-        return status, 0, 0, None, None, err, None, None, None, None, None
+        return status, 0, 0, None, None, err, None, None, None, None, None, None
 
     try:
         chunks = chunk_text(
@@ -352,7 +389,7 @@ def _run_extract_chunk_store(
         status, _, _, _, err = _mark_failed(
             fs_client, document_id, version_id, exc.message
         )
-        return status, len(text), 0, None, None, err, None, None, None, None, None
+        return status, len(text), 0, None, None, err, None, None, None, None, None, None
 
     try:
         artifacts: ProcessedArtifacts = write_processed_artifacts(
@@ -373,7 +410,7 @@ def _run_extract_chunk_store(
         status, _, _, _, err = _mark_failed(
             fs_client, document_id, version_id, f"{msg}: {exc}"
         )
-        return status, len(text), 0, None, None, err, None, None, None, None, None
+        return status, len(text), 0, None, None, err, None, None, None, None, None, None
 
     preview = text_preview(text)
     try:
@@ -398,14 +435,18 @@ def _run_extract_chunk_store(
             "Failed to record ready status after processing"
         ) from exc
 
-    emb_status, emb_model, emb_count, emb_uri, emb_err = _embed_and_store(
+    emb_status, emb_model, emb_count, emb_uri, emb_err, vec_status = _embed_and_store(
         settings=settings,
         gcs_client=gcs_client,
         fs_client=fs_client,
         document_id=document_id,
         version_id=version_id,
         chunks=list(chunks),
+        collection=collection,
+        title=title,
+        filename=filename,
         embedder=embedder,
+        vector_client=vector_client,
     )
 
     return (
@@ -420,6 +461,7 @@ def _run_extract_chunk_store(
         emb_count,
         emb_uri,
         emb_err,
+        vec_status,
     )
 
 
@@ -436,6 +478,7 @@ def process_upload(
     firestore_client: firestore.Client | None = None,
     id_factory: Callable[[], tuple[str, str]] | None = None,
     embedder: TextEmbedder | None = None,
+    vector_client: VectorIndexClient | None = None,
 ) -> UploadResult:
     """
     Validate → GCS raw/ → extract/chunk/processed → ready → embeddings.
@@ -501,6 +544,7 @@ def process_upload(
         emb_count,
         emb_uri,
         emb_err,
+        vec_status,
     ) = _run_extract_chunk_store(
         settings=settings,
         gcs_client=gcs_client,
@@ -511,6 +555,10 @@ def process_upload(
         content_type=validated_type,
         data=data,
         embedder=embedder,
+        vector_client=vector_client,
+        collection=collection,
+        title=title,
+        filename=gcs_result.filename,
     )
 
     return UploadResult(
@@ -533,4 +581,5 @@ def process_upload(
         embedded_chunk_count=emb_count,
         embeddings_gcs_uri=emb_uri,
         embeddings_error=emb_err,
+        vector_status=vec_status,
     )

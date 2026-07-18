@@ -98,6 +98,10 @@ def create_document_with_version(
         "embedded_chunk_count": None,
         "embeddings_gcs_uri": None,
         "embeddings_error": None,
+        # Phase 3.2 Vector Search
+        "vector_status": None,
+        "vector_error": None,
+        "vector_datapoint_count": None,
     }
 
     batch.set(doc_ref, doc_data)
@@ -223,6 +227,42 @@ def update_version_embeddings_failed(
         "firestore_embeddings_failed document_id=%s version_id=%s",
         document_id,
         version_id,
+    )
+    return patch
+
+
+def update_version_vector_status(
+    client: firestore.Client,
+    *,
+    document_id: str,
+    version_id: str,
+    vector_status: str,
+    vector_datapoint_count: int | None = None,
+    vector_error: str | None = None,
+) -> dict[str, Any]:
+    """
+    Update Vector Search lifecycle status on the version.
+
+    vector_status: upserted | activated | deactivated | failed | skipped
+    """
+    now = _utc_now()
+    patch: dict[str, Any] = {
+        "vector_status": vector_status,
+        "vector_error": (vector_error[:2000] if vector_error else None),
+        "vector_updated_at": now,
+        "updated_at": now,
+    }
+    if vector_datapoint_count is not None:
+        patch["vector_datapoint_count"] = vector_datapoint_count
+    version_ref(client, document_id, version_id).update(patch)
+    client.collection(DOCUMENTS_COLLECTION).document(document_id).update(
+        {"updated_at": now}
+    )
+    logger.info(
+        "firestore_vector_status document_id=%s version_id=%s status=%s",
+        document_id,
+        version_id,
+        vector_status,
     )
     return patch
 
