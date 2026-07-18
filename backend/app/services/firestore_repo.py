@@ -92,6 +92,12 @@ def create_document_with_version(
         "text_preview": None,
         "extracted_char_count": None,
         "error_message": None,
+        # Phase 3.1 embeddings (separate from content status)
+        "embeddings_status": None,
+        "embedding_model_id": None,
+        "embedded_chunk_count": None,
+        "embeddings_gcs_uri": None,
+        "embeddings_error": None,
     }
 
     batch.set(doc_ref, doc_data)
@@ -153,6 +159,72 @@ def update_version_ready(
     return {
         k: v for k, v in patch.items() if v is not firestore.DELETE_FIELD
     }
+
+
+def update_version_embeddings_ready(
+    client: firestore.Client,
+    *,
+    document_id: str,
+    version_id: str,
+    embedding_model_id: str,
+    embedded_chunk_count: int,
+    embeddings_gcs_uri: str,
+) -> dict[str, Any]:
+    """Mark embeddings successful (does not change content status)."""
+    now = _utc_now()
+    patch: dict[str, Any] = {
+        "embeddings_status": "ready",
+        "embedding_model_id": embedding_model_id,
+        "embedded_chunk_count": embedded_chunk_count,
+        "embeddings_gcs_uri": embeddings_gcs_uri,
+        "embeddings_error": None,
+        "embeddings_completed_at": now,
+        "updated_at": now,
+    }
+    version_ref(client, document_id, version_id).update(patch)
+    client.collection(DOCUMENTS_COLLECTION).document(document_id).update(
+        {"updated_at": now}
+    )
+    logger.info(
+        "firestore_embeddings_ready document_id=%s version_id=%s count=%s model=%s",
+        document_id,
+        version_id,
+        embedded_chunk_count,
+        embedding_model_id,
+    )
+    return patch
+
+
+def update_version_embeddings_failed(
+    client: firestore.Client,
+    *,
+    document_id: str,
+    version_id: str,
+    embedding_model_id: str,
+    error_message: str,
+) -> dict[str, Any]:
+    """Mark embeddings failed; leave content status (ready) intact."""
+    now = _utc_now()
+    safe_error = (error_message or "Embedding failed")[:2000]
+    patch: dict[str, Any] = {
+        "embeddings_status": "failed",
+        "embedding_model_id": embedding_model_id,
+        "embedded_chunk_count": 0,
+        "embeddings_gcs_uri": None,
+        "embeddings_error": safe_error,
+        "embeddings_completed_at": now,
+        "updated_at": now,
+    }
+    version_ref(client, document_id, version_id).update(patch)
+    client.collection(DOCUMENTS_COLLECTION).document(document_id).update(
+        {"updated_at": now}
+    )
+    logger.info(
+        "firestore_embeddings_failed document_id=%s version_id=%s",
+        document_id,
+        version_id,
+    )
+    return patch
 
 
 def update_version_failed(

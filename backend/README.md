@@ -24,9 +24,9 @@ Upload: `POST /api/v1/documents/upload` (PDF/Markdown ≤50MB)
 Multipart form fields: `file` (required), `title`, `collection` (optional).
 
 - Raw: `gs://$GCS_DOCS_BUCKET/raw/{document_id}/{version_id}/{filename}`
-- Processed: `processed/.../full.txt` + `chunks.jsonl` (chunk defaults **1000** / overlap **150**)
-- Firestore: pointers + `text_preview` only (no full text)
-- Final status: **`ready`** or **`failed`**
+- Processed: `full.txt` + `chunks.jsonl` + **`embeddings.jsonl`** (Phase 3.1)
+- Firestore: pointers + `text_preview`; **`embeddings_status`** separate from content `status`
+- Default model: `EMBEDDING_MODEL_ID=text-embedding-005`
 - Temp auth: `AUTH_DEV_BYPASS=true` (default) or Bearer `UPLOAD_BEARER_TOKEN`
 
 See [docs/runbooks/document-upload-api.md](../docs/runbooks/document-upload-api.md).

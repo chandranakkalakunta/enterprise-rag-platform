@@ -103,9 +103,9 @@ async def upload_document(
     collection: Annotated[str | None, Form()] = None,
 ) -> UploadResponse:
     """
-    Upload → GCS raw/ → extract → chunk → GCS processed/ → Firestore ready|failed.
+    Upload → extract → chunk → processed/ → ready → embed → embeddings.jsonl.
 
-    Full text is stored in processed/.../full.txt; Firestore keeps pointers + preview.
+    Content status ready is independent of embeddings_status (ADR-0007).
     """
     try:
         data = await _read_limited(file, settings.max_upload_bytes)
@@ -152,6 +152,11 @@ async def upload_document(
         processed_gcs_prefix=result.processed_gcs_prefix,
         text_preview=result.text_preview,
         error_message=result.error_message,
+        embeddings_status=result.embeddings_status,  # type: ignore[arg-type]
+        embedding_model_id=result.embedding_model_id,
+        embedded_chunk_count=result.embedded_chunk_count,
+        embeddings_gcs_uri=result.embeddings_gcs_uri,
+        embeddings_error=result.embeddings_error,
     )
 
 

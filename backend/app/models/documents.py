@@ -48,6 +48,14 @@ class UploadResponse(BaseModel):
         default=None,
         description="Present when status=failed (safe, bounded message)",
     )
+    embeddings_status: Literal["ready", "failed"] | None = Field(
+        default=None,
+        description="Separate from content status (Phase 3.1)",
+    )
+    embedding_model_id: str | None = None
+    embedded_chunk_count: int | None = None
+    embeddings_gcs_uri: str | None = None
+    embeddings_error: str | None = None
 
 
 class VersionLifecycleResponse(BaseModel):
