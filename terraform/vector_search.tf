@@ -11,14 +11,26 @@
 # text-embedding-005 default output dimensionality = 768
 # (https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings)
 
-# Empty GCS prefix required by index create metadata.contents_delta_uri
-# (STREAM_UPDATE still needs a bootstrap URI; runtime uses UpsertDatapoints.)
+# contents_delta_uri bootstrap for index create.
+# NEVER use .keep / extensionless placeholders — Vertex rejects unknown formats
+# (FAILED_PRECONDITION). Only supported embedding file types under the prefix
+# (e.g. .json / .csv / .avro). See docs/runbooks/vector-search.md.
+#
+# STREAM_UPDATE indexes still need a bootstrap URI at create; runtime datapoints
+# arrive via IndexService.UpsertDatapoints (not this object).
 resource "google_storage_bucket_object" "vector_search_bootstrap" {
   count = var.enable_vector_search ? 1 : 0
 
-  name    = "vector-search/index-bootstrap-${var.environment}/.keep"
-  bucket  = google_storage_bucket.docs[var.environment].name
-  content = "bootstrap"
+  name         = "vector-search/index-bootstrap-${var.environment}/datapoint.json"
+  bucket       = google_storage_bucket.docs[var.environment].name
+  content_type = "application/json"
+  content = jsonencode({
+    id = "bootstrap-0"
+    embedding = concat(
+      [1.0],
+      [for _ in range(var.vector_search_dimensions - 1) : 0.0]
+    )
+  })
 }
 
 resource "google_vertex_ai_index" "rag_docs" {

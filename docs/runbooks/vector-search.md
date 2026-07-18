@@ -20,6 +20,28 @@ vector_search_region = "us-central1"
 
 **Toggle:** `enable_vector_search = false` skips provisioning (local/dev workspaces without cost).
 
+### Bootstrap object (index create)
+
+`contents_delta_uri` must contain a **valid embedding file** with a supported extension:
+
+| Allowed | Not allowed |
+|---------|-------------|
+| `.json`, `.csv`, `.avro` embedding dumps | **`.keep`**, empty markers, unknown extensions |
+
+**Lesson (Phase 3.2 hotfix):** bootstrap with `.keep` caused index create `FAILED_PRECONDITION` / unknown format. Terraform now writes env-aware:
+
+```text
+gs://rag-docs-{env}/vector-search/index-bootstrap-{env}/datapoint.json
+```
+
+with a single JSON datapoint whose `embedding` length = `var.vector_search_dimensions` (default 768). Runtime still uses **STREAM_UPDATE** upserts; the bootstrap file is only for create-time metadata.
+
+Also include bootstrap in targeted applies:
+
+```bash
+-target=google_storage_bucket_object.vector_search_bootstrap
+```
+
 ### Cost notes (dev)
 
 - Smallest practical: `SHARD_SIZE_SMALL`, 1 automatic replica  
@@ -32,6 +54,7 @@ vector_search_region = "us-central1"
 cd terraform
 terraform init -reconfigure -backend-config=environments/dev/backend.hcl
 terraform plan -var-file=environments/dev/terraform.tfvars \
+  -target=google_storage_bucket_object.vector_search_bootstrap \
   -target=google_vertex_ai_index.rag_docs \
   -target=google_vertex_ai_index_endpoint.rag_docs \
   -target=google_vertex_ai_index_endpoint_deployed_index.rag_docs \
