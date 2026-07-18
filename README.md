@@ -3,7 +3,7 @@
 Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
-**Status:** **Phase 2 Complete** — ingestion MVP lifecycle live; **Phase 3 next** (retrieval)  
+**Status:** **Phase 3.0 ADRs accepted** — retrieval foundation locked; **Phase 3.1 next** (implement embed + query)  
 **GCP project:** set via `var.gcp_project_id` / `GCP_PROJECT_ID` (never hard-coded in app code)  
 **Project ID:** `enterprise-rag-platform-502711` (number `642114828076`)  
 
@@ -21,8 +21,10 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 | **1** | **GCP Foundation** (1.1–1.7) | ✅ **Complete** (PRs #3–#9) |
 | **2** | **Ingestion MVP** (upload → extract → chunk → publish/retire) | ✅ **Complete** (PRs #11–#15) |
 | **2.0–2.4** | ADR-0006, upload, Firestore, chunking, lifecycle | ✅ **Complete** |
-| **3** | Hybrid RAG, citations, guardrails, 5-star feedback | 🔜 **Next** |
-| **4** | Multi-turn, ACL depth, safety tuning | Planned |
+| **3** | Retrieval foundation + grounded Q&A | 🔄 **In progress** |
+| **3.0** | ADR-0007 embeddings/VS + ADR-0008 retrieval/gen | ✅ **Accepted** |
+| **3.1** | Embed pipeline + Vector Search + query path | 🔜 **Next** |
+| **4** | Multi-turn, ACL depth, hybrid/RRF stretch | Planned |
 | **5** | Voice + **full PWA** (desktop/tablet/mobile browser + installable) | Planned — **no native apps** |
 | **6** | Analytics, eval gates, cost dashboards | Planned |
 
@@ -40,6 +42,11 @@ POST /api/v1/documents/{id}/versions/{vid}/retire
 ```
 
 Runbooks: [upload](docs/runbooks/document-upload-api.md) · [lifecycle](docs/runbooks/version-lifecycle.md)
+
+### Phase 3.0 retrieval decisions
+
+- [ADR-0007](docs/adr/0007-embedding-and-vector-search.md) — Vertex embeddings + Vector Search; embed on **ready**, activate on **publish**
+- [ADR-0008](docs/adr/0008-retrieval-and-grounded-generation.md) — LangGraph dense retrieve → evidence check → Gemini; `top_k=5`, temperature `0.2`
 
 ---
 
@@ -65,7 +72,7 @@ Details: [docs/architecture/overview.md](docs/architecture/overview.md) · ADRs 
 | [docs/requirements.md](docs/requirements.md) | Personas, user stories, NFRs (v3 locked) |
 | [docs/ui-specs.md](docs/ui-specs.md) | Screens, PWA, voice, StarRating, multimodal, shadcn/ui |
 | [docs/architecture/overview.md](docs/architecture/overview.md) | Services, LangGraph, cache, multimodal |
-| [docs/adr/](docs/adr/) | Architecture Decision Records (0001–0006) |
+| [docs/adr/](docs/adr/) | Architecture Decision Records (0001–0008) |
 | [docs/backlog.md](docs/backlog.md) | Living backlog |
 | [docs/phases.md](docs/phases.md) | Phase index |
 | [docs/grok-three-agent-protocol.md](docs/grok-three-agent-protocol.md) | How we build |

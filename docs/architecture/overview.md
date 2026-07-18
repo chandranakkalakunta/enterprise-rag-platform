@@ -1,10 +1,10 @@
 # Architecture Overview — Enterprise RAG Platform
 
-**Version:** 1.1 (Phase 0 Gamma)  
-**Date:** 2026-07-16  
-**Status:** Requirements-locked pre-implementation view  
+**Version:** 1.2 (Phase 3.0 retrieval ADRs)  
+**Date:** 2026-07-18  
+**Status:** Phase 2 complete; Phase 3 retrieval foundation decisions locked  
 
-Governing ADRs: [0001](../adr/0001-high-level-architecture.md) · [0002](../adr/0002-tech-stack.md) · [0003](../adr/0003-document-versioning.md) · [0004](../adr/0004-guardrails-architecture.md) · [0005](../adr/0005-security-posture.md) · [0006](../adr/0006-metadata-store-firestore.md)
+Governing ADRs: [0001](../adr/0001-high-level-architecture.md) · [0002](../adr/0002-tech-stack.md) · [0003](../adr/0003-document-versioning.md) · [0004](../adr/0004-guardrails-architecture.md) · [0005](../adr/0005-security-posture.md) · [0006](../adr/0006-metadata-store-firestore.md) · [0007](../adr/0007-embedding-and-vector-search.md) · [0008](../adr/0008-retrieval-and-grounded-generation.md)
 
 ---
 
@@ -155,38 +155,39 @@ Enqueue mechanism (Cloud Tasks vs Pub/Sub) remains a small open decision; **work
 
 ## 5. LangGraph query path
 
+**Phase 3.0 lock:** [ADR-0008](../adr/0008-retrieval-and-grounded-generation.md). **MVP graph is dense-only** (Vector Search); hybrid BM25 + RRF deferred to later 3.x / Phase 4.
+
+### 5.1 MVP graph (first implementation)
+
 ```text
-                    ┌─────────────────────────────────────────┐
-                    │              LangGraph (api)              │
+ START → authz_ok → retrieve (Vector Search, published/active only, top_k=5)
+                 → evidence_check ──refuse──▶ END (safe message)
+                 → generate (Gemini, temperature=0.2)
+                 → package_citations → END
+```
+
+| Node | Responsibility (MVP) |
+|------|----------------------|
+| `retrieve` | Embed query → Vertex Vector Search; filter active/published versions only |
+| `evidence_check` | Minimal: no/weak hits → refuse (do not invent) |
+| `generate` | Gemini via `GENERATION_MODEL_ID`; context = retrieved chunk text |
+| `package_citations` | `document_id`, `version_id`, chunk/locator |
+
+Config: `EMBEDDING_MODEL_ID`, `GENERATION_MODEL_ID`, `RETRIEVAL_TOP_K` (default **5**), `GENERATION_TEMPERATURE` (default **0.2**). See ADR-0007 / ADR-0008.
+
+### 5.2 Target graph (later)
+
+```text
  START → authz_ok → input_guard → cache_lookup ─┬─ hit → output_guard → END
                     │                           │
                     │                        miss
                     │                           ▼
-                    │              retrieve (metadata filters + hybrid + RRF)
+                    │              retrieve (filters + hybrid BM25 + dense + RRF)
                     │                           ▼
-                    │                    grounding_gate
-                    │                      │        │
-                    │                   refuse    generate (Gemini)
-                    │                      │        ▼
-                    │                      │   package_citations_mm
-                    │                      │        ▼
-                    │                      └──▶ output_guard → cache_store? → END
-                    └─────────────────────────────────────────┘
-                              │
-                              ▼
-                         analytics + optional feedback (async client)
+                    │                    grounding_gate → generate → citations
+                    │                           ▼
+                    │                    output_guard → cache_store? → END
 ```
-
-| Node | Responsibility |
-|------|----------------|
-| `input_guard` | Size, rate, injection heuristics |
-| `cache_lookup` | Semantic cache by embedding + ACL + corpus fingerprint |
-| `retrieve` | ACL + collection metadata filters → BM25 + Vector Search → RRF |
-| `grounding_gate` | Refuse if insufficient evidence |
-| `generate` | Gemini with docs-as-data prompt hygiene |
-| `package_citations_mm` | Citations + table/image refs |
-| `output_guard` | Citation id validation; ACL double-check |
-| `cache_store` | Store only successful grounded answers when policy allows |
 
 ---
 
@@ -242,12 +243,14 @@ Upload (api) → GCS raw/{document_id}/{version_id}/{filename}
   → Firestore ready (pointers + text_preview) | failed  (Phase 2.3 ✓)
   → Publish (api) → published + active_version_id; previous published → retired  (Phase 2.4 ✓)
   → Retire (api) → retired; clear active pointer if needed  (Phase 2.4 ✓)
-  → enqueue ingest-worker for embed/index  (later)
-  → multimodal / embed / index (staging) + alias swap on publish (later)
-  → invalidate semantic cache fingerprint for scope
+  → On ready: embed chunks → Vector Search (staging/non-active)   (ADR-0007)
+  → On publish: activate searchable set for version
+  → On retire: deactivate from active searchable set
+  → multimodal / hybrid BM25+RRF / semantic cache  (later)
 ```
 
-**Phase 2.1–2.4:** Upload through version lifecycle. See [document-upload-api](../runbooks/document-upload-api.md) · [version-lifecycle](../runbooks/version-lifecycle.md).
+**Phase 2.1–2.4:** Upload through version lifecycle.  
+**Phase 3.0:** Index + query contracts — [ADR-0007](../adr/0007-embedding-and-vector-search.md) · [ADR-0008](../adr/0008-retrieval-and-grounded-generation.md).
 
 ---
 
@@ -316,16 +319,18 @@ Environments supply `gcp_project_id` via tfvars (not committed secrets).
 
 | Topic | Tracking | Target |
 |-------|----------|--------|
-| ~~Firestore vs Cloud SQL for metadata~~ | **Resolved** | [ADR-0006](../adr/0006-metadata-store-firestore.md) — Firestore Native |
-| Exact embedding model + dimensions | BL-DEC-02 | ADR-0007 |
-| Vector Search index topology (shards, filters schema) | BL-DEC-03 | ADR-0007 |
-| Semantic cache store (Memorystore vs other) | BL-DEC-06 | Phase 3 design |
+| ~~Firestore vs Cloud SQL for metadata~~ | **Resolved** | [ADR-0006](../adr/0006-metadata-store-firestore.md) |
+| ~~Embedding provider / Vector Search / lifecycle~~ | **Resolved** | [ADR-0007](../adr/0007-embedding-and-vector-search.md) |
+| ~~Retrieval + grounded generation MVP flow~~ | **Resolved** | [ADR-0008](../adr/0008-retrieval-and-grounded-generation.md) |
+| Exact GA model id pin + index dimensions at create | Implement | Phase 3.1 (`EMBEDDING_MODEL_ID`) |
+| Semantic cache store (Memorystore vs other) | BL-DEC-06 | Later 3.x / Phase 4 |
+| Hybrid BM25 + RRF | BL-RAG-01/02 | Later 3.x / Phase 4 |
 | STT/TTS provider | BL-DEC-04 | Phase 5 ADR |
-| Ingest enqueue: Cloud Tasks vs Pub/Sub | BL-DEC-05 | Phase 2 |
+| Ingest enqueue: Cloud Tasks vs Pub/Sub | BL-DEC-05 | Backlog (worker) |
 | Streaming tokens to client | BL-RAG-08 | Phase 3+ |
 | HTTPS LB + Cloud Armor | deferred | Pre-prod hardening |
 
-**Locked:** LangGraph; Vertex AI Vector Search; services api/ingest-worker/web; zero JSON keys + WIF.
+**Locked:** LangGraph; Vertex embeddings + Vector Search; embed-on-ready / activate-on-publish; dense-first query path; `top_k=5`, temperature `0.2`; Firestore metadata; zero JSON keys + WIF.
 
 ---
 

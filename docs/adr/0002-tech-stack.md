@@ -4,7 +4,8 @@
 
 Accepted — 2026-07-16  
 **Amended:** 2026-07-16 (Phase 0 Beta) — locked **shadcn/ui** + UX contract `docs/ui-specs.md`.  
-**Amended:** 2026-07-16 (Phase 0 Gamma) — locked **LangGraph** orchestration, **Vertex AI Vector Search**, multimodal notes, three Cloud Run services.
+**Amended:** 2026-07-16 (Phase 0 Gamma) — locked **LangGraph** orchestration, **Vertex AI Vector Search**, multimodal notes, three Cloud Run services.  
+**Amended:** 2026-07-18 (Phase 3.0) — retrieval details in [ADR-0007](./0007-embedding-and-vector-search.md) / [ADR-0008](./0008-retrieval-and-grounded-generation.md); hybrid BM25+RRF deferred past first dense path.
 
 ## Context
 

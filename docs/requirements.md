@@ -79,8 +79,13 @@ No production customer PII corpora are required for Phase 0–3 development. Pro
 
 | Choice | Decision |
 |--------|----------|
-| Orchestration | **LangGraph** (query path graph) |
-| Vector index | **Vertex AI Vector Search** (confirmed) |
+| Orchestration | **LangGraph** (query path graph) — [ADR-0008](./adr/0008-retrieval-and-grounded-generation.md) |
+| Vector index | **Vertex AI Vector Search** — [ADR-0007](./adr/0007-embedding-and-vector-search.md) |
+| Embeddings | **Vertex AI** text embeddings via `EMBEDDING_MODEL_ID` (GA pin per env) |
+| Embed lifecycle | Embed on **ready**; activate on **publish**; deactivate on **retire** |
+| Generation | Vertex Gemini via `GENERATION_MODEL_ID`; default temperature **0.2** |
+| Retrieval top_k | Default **5** (`RETRIEVAL_TOP_K`) |
+| First query path | Dense-only + minimal evidence refusal; hybrid BM25+RRF later |
 | Cloud Run services | **`api`**, **`ingest-worker`**, **`web`** |
 | Metadata store | **Firestore (Native mode)** — [ADR-0006](./adr/0006-metadata-store-firestore.md) |
 | Load balancer + Cloud Armor | **Later** (not Phase 1 blockers) |
