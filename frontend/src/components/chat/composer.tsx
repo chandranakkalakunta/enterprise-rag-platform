@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useId, useState, type FormEvent, type KeyboardEvent } from "react";
+import {
+  useCallback,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 import { SendHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -10,15 +17,21 @@ interface ComposerProps {
   onSend: (text: string) => void | Promise<void>;
   disabled?: boolean;
   placeholder?: string;
+  /** Previous user prompts for ArrowUp cycling (newest last). */
+  promptHistory?: string[];
 }
 
 /**
- * Keyboard: Enter sends; Shift+Enter inserts a newline.
+ * Keyboard:
+ * - Enter sends; Shift+Enter inserts a newline
+ * - ArrowUp cycles previous user prompts (session-local history)
+ * - ArrowDown moves toward newer / draft
  */
 export function Composer({
   onSend,
   disabled = false,
   placeholder = "Ask about published documents…",
+  promptHistory = [],
 }: ComposerProps) {
   const [value, setValue] = useState("");
   const inputId = useId();
@@ -26,10 +39,16 @@ export function Composer({
   const trimmed = value.trim();
   const canSend = !disabled && trimmed.length > 0;
 
+  /** Index into promptHistory from the end; -1 = live draft. */
+  const historyIndex = useRef(-1);
+  const draftRef = useRef("");
+
   const submit = useCallback(async () => {
     if (!canSend) return;
     const text = trimmed;
     setValue("");
+    historyIndex.current = -1;
+    draftRef.current = "";
     await onSend(text);
   }, [canSend, onSend, trimmed]);
 
@@ -42,6 +61,47 @@ export function Composer({
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       void submit();
+      return;
+    }
+
+    if (e.key === "ArrowUp" && promptHistory.length > 0) {
+      const el = e.currentTarget;
+      const atStart =
+        el.selectionStart === 0 && el.selectionEnd === 0;
+      // Cycle when empty or caret at start (common REPL pattern)
+      if (value === "" || atStart) {
+        e.preventDefault();
+        if (historyIndex.current === -1) {
+          draftRef.current = value;
+        }
+        const next = Math.min(
+          historyIndex.current + 1,
+          promptHistory.length - 1,
+        );
+        historyIndex.current = next;
+        const entry = promptHistory[promptHistory.length - 1 - next];
+        if (entry != null) setValue(entry);
+      }
+      return;
+    }
+
+    if (e.key === "ArrowDown" && historyIndex.current >= 0) {
+      const el = e.currentTarget;
+      const atEnd =
+        el.selectionStart === value.length &&
+        el.selectionEnd === value.length;
+      if (atEnd || value === promptHistory[promptHistory.length - 1 - historyIndex.current]) {
+        e.preventDefault();
+        const next = historyIndex.current - 1;
+        if (next < 0) {
+          historyIndex.current = -1;
+          setValue(draftRef.current);
+        } else {
+          historyIndex.current = next;
+          const entry = promptHistory[promptHistory.length - 1 - next];
+          if (entry != null) setValue(entry);
+        }
+      }
     }
   }
 
@@ -59,7 +119,12 @@ export function Composer({
           name="message"
           rows={1}
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => {
+            setValue(e.target.value);
+            if (historyIndex.current === -1) {
+              draftRef.current = e.target.value;
+            }
+          }}
           onKeyDown={onKeyDown}
           disabled={disabled}
           placeholder={placeholder}
@@ -82,7 +147,8 @@ export function Composer({
         </Button>
       </div>
       <p id={helpId} className="mt-1.5 text-[11px] text-muted-foreground">
-        Enter to send · Shift+Enter for new line
+        Enter to send · Shift+Enter newline · ↑ previous prompts ·{" "}
+        <code className="rounded bg-muted px-0.5">/clear</code> clears chat
       </p>
     </form>
   );

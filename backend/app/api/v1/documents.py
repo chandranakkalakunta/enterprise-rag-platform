@@ -1,16 +1,24 @@
-"""Document upload + version lifecycle API (Phase 2.1–2.4)."""
+"""Document upload + version lifecycle + Admin reads (Phase 2.1–2.4, 5.3)."""
 
 from __future__ import annotations
 
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from google.cloud import firestore
 
 from app.core.auth import AuthContext, require_content_auth, require_upload_auth
 from app.core.config import Settings, get_settings
-from app.models.documents import UploadResponse, VersionLifecycleResponse
+from app.models.documents import (
+    DocumentDetailResponse,
+    DocumentListResponse,
+    DocumentSummary,
+    UploadResponse,
+    VersionLifecycleResponse,
+    VersionSummary,
+)
+from app.services.firestore_repo import get_document, list_documents
 from app.services.lifecycle import (
     ConflictError,
     InvalidIdError,
@@ -81,6 +89,121 @@ def _to_lifecycle_response(result: LifecycleResult) -> VersionLifecycleResponse:
         retired_by=result.retired_by,
         previous_published_version_id=result.previous_published_version_id,
         cleared_active_pointer=result.cleared_active_pointer,
+    )
+
+
+def _version_summary(raw: dict | None) -> VersionSummary | None:
+    if not raw:
+        return None
+    return VersionSummary(
+        version_id=str(raw["version_id"]),
+        status=raw.get("status") or "processing",  # type: ignore[arg-type]
+        filename=raw.get("filename"),
+        gcs_uri=raw.get("gcs_uri"),
+        content_type=raw.get("content_type"),
+        size_bytes=raw.get("size_bytes"),
+        created_at=raw.get("created_at"),
+        created_by=raw.get("created_by"),
+        chunk_count=raw.get("chunk_count"),
+        embeddings_status=raw.get("embeddings_status"),
+        vector_status=raw.get("vector_status"),
+        error_message=raw.get("error_message"),
+        text_preview=raw.get("text_preview"),
+    )
+
+
+def _document_summary(raw: dict) -> DocumentSummary:
+    return DocumentSummary(
+        document_id=str(raw["document_id"]),
+        title=raw.get("title"),
+        collection=raw.get("collection"),
+        active_version_id=raw.get("active_version_id"),
+        latest_version_id=raw.get("latest_version_id"),
+        created_at=raw.get("created_at"),
+        updated_at=raw.get("updated_at"),
+        created_by=raw.get("created_by"),
+        latest_version=_version_summary(raw.get("latest_version")),
+    )
+
+
+@router.get(
+    "",
+    response_model=DocumentListResponse,
+    summary="List documents (Admin)",
+    responses={
+        401: {"description": "Unauthorized"},
+        403: {"description": "Requires content_admin or admin"},
+    },
+)
+async def list_documents_api(
+    auth: Annotated[AuthContext, Depends(require_content_auth)],
+    settings: Annotated[Settings, Depends(get_settings)],
+    limit: Annotated[int, Query(ge=1, le=100)] = 50,
+) -> DocumentListResponse:
+    """List documents with latest version status for Admin UI (Phase 5.3)."""
+    try:
+        client = firestore.Client(project=settings.gcp_project_id)
+        rows = list_documents(client, limit=limit)
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("list_documents_failed")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Document list unavailable: {exc}",
+        ) from exc
+    docs = [_document_summary(r) for r in rows]
+    logger.info("list_documents_ok count=%s auth_mode=%s", len(docs), auth.auth_mode)
+    return DocumentListResponse(documents=docs, count=len(docs))
+
+
+@router.get(
+    "/{document_id}",
+    response_model=DocumentDetailResponse,
+    summary="Get document and versions (Admin)",
+    responses={
+        401: {"description": "Unauthorized"},
+        403: {"description": "Requires content_admin or admin"},
+        404: {"description": "Document not found"},
+    },
+)
+async def get_document_api(
+    document_id: str,
+    auth: Annotated[AuthContext, Depends(require_content_auth)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> DocumentDetailResponse:
+    """Return one document with all versions for Admin publish/retire."""
+    try:
+        client = firestore.Client(project=settings.gcp_project_id)
+        raw = get_document(client, document_id, include_versions=True)
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("get_document_failed document_id=%s", document_id)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Document read unavailable: {exc}",
+        ) from exc
+    if not raw:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document not found: {document_id}",
+        )
+    versions = [_version_summary(v) for v in raw.get("versions") or []]
+    versions = [v for v in versions if v is not None]
+    logger.info(
+        "get_document_ok document_id=%s versions=%s auth_mode=%s",
+        document_id,
+        len(versions),
+        auth.auth_mode,
+    )
+    return DocumentDetailResponse(
+        document_id=str(raw["document_id"]),
+        title=raw.get("title"),
+        collection=raw.get("collection"),
+        active_version_id=raw.get("active_version_id"),
+        latest_version_id=raw.get("latest_version_id"),
+        created_at=raw.get("created_at"),
+        updated_at=raw.get("updated_at"),
+        created_by=raw.get("created_by"),
+        latest_version=_version_summary(raw.get("latest_version")),
+        versions=versions,  # type: ignore[arg-type]
     )
 
 

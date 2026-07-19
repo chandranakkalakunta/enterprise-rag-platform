@@ -52,4 +52,22 @@ assert(refused.refused === true, "refused flag");
 assert(refused.citations.length === 0, "no fake citations on refusal");
 assert(refused.refusalReason === "no_hits", "refusal reason");
 
+function isClearCommand(text) {
+  return text.trim() === "/clear";
+}
+function historyEntryAt(history, historyIndexFromNewest) {
+  if (historyIndexFromNewest < 0 || historyIndexFromNewest >= history.length) {
+    return undefined;
+  }
+  return history[history.length - 1 - historyIndexFromNewest];
+}
+
+assert(isClearCommand("/clear") === true, "/clear exact");
+assert(isClearCommand(" /clear ") === true, "/clear trim");
+assert(isClearCommand("/clear now") === false, "/clear not prefix");
+assert(historyEntryAt(["a", "b", "c"], 0) === "c", "newest");
+assert(historyEntryAt(["a", "b", "c"], 1) === "b", "prev");
+assert(historyEntryAt(["a", "b", "c"], 2) === "a", "oldest");
+assert(historyEntryAt(["a"], 1) === undefined, "oob");
+
 console.log("chat-utils.test.mjs: ok");

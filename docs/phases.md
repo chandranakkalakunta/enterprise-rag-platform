@@ -31,8 +31,8 @@ Update when a phase opens or closes.
 | **5** | Voice + **full PWA** | 🔄 **In progress** | Desktop/tablet/mobile browser + installable; **no native apps** |
 | **5.0** | ADR-0009 Auth/Roles + ADR-0010 PWA shell & version reload | ✅ **Accepted** | [Auth](./adr/0009-authn-authz-user-profiles.md) · [PWA/reload](./adr/0010-pwa-shell-version-reload.md) |
 | **5.1** | OAuth + `/me` + app shell + version watcher | ✅ **Complete** | [Auth runbook](./runbooks/oauth-and-frontend-auth.md) |
-| **5.2** | Chat UI — answer, refusal, citations | 🔄 **In progress** | `frontend/` ChatPanel → `POST /api/v1/query/answer` |
-| **5.3** | Admin upload / publish UI | 🔜 **Next** | After 5.2 |
+| **5.2** | Chat UI — answer, refusal, citations | ✅ **Complete** | ChatPanel → `POST /api/v1/query/answer` |
+| **5.3** | Admin UI + chat ↑ / `/clear` | 🔄 **In progress** | Upload/list/publish/retire; GET documents |
 | **4** | Multi-turn & ACL depth (+ hybrid/RRF, fuller guards) | Planned **after Phase 5** | RAG quality track |
 | **6** | Analytics & Evaluation (+ Binary Auth / LB hardening) | Planned | BigQuery; NFR-SEC-14; HTTPS LB + Cloud Armor |
 
@@ -78,4 +78,10 @@ Phase 5 delivers a **full Progressive Web App**: responsive on **desktop, tablet
 - Keyboard: **Enter** send, **Shift+Enter** newline  
 - Manual checklist: [frontend/README.md](../frontend/README.md)  
 
-Last updated: 2026-07-19 (Phase 5.2 chat UI)
+### Phase 5.3 implementation links
+
+- Admin: upload PDF/MD; document list; publish/retire with confirm  
+- Backend reads: `GET /api/v1/documents`, `GET /api/v1/documents/{document_id}` (content_admin|admin)  
+- Chat: **↑** cycles previous user prompts; **`/clear`** clears local history  
+
+Last updated: 2026-07-19 (Phase 5.3 admin + chat polish)
