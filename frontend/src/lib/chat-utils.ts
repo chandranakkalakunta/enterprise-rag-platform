@@ -24,11 +24,26 @@ export function formatCitationScore(score: number): string {
   return score.toFixed(3);
 }
 
+/**
+ * Meaningful label: treat empty and generic "Untitled" as missing so filename wins.
+ * Order: title || filename || document id snippet || "Source N"
+ */
+export function meaningfulCitationField(
+  value: string | null | undefined,
+): string | null {
+  const t = value?.trim();
+  if (!t) return null;
+  if (t.toLowerCase() === "untitled") return null;
+  return t;
+}
+
 export function citationDisplayTitle(
   c: AnswerCitation,
   index: number,
 ): string {
-  const title = c.title?.trim() || c.filename?.trim();
+  const title =
+    meaningfulCitationField(c.title) ||
+    meaningfulCitationField(c.filename);
   if (title) return title;
   if (c.document_id) return `Document ${c.document_id.slice(0, 8)}…`;
   return `Source ${index + 1}`;

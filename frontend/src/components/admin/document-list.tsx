@@ -162,7 +162,9 @@ export function DocumentList({
                 >
                   <div className="min-w-0">
                     <p className="truncate font-medium">
-                      {doc.title || "Untitled"}
+                      {doc.title ||
+                        doc.latest_version?.filename ||
+                        "Untitled"}
                     </p>
                     <p className="truncate font-mono text-xs text-muted-foreground">
                       {doc.document_id}

@@ -24,7 +24,7 @@ def _clear_settings() -> None:
 @pytest.fixture
 def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setenv("AUTH_DEV_BYPASS", "true")
-    monkeypatch.setenv("GENERATION_MODEL_ID", "gemini-2.0-flash-001")
+    monkeypatch.setenv("GENERATION_MODEL_ID", "gemini-2.5-flash")
     monkeypatch.setenv("GENERATION_TEMPERATURE", "0.2")
     monkeypatch.setenv("RETRIEVAL_TOP_K", "5")
     get_settings.cache_clear()
@@ -50,7 +50,7 @@ def _hit(
 
 
 def test_run_grounded_answer_success() -> None:
-    settings = Settings(generation_model_id="gemini-2.0-flash-001")
+    settings = Settings(generation_model_id="gemini-2.5-flash")
     search_resp = SearchResponse(query="leave?", top_k=5, results=[_hit()])
 
     def fake_search(**_kwargs):

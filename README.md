@@ -3,7 +3,8 @@
 Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
-**Status:** **Phase 5.3 in progress** — admin document UI + chat polish  
+**Status:** **Phase 5 complete** — installable PWA + chat + admin; **next: Phase 4**  
+
 
 
 
@@ -25,18 +26,15 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 | **2** | **Ingestion MVP** (upload → extract → chunk → publish/retire) | ✅ **Complete** (PRs #11–#15) |
 | **3** | **Retrieval MVP** (embed → Vector Search → search + grounded answer) | ✅ **Complete** (PRs #17–#22) |
 | **3.0–3.4** | ADRs, embeddings, index, search API, LangGraph+Gemini answer | ✅ **Complete** |
-| **5** | Voice + **full PWA** (desktop/tablet/mobile browser + installable) | 🔄 **In progress** — **no native apps** |
-| **5.0** | ADR-0009 Auth/Roles + ADR-0010 PWA & version reload | ✅ **Accepted** |
-| **5.1** | OAuth, `/me`, app shell, health auto-reload | ✅ **Complete** |
-| **5.2** | Chat UI — answer, refusal, citations | ✅ **Complete** |
-| **5.3** | Admin upload/publish UI + chat ↑ /clear | 🔄 **This PR** |
-| **4** | Multi-turn, ACL depth, hybrid/RRF, fuller guardrails | Planned **after Phase 5** |
+| **5** | Voice + **full PWA** (desktop/tablet/mobile browser + installable) | ✅ **Complete** — **no native apps** |
+| **5.0–5.4** | Auth, chat, admin, PWA install, closeout | ✅ **Complete** |
+| **4** | Multi-turn, ACL depth, hybrid/RRF, fuller guardrails | 🔜 **Next** |
 | **6** | Analytics, eval, Binary Auth, **HTTPS LB + Cloud Armor** | Planned |
 
 ### Delivery order (post–Phase 3)
 
-1. **Phase 5** — full responsive PWA / UI (chat, admin, citations UI) — **5.0–5.3**  
-2. **Phase 4** — RAG quality (hybrid BM25+RRF, multi-turn, ACL, fuller guards)  
+1. **Phase 5** — full responsive PWA / UI — ✅ **Complete**  
+2. **Phase 4** — RAG quality (hybrid BM25+RRF, multi-turn, ACL, fuller guards) — **next**  
 3. **Phase 6** — analytics / evaluation / Binary Auth / LB + Armor  
 
 Full index: [docs/phases.md](docs/phases.md)  
@@ -44,6 +42,7 @@ Phase 0: [retro](docs/retrospectives/phase-0.md) · [report](docs/reports/phase-
 Phase 1: [retro](docs/retrospectives/phase-1.md) · [report](docs/reports/phase-1-engineering-report.md)  
 Phase 2: [retro](docs/retrospectives/phase-2.md) · [report](docs/reports/phase-2-engineering-report.md)  
 Phase 3: [retro](docs/retrospectives/phase-3.md) · [report](docs/reports/phase-3-engineering-report.md)  
+Phase 5: [retro](docs/retrospectives/phase-5.md) · [report](docs/reports/phase-5-engineering-report.md) · [PWA install](docs/runbooks/pwa-install.md)  
 
 ### Phase 5 auth + frontend
 
@@ -52,7 +51,8 @@ Phase 3: [retro](docs/retrospectives/phase-3.md) · [report](docs/reports/phase-
 - **Phase 5.1:** `GET /api/v1/me`; protected APIs; Next.js shell (`frontend/`); Google ID token Bearer session; version watcher  
 - **Phase 5.2:** Chat composer + messages; `POST /api/v1/query/answer`; refusal + citations UI  
 - **Phase 5.3:** Admin upload/list/publish/retire; chat ↑ history + `/clear`  
-- Runbook: [oauth-and-frontend-auth](docs/runbooks/oauth-and-frontend-auth.md)
+- **Phase 5.4:** Installable PWA (SW + manifest); citation/title polish; generation default `gemini-2.5-flash`  
+- Runbooks: [oauth-and-frontend-auth](docs/runbooks/oauth-and-frontend-auth.md) · [pwa-install](docs/runbooks/pwa-install.md)
 
 ### Core APIs (backend MVP)
 

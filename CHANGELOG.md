@@ -10,13 +10,15 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- **Phase 5.4+:** fuller PWA service worker / install polish; multi-turn chat
-- **Phase 4 (after Phase 5):** hybrid BM25 + RRF, multi-turn, ACL depth, fuller guardrails, semantic cache
+- **Phase 4:** hybrid BM25 + RRF, multi-turn, ACL depth, fuller guardrails, semantic cache
 - **Phase 6+:** HTTPS LB + Cloud Armor; Binary Auth; analytics
+- Voice / star feedback / streaming (deferred from Phase 5)
 - Backlog: inactive vector hard-delete (BL-RAG-16); async worker; live E2E hardening
 - Coordinator: OAuth secret versions + consent screen; detect-secrets (BL-FND-08)
 
 ### Added
+- **Phase 5.4 / Phase 5 complete:** PWA SW + manifest installability (shell offline only); citation title→filename fallback; upload title defaults to filename; default `GENERATION_MODEL_ID=gemini-2.5-flash`
+- **Phase 5.4:** [pwa-install runbook](docs/runbooks/pwa-install.md) · [Phase 5 retro](docs/retrospectives/phase-5.md) · [eng report](docs/reports/phase-5-engineering-report.md)
 - **Phase 5.3:** Admin UI — upload PDF/MD, list/detail, publish/retire; `GET /api/v1/documents` + `GET /api/v1/documents/{id}`
 - **Phase 5.3:** Chat polish — ArrowUp previous prompts; `/clear` clears local messages
 - **Phase 5.2:** Chat UI — composer, message list, grounded answers via `POST /api/v1/query/answer`, refusal state, citation list (Enter to send / Shift+Enter newline)

@@ -130,9 +130,10 @@ class Settings(BaseSettings):
     )
 
     # Grounded generation (Phase 3.4 / ADR-0008)
+    # Model runs in VERTEX_LOCATION (same region as embeddings unless overridden).
     generation_model_id: str = Field(
-        default="gemini-2.0-flash-001",
-        description="Vertex Gemini model id (GENERATION_MODEL_ID)",
+        default="gemini-2.5-flash",
+        description="Vertex Gemini model id (GENERATION_MODEL_ID); default gemini-2.5-flash",
     )
     generation_temperature: float = Field(
         default=0.2,

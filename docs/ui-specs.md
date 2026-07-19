@@ -332,7 +332,9 @@ UI talks only to backend voice endpoints (or approved browser STT for prototype)
 
 ## 7. PWA requirements
 
-### Phase 5 delivery profile (locked; ADR-0010)
+### Phase 5 delivery profile (locked; ADR-0010) — implemented 5.1–5.4
+
+**Install:** See [pwa-install runbook](./runbooks/pwa-install.md). Manifest + service worker cache **app shell only**; answers always require network. Version auto-reload via `/health` remains mandatory.
 
 | In scope | Out of scope |
 |----------|--------------|

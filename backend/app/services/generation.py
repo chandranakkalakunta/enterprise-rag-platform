@@ -11,7 +11,7 @@ from typing import Protocol, Sequence
 
 logger = logging.getLogger("erp.api.generation")
 
-DEFAULT_GENERATION_MODEL_ID = "gemini-2.0-flash-001"
+DEFAULT_GENERATION_MODEL_ID = "gemini-2.5-flash"
 DEFAULT_GENERATION_TEMPERATURE = 0.2
 
 SAFE_REFUSAL_ANSWER = (

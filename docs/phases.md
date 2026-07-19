@@ -28,20 +28,21 @@ Update when a phase opens or closes.
 | **3.2h** | Bootstrap datapoint.json hotfix | ✅ **Complete** | Never `.keep` under `contents_delta_uri` |
 | **3.3** | Dense Search API | ✅ **Complete** | [dense-search runbook](./runbooks/dense-search-api.md) |
 | **3.4** | Grounded Answer API (LangGraph + Gemini) | ✅ **Complete** | [grounded-answer runbook](./runbooks/grounded-answer-api.md) |
-| **5** | Voice + **full PWA** | 🔄 **In progress** | Desktop/tablet/mobile browser + installable; **no native apps** |
+| **5** | Voice + **full PWA** | ✅ **Complete** | [retro](./retrospectives/phase-5.md) · [eng report](./reports/phase-5-engineering-report.md) |
 | **5.0** | ADR-0009 Auth/Roles + ADR-0010 PWA shell & version reload | ✅ **Accepted** | [Auth](./adr/0009-authn-authz-user-profiles.md) · [PWA/reload](./adr/0010-pwa-shell-version-reload.md) |
 | **5.1** | OAuth + `/me` + app shell + version watcher | ✅ **Complete** | [Auth runbook](./runbooks/oauth-and-frontend-auth.md) |
 | **5.2** | Chat UI — answer, refusal, citations | ✅ **Complete** | ChatPanel → `POST /api/v1/query/answer` |
-| **5.3** | Admin UI + chat ↑ / `/clear` | 🔄 **In progress** | Upload/list/publish/retire; GET documents |
-| **4** | Multi-turn & ACL depth (+ hybrid/RRF, fuller guards) | Planned **after Phase 5** | RAG quality track |
+| **5.3** | Admin UI + chat ↑ / `/clear` | ✅ **Complete** | Upload/list/publish/retire; GET documents |
+| **5.4** | PWA install + closeout polish | ✅ **Complete** | [PWA runbook](./runbooks/pwa-install.md) |
+| **4** | Multi-turn & ACL depth (+ hybrid/RRF, fuller guards) | 🔜 **Next** after Phase 5 | RAG quality track |
 | **6** | Analytics & Evaluation (+ Binary Auth / LB hardening) | Planned | BigQuery; NFR-SEC-14; HTTPS LB + Cloud Armor |
 
 ## Delivery order (Coordinator — post–Phase 3)
 
 Phase **numbers** are stable product tracks. **Execution order after Phase 3:**
 
-1. **Phase 5** — full responsive PWA / UI (consume search + answer APIs) — **started 5.0**  
-2. **Phase 4** — RAG quality (hybrid BM25+RRF, multi-turn, ACL depth, fuller guardrails)  
+1. **Phase 5** — full responsive PWA / UI — ✅ **Complete**  
+2. **Phase 4** — RAG quality (hybrid BM25+RRF, multi-turn, ACL depth, fuller guardrails) — **next**  
 3. **Phase 6** — analytics / eval / Binary Auth / **HTTPS LB + Cloud Armor**  
 
 ## Phase 0–2 closure links
@@ -84,4 +85,10 @@ Phase 5 delivers a **full Progressive Web App**: responsive on **desktop, tablet
 - Backend reads: `GET /api/v1/documents`, `GET /api/v1/documents/{document_id}` (content_admin|admin)  
 - Chat: **↑** cycles previous user prompts; **`/clear`** clears local history  
 
-Last updated: 2026-07-19 (Phase 5.3 admin + chat polish)
+### Phase 5.4 + closure
+
+- [PWA install runbook](./runbooks/pwa-install.md) — manifest, SW, shell offline only  
+- Citation title fallback; upload title defaults to filename; `GENERATION_MODEL_ID` default `gemini-2.5-flash`  
+- Closure: [retro](./retrospectives/phase-5.md) · [eng report](./reports/phase-5-engineering-report.md)  
+
+Last updated: 2026-07-19 (Phase 5 complete — 5.4 closeout)
