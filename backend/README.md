@@ -38,6 +38,12 @@ See [docs/runbooks/document-upload-api.md](../docs/runbooks/document-upload-api.
 
 See [docs/runbooks/version-lifecycle.md](../docs/runbooks/version-lifecycle.md).
 
+### Dense search (Phase 3.3)
+
+`POST /api/v1/query/search` — embed query, retrieve top-k **active** chunks from Vector Search.
+
+See [docs/runbooks/dense-search-api.md](../docs/runbooks/dense-search-api.md).
+
 ### Health contract (Phase 1.5)
 
 Both `/health` (liveness) and `/ready` (readiness) return JSON:

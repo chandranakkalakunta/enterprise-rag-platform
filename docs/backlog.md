@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-18 (**Phase 3.2** — Vector Search upsert + activate/deactivate)
+Last updated: 2026-07-19 (**Phase 3.3** — dense search API)
 
 ---
 
@@ -106,8 +106,9 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-RAG-14b | Activate/deactivate index on publish/retire | Done | ✓ Done — Phase 3.2 | active=true/false re-upsert; no re-embed |
 | BL-RAG-12 | Vertex AI Vector Search index + endpoint wiring | Done | ✓ Done — Phase 3.2 | STREAM_UPDATE; upsert active=false on ready |
 | BL-RAG-16 | **Hard-delete inactive vectors after retention (30–90d)** | Todo | **Backlog** | Retire sets active=false only; scheduled cleanup job |
-| BL-RAG-09 | LangGraph query orchestration (simple graph) | Todo | **Phase 3.3** | ADR-0008 |
-| BL-RAG-15 | Query API `POST /api/v1/query` (or equivalent) | Todo | **Phase 3.3** | Answer + citations |
+| BL-RAG-15a | Dense search API `POST /api/v1/query/search` | Done | ✓ Done — Phase 3.3 | active=true only; top_k default 5 |
+| BL-RAG-09 | LangGraph query orchestration (simple graph) | Todo | **Phase 3.4** | retrieve → evidence → generate |
+| BL-RAG-15 | Full query API (answer + citations) | Todo | **Phase 3.4** | Uses dense search + Gemini |
 | BL-RAG-03 | Gemini generation with citations | Todo | **Phase 3.2** | `GENERATION_MODEL_ID`, temp 0.2 |
 | BL-RAG-04 | Insufficient-evidence refusal (minimal) | Todo | **Phase 3.2** | ADR-0008 evidence_check |
 | BL-RAG-10 | Metadata filtering at index (published/active) | Todo | **Phase 3.1–3.2** | Active version only |
@@ -193,6 +194,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-19** — **Phase 3.3:** Dense search API `POST /api/v1/query/search` (active-only neighbors; no generation).
 - **2026-07-18** — **Phase 3.2:** Vector Search index (dev STREAM_UPDATE); upsert on ready; activate/deactivate on publish/retire; BL-RAG-16 hard-delete backlog.
 - **2026-07-18** — **Phase 3.1:** Vertex embed on ready; `processed/.../embeddings.jsonl`; `embeddings_status` on version.
 - **2026-07-18** — **Phase 3.0:** ADR-0007 (embeddings + Vector Search) + ADR-0008 (retrieval + grounded generation) accepted.

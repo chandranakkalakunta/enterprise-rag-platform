@@ -42,6 +42,34 @@ class VectorIndexClient(Protocol):
     def upsert_datapoints(self, datapoints: Sequence[dict[str, Any]]) -> None: ...
 
 
+class VectorQueryClient(Protocol):
+    """Minimal protocol for FindNeighbors (tests inject fakes)."""
+
+    def find_neighbors(
+        self,
+        *,
+        query_embedding: Sequence[float],
+        top_k: int,
+        restricts: Sequence[dict[str, Any]],
+    ) -> list["NeighborHit"]: ...
+
+
+@dataclass(frozen=True, slots=True)
+class NeighborHit:
+    """One dense search neighbor (citation-ready)."""
+
+    datapoint_id: str
+    score: float
+    document_id: str | None
+    version_id: str | None
+    chunk_index: int | None
+    text: str | None
+    title: str | None
+    filename: str | None
+    collection: str | None
+    char_count: int | None
+
+
 @dataclass(frozen=True, slots=True)
 class ChunkEmbeddingInput:
     """Joined chunk + embedding for datapoint build."""
@@ -340,3 +368,214 @@ def deactivate_version(
         filename=filename,
         index_id=index_id,
     )
+
+
+def _restricts_to_map(restricts: Sequence[Any]) -> dict[str, str]:
+    """Flatten Restriction protos or dicts to namespace → first allow value."""
+    out: dict[str, str] = {}
+    for r in restricts or []:
+        if isinstance(r, dict):
+            ns = r.get("namespace")
+            allow = r.get("allow_list") or []
+        else:
+            ns = getattr(r, "namespace", None)
+            allow = list(getattr(r, "allow_list", []) or [])
+        if ns and allow:
+            out[str(ns)] = str(allow[0])
+    return out
+
+
+def parse_datapoint_id(datapoint_id: str) -> tuple[str | None, str | None, int | None]:
+    """Parse {document_id}:{version_id}:{chunk_index} (best-effort)."""
+    parts = (datapoint_id or "").split(":")
+    if len(parts) < 3:
+        return None, None, None
+    try:
+        chunk_index = int(parts[-1])
+    except ValueError:
+        chunk_index = None
+    version_id = parts[-2]
+    document_id = ":".join(parts[:-2]) if len(parts) > 3 else parts[0]
+    return document_id or None, version_id or None, chunk_index
+
+
+def neighbor_from_match(
+    *,
+    datapoint_id: str,
+    distance: float,
+    restricts: Sequence[Any] | None = None,
+) -> NeighborHit:
+    """Map a MatchService neighbor to NeighborHit (distance → score)."""
+    meta = _restricts_to_map(restricts or [])
+    doc_id, ver_id, chunk_idx = parse_datapoint_id(datapoint_id)
+    # Prefer restrict metadata over id parse
+    document_id = meta.get("document_id") or doc_id
+    version_id = meta.get("version_id") or ver_id
+    if "chunk_index" in meta:
+        try:
+            chunk_idx = int(meta["chunk_index"])
+        except ValueError:
+            pass
+    char_count = None
+    if "char_count" in meta:
+        try:
+            char_count = int(meta["char_count"])
+        except ValueError:
+            char_count = None
+    # DOT_PRODUCT: higher is better; distance field is often similarity for this measure
+    score = float(distance)
+    return NeighborHit(
+        datapoint_id=datapoint_id,
+        score=score,
+        document_id=document_id,
+        version_id=version_id,
+        chunk_index=chunk_idx,
+        text=meta.get("payload_text"),
+        title=meta.get("title"),
+        filename=meta.get("filename"),
+        collection=meta.get("collection"),
+        char_count=char_count,
+    )
+
+
+def build_active_restricts(collection: str | None = None) -> list[dict[str, Any]]:
+    """Query filters: always active=true; optional collection."""
+    restricts: list[dict[str, Any]] = [
+        {"namespace": "active", "allow_list": ["true"]},
+    ]
+    if collection and collection.strip():
+        restricts.append(
+            {"namespace": "collection", "allow_list": [collection.strip()]}
+        )
+    return restricts
+
+
+class VertexMatchClient:
+    """FindNeighbors via Vertex AI MatchServiceClient."""
+
+    def __init__(
+        self,
+        *,
+        project_id: str,
+        location: str,
+        endpoint_id: str,
+        deployed_index_id: str,
+        public_endpoint_domain: str = "",
+    ) -> None:
+        self.project_id = project_id
+        self.location = location
+        self.deployed_index_id = deployed_index_id
+        if endpoint_id.startswith("projects/"):
+            self.endpoint_name = endpoint_id
+        else:
+            self.endpoint_name = (
+                f"projects/{project_id}/locations/{location}/"
+                f"indexEndpoints/{endpoint_id}"
+            )
+        # Public endpoints require the public domain as api_endpoint
+        self._api_endpoint = (
+            public_endpoint_domain.strip()
+            if public_endpoint_domain.strip()
+            else f"{location}-aiplatform.googleapis.com"
+        )
+        self._client = None
+
+    def _get_client(self):
+        if self._client is None:
+            from google.cloud import aiplatform_v1
+            from google.api_core.client_options import ClientOptions
+
+            self._client = aiplatform_v1.MatchServiceClient(
+                client_options=ClientOptions(api_endpoint=self._api_endpoint)
+            )
+        return self._client
+
+    def find_neighbors(
+        self,
+        *,
+        query_embedding: Sequence[float],
+        top_k: int,
+        restricts: Sequence[dict[str, Any]],
+    ) -> list[NeighborHit]:
+        from google.cloud import aiplatform_v1
+
+        if top_k < 1:
+            raise VectorSearchError("top_k must be >= 1")
+        if not query_embedding:
+            raise VectorSearchError("query_embedding is required")
+
+        client = self._get_client()
+        proto_restricts = [
+            aiplatform_v1.IndexDatapoint.Restriction(
+                namespace=r["namespace"],
+                allow_list=list(r["allow_list"]),
+            )
+            for r in restricts
+        ]
+        datapoint = aiplatform_v1.IndexDatapoint(
+            feature_vector=list(query_embedding),
+            restricts=proto_restricts,
+        )
+        query = aiplatform_v1.FindNeighborsRequest.Query(
+            datapoint=datapoint,
+            neighbor_count=top_k,
+        )
+        request = aiplatform_v1.FindNeighborsRequest(
+            index_endpoint=self.endpoint_name,
+            deployed_index_id=self.deployed_index_id,
+            queries=[query],
+            return_full_datapoint=True,
+        )
+        try:
+            response = client.find_neighbors(request)
+        except Exception as exc:  # noqa: BLE001
+            raise VectorSearchError(f"FindNeighbors failed: {exc}") from exc
+
+        hits: list[NeighborHit] = []
+        nearest = list(response.nearest_neighbors) if response.nearest_neighbors else []
+        if not nearest:
+            return hits
+        for neighbor in nearest[0].neighbors:
+            dp = neighbor.datapoint
+            datapoint_id = dp.datapoint_id if dp else ""
+            distance = float(neighbor.distance) if neighbor.distance is not None else 0.0
+            restricts_out = list(dp.restricts) if dp and dp.restricts else []
+            hits.append(
+                neighbor_from_match(
+                    datapoint_id=datapoint_id,
+                    distance=distance,
+                    restricts=restricts_out,
+                )
+            )
+        logger.info(
+            "vector_find_neighbors_ok endpoint=%s hits=%s top_k=%s",
+            self.endpoint_name,
+            len(hits),
+            top_k,
+        )
+        return hits
+
+
+def find_neighbors(
+    *,
+    client: VectorQueryClient,
+    query_embedding: Sequence[float],
+    top_k: int = 5,
+    collection: str | None = None,
+) -> list[NeighborHit]:
+    """
+    Dense search with published-only filter (active=true).
+
+    Optional collection filter is ANDed via restricts.
+    """
+    restricts = build_active_restricts(collection)
+    try:
+        return client.find_neighbors(
+            query_embedding=query_embedding,
+            top_k=top_k,
+            restricts=restricts,
+        )
+    except VectorSearchError:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        raise VectorSearchError(f"Search failed: {exc}") from exc

@@ -92,6 +92,21 @@ class Settings(BaseSettings):
         default=768,
         description="Expected embedding dimensions (text-embedding-005 default)",
     )
+    vector_search_public_endpoint_domain: str = Field(
+        default="",
+        description=(
+            "Public endpoint domain for MatchService (VECTOR_SEARCH_PUBLIC_ENDPOINT_DOMAIN). "
+            "When set, used as api_endpoint for FindNeighbors."
+        ),
+    )
+
+    # Dense retrieval (Phase 3.3 / ADR-0008)
+    retrieval_top_k: int = Field(
+        default=5,
+        ge=1,
+        le=50,
+        description="Default neighbor count for dense search (RETRIEVAL_TOP_K)",
+    )
 
 
 @lru_cache
