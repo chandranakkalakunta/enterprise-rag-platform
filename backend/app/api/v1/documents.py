@@ -353,6 +353,19 @@ async def publish_document_version(
                 title=doc_data.get("title"),
                 filename=prev_meta.get("filename"),
             )
+        # Phase 4.2: BM25 in-process index — published corpus only
+        from app.services.bm25_ops import bm25_index_published_version
+
+        bm25_index_published_version(
+            settings=settings,
+            gcs_client=gcs_client,
+            document_id=document_id,
+            version_id=version_id,
+            title=doc_data.get("title"),
+            filename=meta.get("filename"),
+            collection=doc_data.get("collection"),
+            previous_version_id=result.previous_published_version_id,
+        )
     except (InvalidIdError, NotFoundError, ConflictError) as exc:
         raise _lifecycle_http(exc) from exc
     except Exception as exc:  # noqa: BLE001
@@ -418,6 +431,16 @@ async def retire_document_version(
             collection=doc_data.get("collection"),
             title=doc_data.get("title"),
             filename=meta.get("filename"),
+        )
+        # Phase 4.2: drop retired version from BM25 published index
+        from app.services.bm25_ops import bm25_remove_version
+
+        bm25_remove_version(
+            document_id=document_id,
+            version_id=version_id,
+            enabled=(
+                settings.hybrid_retrieval_enabled or settings.bm25_always_index
+            ),
         )
     except (InvalidIdError, NotFoundError, ConflictError) as exc:
         raise _lifecycle_http(exc) from exc

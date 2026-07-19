@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-19 (**Phase 4.1** — eval harness + dense baseline)
+Last updated: 2026-07-19 (**Phase 4.2** — hybrid BM25 + dense RRF)
 
 ---
 
@@ -121,8 +121,8 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 |----|------|--------|--------|-------|
 | BL-RAG-18 | **ADR-0011** eval + hybrid design | Done | ✓ Done — Phase 4.0 | Eval first; BM25+dense+RRF; LangGraph retrieve |
 | BL-RAG-19 | **Eval harness + golden set + dense baseline** | Done | ✓ Done — Phase 4.1 | `eval/` harness; fixture baseline; live optional |
-| BL-RAG-01 | Hybrid BM25 + dense retrieval | Todo | **Phase 4.2** | In-process BM25 MVP (ADR-0011) |
-| BL-RAG-02 | RRF fusion | Todo | **Phase 4.2** | Fuse dense + BM25 ranks |
+| BL-RAG-01 | Hybrid BM25 + dense retrieval | Done | ✓ Done — Phase 4.2 | In-process Okapi BM25 + hybrid_search |
+| BL-RAG-02 | RRF fusion | Done | ✓ Done — Phase 4.2 | `rrf.py` fuse_rrf; RRF_K default 60 |
 | BL-RAG-20 | Citation dedupe by document_id | Todo | **Phase 4.x** | Reduce same-doc citation spam |
 | BL-RAG-21 | Optional managed OpenSearch for BM25 | Todo | **Later** | If in-process scale insufficient |
 | BL-RAG-05 | ACL-aware retrieval (deep) | Todo | **Phase 4+** | Beyond published-only |
@@ -211,6 +211,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-19** — **Phase 4.2:** Hybrid BM25+dense RRF; publish/retire BM25 hooks; feature flag.
 - **2026-07-19** — **Phase 4.1:** Golden set (25) + dense eval harness + fixture baseline; hybrid still off.
 - **2026-07-19** — **Phase 4.0:** ADR-0011 RAG evaluation + hybrid BM25+dense RRF (Accepted).
 - **2026-07-19** — **Phase 5 complete:** 5.4 PWA install + polish; retro + eng report; next Phase 4.

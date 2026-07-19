@@ -126,7 +126,47 @@ class Settings(BaseSettings):
         default=5,
         ge=1,
         le=50,
-        description="Default neighbor count for dense search (RETRIEVAL_TOP_K)",
+        description="Default fused/final neighbor count (RETRIEVAL_TOP_K)",
+    )
+
+    # Hybrid retrieval (Phase 4.2 / ADR-0011)
+    hybrid_retrieval_enabled: bool = Field(
+        default=True,
+        description=(
+            "When true, fuse dense Vector Search + in-process BM25 via RRF "
+            "(HYBRID_RETRIEVAL_ENABLED). False = dense-only."
+        ),
+    )
+    retrieval_top_k_dense: int | None = Field(
+        default=None,
+        ge=1,
+        le=50,
+        description=(
+            "Per-channel dense top_k before RRF (RETRIEVAL_TOP_K_DENSE). "
+            "None = use RETRIEVAL_TOP_K."
+        ),
+    )
+    retrieval_top_k_bm25: int | None = Field(
+        default=None,
+        ge=1,
+        le=50,
+        description=(
+            "Per-channel BM25 top_k before RRF (RETRIEVAL_TOP_K_BM25). "
+            "None = use RETRIEVAL_TOP_K."
+        ),
+    )
+    rrf_k: int = Field(
+        default=60,
+        ge=1,
+        le=200,
+        description="RRF constant k (RRF_K); typical default 60",
+    )
+    bm25_always_index: bool = Field(
+        default=False,
+        description=(
+            "If true, index BM25 on publish even when hybrid is off "
+            "(BM25_ALWAYS_INDEX). Useful for warm standby."
+        ),
     )
 
     # Grounded generation (Phase 3.4 / ADR-0008)

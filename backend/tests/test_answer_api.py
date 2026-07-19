@@ -114,7 +114,7 @@ def test_api_answer_success(client: TestClient) -> None:
 
     with (
         patch(
-            "app.services.answer_graph.dense_search",
+            "app.services.answer_graph.hybrid_search",
             return_value=search_resp,
         ),
         patch(
@@ -140,7 +140,7 @@ def test_api_answer_success(client: TestClient) -> None:
 
 def test_api_answer_refused_empty(client: TestClient) -> None:
     empty = SearchResponse(query="x", top_k=5, results=[])
-    with patch("app.services.answer_graph.dense_search", return_value=empty):
+    with patch("app.services.answer_graph.hybrid_search", return_value=empty):
         response = client.post(
             "/api/v1/query/answer",
             json={"query": "nothing known"},

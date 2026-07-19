@@ -46,12 +46,13 @@ See [docs/runbooks/version-lifecycle.md](../docs/runbooks/version-lifecycle.md).
 - `GET /api/v1/documents` — list with latest version summary (`content_admin`|`admin`)
 - `GET /api/v1/documents/{document_id}` — detail + all versions
 
-### Dense search + grounded answer (Phase 3.3–3.4)
+### Dense / hybrid search + grounded answer (Phase 3.3–3.4, 4.2)
 
-- `POST /api/v1/query/search` — top-k **active** chunks  
+- `POST /api/v1/query/search` — top-k **active** chunks (hybrid BM25+dense+RRF when enabled)  
 - `POST /api/v1/query/answer` — LangGraph retrieve → evidence → Gemini + citations  
+- Flags: `HYBRID_RETRIEVAL_ENABLED`, `RRF_K`, `RETRIEVAL_TOP_K_DENSE` / `_BM25`  
 
-See [dense-search](../docs/runbooks/dense-search-api.md) · [grounded-answer](../docs/runbooks/grounded-answer-api.md).
+See [dense-search](../docs/runbooks/dense-search-api.md) · [grounded-answer](../docs/runbooks/grounded-answer-api.md) · [rag-eval](../docs/runbooks/rag-eval-harness.md).
 
 ### Health contract (Phase 1.5)
 

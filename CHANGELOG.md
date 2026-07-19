@@ -10,14 +10,14 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- **Phase 4.2:** hybrid MVP (in-process BM25 + RRF in LangGraph retrieve)
-- **Phase 4+:** multi-turn, ACL depth, fuller guardrails, semantic cache, citation dedupe
+- **Phase 4+:** multi-turn, ACL depth, fuller guardrails, semantic cache, citation dedupe, optional OpenSearch BM25
 - **Phase 6+:** HTTPS LB + Cloud Armor; Binary Auth; analytics
 - Voice / star feedback / streaming (deferred from Phase 5)
 - Backlog: inactive vector hard-delete (BL-RAG-16); async worker; live E2E hardening
-- Coordinator: OAuth secret versions + consent screen; detect-secrets (BL-FND-08); live dense baseline fill
+- Coordinator: re-run live eval hybrid vs dense; OAuth secrets; detect-secrets (BL-FND-08)
 
 ### Added
+- **Phase 4.2:** Hybrid retrieval — in-process Okapi BM25 over published chunks, RRF fusion with Vertex dense, LangGraph/`/query/*` wired; flags `HYBRID_RETRIEVAL_ENABLED`, `RRF_K`, per-channel top_k; publish/retire BM25 hooks
 - **Phase 4.1:** Golden set (`eval/golden/golden_set.jsonl`, 25 cases) + dense-only eval harness (`python -m eval.harness`); metrics: refusal correctness, Recall@k proxy, list completeness; fixture baseline + [runbook](docs/runbooks/rag-eval-harness.md)
 - **Phase 4.0:** [ADR-0011](docs/adr/0011-rag-evaluation-and-hybrid-retrieval.md) — eval-first quality program; hybrid BM25 + dense + RRF inside LangGraph `retrieve`; in-process BM25 MVP then optional OpenSearch
 - **Phase 5.4 / Phase 5 complete:** PWA SW + manifest installability (shell offline only); citation title→filename fallback; upload title defaults to filename; default `GENERATION_MODEL_ID=gemini-2.5-flash`

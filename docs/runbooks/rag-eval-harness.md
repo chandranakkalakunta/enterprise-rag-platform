@@ -78,7 +78,19 @@ Live results depend on the **published corpus**. Golden cases assume product/doc
 - Live dense baseline is the **real** Phase 4.1 artifact before hybrid (4.2).  
 - Compare hybrid later against the same golden set and `--top-k`.
 
+## Hybrid comparison (Phase 4.2)
+
+With hybrid enabled on the API (`HYBRID_RETRIEVAL_ENABLED=true`) and documents **published** so BM25 is warm:
+
+```bash
+python -m eval.harness --mode live --path answer \
+  --out eval/results/baseline-hybrid-live.json
+```
+
+Compare against `eval/results/baseline-dense-live.json` (or re-run with hybrid off).
+
 ## Related
 
 - [ADR-0011](../adr/0011-rag-evaluation-and-hybrid-retrieval.md)  
 - [baseline-dense.md](../eval/baseline-dense.md)  
+

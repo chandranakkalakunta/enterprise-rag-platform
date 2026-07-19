@@ -226,7 +226,7 @@ def test_api_search_empty_string_query(client: TestClient) -> None:
 
 def test_api_search_service_unavailable(client: TestClient) -> None:
     with patch(
-        "app.api.v1.query.dense_search",
+        "app.api.v1.query.hybrid_search",
         side_effect=SearchServiceError("Vector Search is not enabled"),
     ):
         response = client.post(
