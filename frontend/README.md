@@ -73,7 +73,17 @@ Home route is the chat UI:
 - [ ] Publish enabled only for `ready`; Retire for `ready`/`published`
 - [ ] Backend 403 if role insufficient (even if UI mishandled)
 
-## PWA
+## PWA (Phase 5.4)
 
-- `public/manifest.webmanifest` + icon (installable baseline)
-- Full service worker offline shell can land later (Phase 5.3+)
+- `public/manifest.webmanifest` — standalone, theme, 192/512 PNG icons  
+- `public/sw.js` — precache shell; offline → `offline.html`; **no API answer cache**  
+- Register via `ServiceWorkerRegister` in app shell  
+- Version watcher still polls backend `/health` (cross-origin; not SW-blocked)  
+- Runbook: [docs/runbooks/pwa-install.md](../docs/runbooks/pwa-install.md)
+
+### PWA checklist
+- [ ] SW registered (DevTools → Application → Service Workers)
+- [ ] Manifest valid; icons 192 + 512
+- [ ] Install available on Chromium desktop (localhost/HTTPS)
+- [ ] Offline: shell/offline page only — chat answer still needs network
+- [ ] After API deploy: version auto-reload still works

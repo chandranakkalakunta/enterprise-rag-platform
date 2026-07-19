@@ -42,6 +42,7 @@ from app.services.firestore_repo import (
 from app.services.gcs_storage import (
     GcsUploadResult,
     ProcessedArtifacts,
+    sanitize_filename,
     upload_raw_bytes,
     write_embeddings_jsonl,
     write_processed_artifacts,
@@ -491,6 +492,11 @@ def process_upload(
     )
     factory = id_factory or new_ids
     document_id, version_id = factory()
+
+    # Default document title to original filename when title omitted (Phase 5.4)
+    safe_name = sanitize_filename(filename) if filename else "document"
+    resolved_title = (title or "").strip() or safe_name
+    title = resolved_title
 
     gcs_client = storage_client or storage.Client(project=settings.gcp_project_id)
     try:

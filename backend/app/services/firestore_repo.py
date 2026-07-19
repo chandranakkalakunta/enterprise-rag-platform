@@ -66,7 +66,8 @@ def create_document_with_version(
 
     doc_data: dict[str, Any] = {
         "document_id": document_id,
-        "title": title or "Untitled",
+        # Prefer caller-resolved title (filename default in process_upload)
+        "title": (title or "").strip() or "Untitled",
         "collection": collection,
         "active_version_id": None,
         "latest_version_id": version_id,

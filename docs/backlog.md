@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-19 (**Phase 5.3** — admin upload/publish UI + chat ↑ and /clear)
+Last updated: 2026-07-19 (**Phase 5 complete** — 5.4 PWA install + closeout)
 
 ---
 
@@ -155,9 +155,9 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-VOICE-01 | STT integration | Deferred | Phase 5 | In-PWA only |
 | BL-VOICE-02 | TTS integration | Deferred | Phase 5 | In-PWA only |
 | BL-PWA-00 | **ADR-0010 PWA shell + backend version auto-reload** | Done | ✓ Done — Phase 5.0 | Poll /health; hard reload on version change |
-| BL-PWA-01 | Installable PWA shell (manifest + SW) | In Progress | **Phase 5.1+** | Manifest + icon done; full SW → later |
-| BL-PWA-02 | Offline UI shell | Todo | **Phase 5.3+** | P2; shell only, not offline RAG |
-| BL-PWA-03 | Responsive desktop/tablet/mobile layouts | In Progress | **Phase 5.1–5.2** | Shell + chat mobile-friendly |
+| BL-PWA-01 | Installable PWA shell (manifest + SW) | Done | ✓ Done — Phase 5.4 | Manifest 192/512 + sw.js shell |
+| BL-PWA-02 | Offline UI shell | Done | ✓ Done — Phase 5.4 | offline.html; no offline RAG |
+| BL-PWA-03 | Responsive desktop/tablet/mobile layouts | Done | ✓ Done — Phase 5.1–5.3 | Shell + chat + admin mobile-friendly |
 | BL-PWA-04 | Health poll + force reload on version/deployed_at change | Done | ✓ Done — Phase 5.1 | ADR-0010 VersionWatcher |
 
 ## Analytics & Evaluation
@@ -207,6 +207,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-19** — **Phase 5 complete:** 5.4 PWA install + polish; retro + eng report; next Phase 4.
 - **2026-07-19** — **Phase 5.3:** Admin upload/list/publish/retire UI; chat ↑ history + `/clear`; GET documents APIs.
 - **2026-07-19** — **Phase 5.2:** Chat UI — answer, refusal, citations via `/api/v1/query/answer`.
 - **2026-07-19** — **Phase 5.1:** Google auth + `/me` + Next.js shell + version watcher (ADR-0009/0010 implementation).

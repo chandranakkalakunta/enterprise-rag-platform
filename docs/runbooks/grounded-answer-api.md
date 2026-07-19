@@ -95,7 +95,8 @@ POST /answer
 
 | Variable | Default | Notes |
 |----------|---------|--------|
-| `GENERATION_MODEL_ID` | `gemini-2.0-flash-001` | Vertex Gemini pin per env |
+| `GENERATION_MODEL_ID` | `gemini-2.5-flash` | Vertex Gemini pin per env (Phase 5.4 default) |
+| `VERTEX_LOCATION` | `asia-south1` | Region for Gemini + embeddings init |
 | `GENERATION_TEMPERATURE` | `0.2` | Low creativity |
 | `RETRIEVAL_TOP_K` | `5` | Dense neighbors |
 | `EVIDENCE_MIN_SCORE` | unset | Optional score floor |
