@@ -20,6 +20,7 @@ function newId(): string {
 export function ChatPanel() {
   const { idToken, logout } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [promptHistory, setPromptHistory] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [authExpired, setAuthExpired] = useState(false);
@@ -28,6 +29,25 @@ export function ChatPanel() {
     async (text: string) => {
       setError(null);
       setAuthExpired(false);
+
+      // Exact local command — no API call (Phase 5.3)
+      if (text.trim() === "/clear") {
+        setMessages([
+          {
+            id: newId(),
+            role: "assistant",
+            content: "Chat cleared (local only — not stored on the server).",
+            createdAt: Date.now(),
+          },
+        ]);
+        return;
+      }
+
+      setPromptHistory((prev) => {
+        // Avoid consecutive duplicates
+        if (prev[prev.length - 1] === text) return prev;
+        return [...prev, text];
+      });
 
       const userMsg: ChatMessage = {
         id: newId(),
@@ -92,7 +112,11 @@ export function ChatPanel() {
         </div>
       )}
 
-      <Composer onSend={handleSend} disabled={loading} />
+      <Composer
+        onSend={handleSend}
+        disabled={loading}
+        promptHistory={promptHistory}
+      />
     </div>
   );
 }

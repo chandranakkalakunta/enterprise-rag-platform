@@ -90,3 +90,55 @@ class ErrorBody(BaseModel):
     """Stable error envelope for client handling."""
 
     detail: str
+
+
+class VersionSummary(BaseModel):
+    """Minimal version fields for Admin list/detail (Phase 5.3)."""
+
+    version_id: str
+    status: VersionStatus
+    filename: str | None = None
+    gcs_uri: str | None = None
+    content_type: str | None = None
+    size_bytes: int | None = None
+    created_at: datetime | None = None
+    created_by: str | None = None
+    chunk_count: int | None = None
+    embeddings_status: str | None = None
+    vector_status: str | None = None
+    error_message: str | None = None
+    text_preview: str | None = None
+
+
+class DocumentSummary(BaseModel):
+    """Document row for Admin list."""
+
+    document_id: str
+    title: str | None = None
+    collection: str | None = None
+    active_version_id: str | None = None
+    latest_version_id: str | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    created_by: str | None = None
+    latest_version: VersionSummary | None = None
+
+
+class DocumentListResponse(BaseModel):
+    documents: list[DocumentSummary]
+    count: int
+
+
+class DocumentDetailResponse(BaseModel):
+    """Single document with all versions (Admin detail)."""
+
+    document_id: str
+    title: str | None = None
+    collection: str | None = None
+    active_version_id: str | None = None
+    latest_version_id: str | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    created_by: str | None = None
+    latest_version: VersionSummary | None = None
+    versions: list[VersionSummary] = Field(default_factory=list)

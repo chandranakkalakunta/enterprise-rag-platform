@@ -303,3 +303,124 @@ def update_version_failed(
     return {
         k: v for k, v in patch.items() if v is not firestore.DELETE_FIELD
     }
+
+
+# ── Read helpers (Phase 5.3 Admin UI) ────────────────────────────────────────
+
+
+def _serialize_ts(value: Any) -> datetime | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value
+    # Firestore may return DatetimeWithNanoseconds (subclass of datetime)
+    return None
+
+
+def version_summary_from_data(version_id: str, data: dict[str, Any]) -> dict[str, Any]:
+    """Normalize a version document for API responses."""
+    return {
+        "version_id": version_id,
+        "status": data.get("status") or "processing",
+        "filename": data.get("filename"),
+        "gcs_uri": data.get("gcs_uri"),
+        "content_type": data.get("content_type"),
+        "size_bytes": data.get("size_bytes"),
+        "created_at": _serialize_ts(data.get("created_at")),
+        "created_by": data.get("created_by"),
+        "chunk_count": data.get("chunk_count"),
+        "embeddings_status": data.get("embeddings_status"),
+        "vector_status": data.get("vector_status"),
+        "error_message": data.get("error_message"),
+        "text_preview": data.get("text_preview"),
+    }
+
+
+def get_version(
+    client: FirestoreClientLike,
+    document_id: str,
+    version_id: str,
+) -> dict[str, Any] | None:
+    ref = (
+        client.collection(DOCUMENTS_COLLECTION)
+        .document(document_id)
+        .collection(VERSIONS_SUBCOLLECTION)
+        .document(version_id)
+    )
+    snap = ref.get()
+    if not snap.exists:
+        return None
+    data = snap.to_dict() or {}
+    return version_summary_from_data(version_id, data)
+
+
+def get_document(
+    client: FirestoreClientLike,
+    document_id: str,
+    *,
+    include_versions: bool = True,
+) -> dict[str, Any] | None:
+    """Return document metadata and optionally all versions (newest first)."""
+    doc_ref = client.collection(DOCUMENTS_COLLECTION).document(document_id)
+    snap = doc_ref.get()
+    if not snap.exists:
+        return None
+    data = snap.to_dict() or {}
+    out: dict[str, Any] = {
+        "document_id": document_id,
+        "title": data.get("title"),
+        "collection": data.get("collection"),
+        "active_version_id": data.get("active_version_id"),
+        "latest_version_id": data.get("latest_version_id"),
+        "created_at": _serialize_ts(data.get("created_at")),
+        "updated_at": _serialize_ts(data.get("updated_at")),
+        "created_by": data.get("created_by"),
+    }
+    if include_versions:
+        versions: list[dict[str, Any]] = []
+        for v_snap in doc_ref.collection(VERSIONS_SUBCOLLECTION).stream():
+            v_data = v_snap.to_dict() or {}
+            versions.append(version_summary_from_data(v_snap.id, v_data))
+        # Newest first by created_at when available
+        versions.sort(
+            key=lambda v: v.get("created_at") or datetime.min.replace(tzinfo=timezone.utc),
+            reverse=True,
+        )
+        out["versions"] = versions
+        # Convenience pointer for list-style cards
+        latest_id = out.get("latest_version_id")
+        out["latest_version"] = next(
+            (v for v in versions if v["version_id"] == latest_id),
+            versions[0] if versions else None,
+        )
+    return out
+
+
+def list_documents(
+    client: FirestoreClientLike,
+    *,
+    limit: int = 50,
+) -> list[dict[str, Any]]:
+    """List documents (most recently updated first), with latest version summary."""
+    limit = max(1, min(limit, 100))
+    col = client.collection(DOCUMENTS_COLLECTION)
+    try:
+        query = col.order_by(
+            "updated_at", direction=firestore.Query.DESCENDING
+        ).limit(limit)
+        snaps = list(query.stream())
+    except Exception:
+        # Missing index or field — fall back to unordered limited scan
+        logger.warning("list_documents_order_by_fallback")
+        snaps = list(col.limit(limit).stream())
+
+    results: list[dict[str, Any]] = []
+    for snap in snaps:
+        doc = get_document(client, snap.id, include_versions=True)
+        if doc:
+            # Drop full versions list on list endpoint payload (keep latest only)
+            versions = doc.pop("versions", [])
+            if not doc.get("latest_version") and versions:
+                doc["latest_version"] = versions[0]
+            results.append(doc)
+    return results

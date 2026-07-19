@@ -41,6 +41,11 @@ See [docs/runbooks/document-upload-api.md](../docs/runbooks/document-upload-api.
 
 See [docs/runbooks/version-lifecycle.md](../docs/runbooks/version-lifecycle.md).
 
+### Admin document reads (Phase 5.3)
+
+- `GET /api/v1/documents` — list with latest version summary (`content_admin`|`admin`)
+- `GET /api/v1/documents/{document_id}` — detail + all versions
+
 ### Dense search + grounded answer (Phase 3.3–3.4)
 
 - `POST /api/v1/query/search` — top-k **active** chunks  

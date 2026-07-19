@@ -15,8 +15,12 @@ import { getApiBaseUrl } from "@/lib/config";
 import type {
   AnswerRequest,
   AnswerResponse,
+  DocumentDetailResponse,
+  DocumentListResponse,
   HealthResponse,
   MeResponse,
+  UploadResponse,
+  VersionLifecycleResponse,
 } from "@/lib/types";
 
 export class ApiError extends Error {
@@ -140,6 +144,114 @@ export async function postAnswer(
   }
 
   return res.json() as Promise<AnswerResponse>;
+}
+
+function requireToken(idToken?: string | null): string {
+  const token = idToken ?? getStoredIdToken();
+  if (!token) {
+    throw new ApiError(401, "Not signed in — please sign in again");
+  }
+  return token;
+}
+
+async function raiseIfNotOk(res: Response, fallback: string): Promise<never> {
+  const detail = await safeDetail(res);
+  if (res.status === 401) {
+    throw new ApiError(
+      401,
+      detail || "Session expired or invalid — please sign in again",
+    );
+  }
+  if (res.status === 403) {
+    throw new ApiError(403, detail || "Access denied for this account");
+  }
+  throw new ApiError(res.status, detail || fallback);
+}
+
+/** Admin: list documents (content_admin | admin). */
+export async function listDocuments(
+  idToken?: string | null,
+  limit = 50,
+): Promise<DocumentListResponse> {
+  const token = requireToken(idToken);
+  const res = await apiFetch(
+    `/api/v1/documents?limit=${limit}`,
+    { method: "GET", cache: "no-store" },
+    token,
+  );
+  if (!res.ok) await raiseIfNotOk(res, `List documents failed (${res.status})`);
+  return res.json() as Promise<DocumentListResponse>;
+}
+
+/** Admin: get document + versions. */
+export async function getDocument(
+  documentId: string,
+  idToken?: string | null,
+): Promise<DocumentDetailResponse> {
+  const token = requireToken(idToken);
+  const res = await apiFetch(
+    `/api/v1/documents/${encodeURIComponent(documentId)}`,
+    { method: "GET", cache: "no-store" },
+    token,
+  );
+  if (!res.ok) await raiseIfNotOk(res, `Get document failed (${res.status})`);
+  return res.json() as Promise<DocumentDetailResponse>;
+}
+
+/** Admin: multipart upload (PDF/Markdown ≤50MB). */
+export async function uploadDocument(
+  form: {
+    file: File;
+    title?: string;
+    collection?: string;
+  },
+  idToken?: string | null,
+): Promise<UploadResponse> {
+  const token = requireToken(idToken);
+  const body = new FormData();
+  body.append("file", form.file);
+  if (form.title?.trim()) body.append("title", form.title.trim());
+  if (form.collection?.trim()) body.append("collection", form.collection.trim());
+
+  const res = await apiFetch(
+    "/api/v1/documents/upload",
+    { method: "POST", body, cache: "no-store" },
+    token,
+  );
+  if (!res.ok) await raiseIfNotOk(res, `Upload failed (${res.status})`);
+  return res.json() as Promise<UploadResponse>;
+}
+
+/** Admin: publish ready version. */
+export async function publishVersion(
+  documentId: string,
+  versionId: string,
+  idToken?: string | null,
+): Promise<VersionLifecycleResponse> {
+  const token = requireToken(idToken);
+  const res = await apiFetch(
+    `/api/v1/documents/${encodeURIComponent(documentId)}/versions/${encodeURIComponent(versionId)}/publish`,
+    { method: "POST", cache: "no-store" },
+    token,
+  );
+  if (!res.ok) await raiseIfNotOk(res, `Publish failed (${res.status})`);
+  return res.json() as Promise<VersionLifecycleResponse>;
+}
+
+/** Admin: retire ready or published version. */
+export async function retireVersion(
+  documentId: string,
+  versionId: string,
+  idToken?: string | null,
+): Promise<VersionLifecycleResponse> {
+  const token = requireToken(idToken);
+  const res = await apiFetch(
+    `/api/v1/documents/${encodeURIComponent(documentId)}/versions/${encodeURIComponent(versionId)}/retire`,
+    { method: "POST", cache: "no-store" },
+    token,
+  );
+  if (!res.ok) await raiseIfNotOk(res, `Retire failed (${res.status})`);
+  return res.json() as Promise<VersionLifecycleResponse>;
 }
 
 async function safeDetail(res: Response): Promise<string> {

@@ -53,15 +53,25 @@ Home route is the chat UI:
 - [ ] Change API `APP_VERSION` or `DEPLOYED_AT` → UI reloads within poll / focus
 - [ ] `/health` works without auth
 
-### Chat (5.2)
+### Chat (5.2–5.3)
 - [ ] Signed-in user can send a question; assistant bubble appears
 - [ ] Loading indicator while waiting for answer; send disabled while in-flight
 - [ ] Empty input cannot send
 - [ ] Refusal path: clear “Insufficient evidence” UI when no published docs / refuse
 - [ ] Citations listed under successful answers (snippet, title/filename, score)
 - [ ] Enter sends; Shift+Enter inserts newline
+- [ ] **↑** cycles previous user prompts; **↓** returns toward draft
+- [ ] **`/clear`** (exact) clears local messages (system note; no API call)
 - [ ] Network/API error shows alert; 401 offers re-login
 - [ ] Usable on narrow mobile width (~320–390px)
+
+### Admin (5.3)
+- [ ] Viewer: no Admin nav; `/admin` redirects home
+- [ ] content_admin/admin: Admin page with upload form
+- [ ] Upload PDF/MD ≤50MB → shows document_id, version_id, status, gcs_uri
+- [ ] Document list loads; expand shows versions with status badges
+- [ ] Publish enabled only for `ready`; Retire for `ready`/`published`
+- [ ] Backend 403 if role insufficient (even if UI mishandled)
 
 ## PWA
 
