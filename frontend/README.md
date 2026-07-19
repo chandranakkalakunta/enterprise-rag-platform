@@ -32,8 +32,20 @@ npm run dev
 
 API must have matching `GOOGLE_OAUTH_CLIENT_ID` and `AUTH_DEV_BYPASS=false` for real OAuth.
 
+## Chat (Phase 5.2)
+
+Home route is the chat UI:
+
+- Composer + message list (user / assistant)
+- `POST /api/v1/query/answer` with `Authorization: Bearer <Google ID token>`
+- Body: `{ "query": "<text>", "top_k": 5 }`
+- Renders answer text; **refusal** banner when `refused=true` (no citations shown)
+- Citations: title/filename, snippet, score
+- **Keyboard:** Enter sends; Shift+Enter newline
+
 ## Manual checklist
 
+### Auth shell (5.1)
 - [ ] Login with allowlisted Google account → redirected to Chat
 - [ ] Domain-denied account → API 403 message on login
 - [ ] Admin / content_admin → Admin nav link visible
@@ -41,7 +53,17 @@ API must have matching `GOOGLE_OAUTH_CLIENT_ID` and `AUTH_DEV_BYPASS=false` for 
 - [ ] Change API `APP_VERSION` or `DEPLOYED_AT` → UI reloads within poll / focus
 - [ ] `/health` works without auth
 
+### Chat (5.2)
+- [ ] Signed-in user can send a question; assistant bubble appears
+- [ ] Loading indicator while waiting for answer; send disabled while in-flight
+- [ ] Empty input cannot send
+- [ ] Refusal path: clear “Insufficient evidence” UI when no published docs / refuse
+- [ ] Citations listed under successful answers (snippet, title/filename, score)
+- [ ] Enter sends; Shift+Enter inserts newline
+- [ ] Network/API error shows alert; 401 offers re-login
+- [ ] Usable on narrow mobile width (~320–390px)
+
 ## PWA
 
 - `public/manifest.webmanifest` + icon (installable baseline)
-- Full service worker offline shell can land in Phase 5.2 if split cleaner
+- Full service worker offline shell can land later (Phase 5.3+)

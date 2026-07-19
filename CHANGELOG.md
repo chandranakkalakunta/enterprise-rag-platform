@@ -10,13 +10,14 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- **Phase 5.2+:** chat composer + citations UI; admin upload UI; fuller PWA service worker
+- **Phase 5.3+:** admin upload/publish UI; fuller PWA service worker; multi-turn chat
 - **Phase 4 (after Phase 5):** hybrid BM25 + RRF, multi-turn, ACL depth, fuller guardrails, semantic cache
 - **Phase 6+:** HTTPS LB + Cloud Armor; Binary Auth; analytics
 - Backlog: inactive vector hard-delete (BL-RAG-16); async worker; live E2E hardening
 - Coordinator: OAuth secret versions + consent screen; detect-secrets (BL-FND-08)
 
 ### Added
+- **Phase 5.2:** Chat UI — composer, message list, grounded answers via `POST /api/v1/query/answer`, refusal state, citation list (Enter to send / Shift+Enter newline)
 - **Phase 5.1:** Google ID token AuthN; domain allowlist; Firestore `users/{uid}` + role bootstrap (`ADMIN_EMAILS` / `CONTENT_ADMIN_EMAILS`)
 - **Phase 5.1:** `GET /api/v1/me`; protect upload/publish/retire (content_admin|admin) and search/answer (authenticated); public `/health`/`/ready`
 - **Phase 5.1:** Next.js 15 shell — GIS login, Chat home, Admin nav by role, health version auto-reload, PWA manifest placeholder

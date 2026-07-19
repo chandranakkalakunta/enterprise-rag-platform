@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-19 (**Phase 5.1** — Google auth, `/me`, frontend shell, version watcher)
+Last updated: 2026-07-19 (**Phase 5.2** — chat UI with grounded answers + citations)
 
 ---
 
@@ -155,9 +155,9 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-VOICE-01 | STT integration | Deferred | Phase 5 | In-PWA only |
 | BL-VOICE-02 | TTS integration | Deferred | Phase 5 | In-PWA only |
 | BL-PWA-00 | **ADR-0010 PWA shell + backend version auto-reload** | Done | ✓ Done — Phase 5.0 | Poll /health; hard reload on version change |
-| BL-PWA-01 | Installable PWA shell (manifest + SW) | In Progress | **Phase 5.1** | Manifest + icon done; full SW → 5.2 |
-| BL-PWA-02 | Offline UI shell | Todo | **Phase 5.2** | P2; shell only, not offline RAG |
-| BL-PWA-03 | Responsive desktop/tablet/mobile layouts | In Progress | **Phase 5.1** | Shell responsive baseline |
+| BL-PWA-01 | Installable PWA shell (manifest + SW) | In Progress | **Phase 5.1+** | Manifest + icon done; full SW → later |
+| BL-PWA-02 | Offline UI shell | Todo | **Phase 5.3+** | P2; shell only, not offline RAG |
+| BL-PWA-03 | Responsive desktop/tablet/mobile layouts | In Progress | **Phase 5.1–5.2** | Shell + chat mobile-friendly |
 | BL-PWA-04 | Health poll + force reload on version/deployed_at change | Done | ✓ Done — Phase 5.1 | ADR-0010 VersionWatcher |
 
 ## Analytics & Evaluation
@@ -176,8 +176,8 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 |----|------|--------|------------|-------|
 | BL-FE-01 | Next.js app scaffold beyond placeholder | Done | ✓ Done — Phase 5.1 | `frontend/` · Tailwind · App Router |
 | BL-FE-02 | shadcn/ui + app shell per ui-specs | In Progress | **Phase 5.1** | Button + nav shell; fuller components later |
-| BL-FE-03 | Chat UI + citations rendering | Todo | **Phase 5.2+** | Calls `/query/answer` + `/query/search` |
-| BL-FE-04 | Admin document management UI | Todo | **Phase 5.2+** | Upload/publish APIs already exist |
+| BL-FE-03 | Chat UI + citations rendering | Done | ✓ Done — Phase 5.2 | Composer + `/query/answer`; refusal + citations |
+| BL-FE-04 | Admin document management UI | Todo | **Phase 5.3** | Upload/publish APIs already exist |
 | BL-FE-05 | History + settings screens | Todo | **Phase 5** | |
 | BL-FE-06 | Analytics dashboard UI | Todo | Phase 6 | |
 | BL-FE-07 | A11y pass on primary flows | Todo | **Phase 5** | |
@@ -207,6 +207,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-19** — **Phase 5.2:** Chat UI — answer, refusal, citations via `/api/v1/query/answer`.
 - **2026-07-19** — **Phase 5.1:** Google auth + `/me` + Next.js shell + version watcher (ADR-0009/0010 implementation).
 - **2026-07-19** — **Phase 5.0:** ADR-0009 AuthN/AuthZ + Firestore users; ADR-0010 PWA + backend version auto-reload.
 - **2026-07-19** — **Phase 3 complete:** retrospective + engineering report; next track Phase 5 then Phase 4.
