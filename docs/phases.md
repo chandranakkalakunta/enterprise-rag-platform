@@ -36,8 +36,8 @@ Update when a phase opens or closes.
 | **5.4** | PWA install + closeout polish | ✅ **Complete** | [PWA runbook](./runbooks/pwa-install.md) |
 | **4** | **RAG quality** (eval + hybrid + multi-turn/ACL later) | 🔄 **In progress** | Starts with ADR-0011 |
 | **4.0** | ADR-0011 Eval + Hybrid retrieval design | ✅ **Accepted** | [ADR-0011](./adr/0011-rag-evaluation-and-hybrid-retrieval.md) |
-| **4.1** | Eval harness + golden set + dense baseline | 🔜 **Next** | After 4.0 merge |
-| **4.2** | Hybrid MVP (in-process BM25 + RRF in LangGraph retrieve) | Planned | After baseline metrics |
+| **4.1** | Eval harness + golden set + dense baseline | ✅ **Complete** | [eval runbook](./runbooks/rag-eval-harness.md) · [baseline](./eval/baseline-dense.md) |
+| **4.2** | Hybrid MVP (in-process BM25 + RRF in LangGraph retrieve) | 🔜 **Next** | After 4.1 merge |
 | **6** | Analytics & Evaluation ops (+ Binary Auth / LB hardening) | Planned | BigQuery; NFR-SEC-14; HTTPS LB + Cloud Armor |
 
 ## Delivery order (Coordinator — post–Phase 3)
@@ -99,4 +99,11 @@ Phase 5 delivers a **full Progressive Web App**: responsive on **desktop, tablet
 - [ADR-0011 RAG evaluation + hybrid retrieval](./adr/0011-rag-evaluation-and-hybrid-retrieval.md) — eval first; BM25 + dense + RRF inside LangGraph `retrieve`; in-process BM25 MVP then optional OpenSearch  
 - Order: **4.1** eval harness + dense baseline → **4.2** hybrid MVP  
 
-Last updated: 2026-07-19 (Phase 4.0 ADR-0011)
+### Phase 4.1 implementation links
+
+- Golden set: `eval/golden/golden_set.jsonl` (25 cases)  
+- Harness: `python -m eval.harness` (fixture | live)  
+- Baseline notes: [docs/eval/baseline-dense.md](./eval/baseline-dense.md)  
+- Runbook: [rag-eval-harness.md](./runbooks/rag-eval-harness.md)  
+
+Last updated: 2026-07-19 (Phase 4.1 eval harness)

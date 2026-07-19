@@ -1,0 +1,517 @@
+{
+  "description": "Synthetic dense-only fixture responses for CI baseline (not live API). Tokens embedded so recall/list metrics pass under perfect retrieval+answer.",
+  "mode": "fixture",
+  "responses": {
+    "fact-001": {
+      "answer": "Based on published docs: asia-south1. See architecture, README.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning asia-south1 architecture README",
+          "filename": "architecture.md",
+          "title": "architecture",
+          "document_id": "doc-fact-001",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning asia-south1 architecture README",
+          "filename": "architecture.md",
+          "title": "architecture",
+          "document_id": "doc-fact-001",
+          "score": 0.91
+        }
+      ]
+    },
+    "fact-002": {
+      "answer": "Based on published docs: chandraailabs.com, gmail.com. See oauth, security, ADR-0009.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning chandraailabs.com gmail.com oauth security ADR-0009",
+          "filename": "oauth.md",
+          "title": "oauth",
+          "document_id": "doc-fact-002",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning chandraailabs.com gmail.com oauth security ADR-0009",
+          "filename": "oauth.md",
+          "title": "oauth",
+          "document_id": "doc-fact-002",
+          "score": 0.91
+        }
+      ]
+    },
+    "fact-003": {
+      "answer": "Based on published docs: 5. See ADR-0008, retrieval.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning 5 ADR-0008 retrieval",
+          "filename": "ADR-0008.md",
+          "title": "ADR-0008",
+          "document_id": "doc-fact-003",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning 5 ADR-0008 retrieval",
+          "filename": "ADR-0008.md",
+          "title": "ADR-0008",
+          "document_id": "doc-fact-003",
+          "score": 0.91
+        }
+      ]
+    },
+    "fact-004": {
+      "answer": "Based on published docs: Firestore. See ADR-0006, Firestore.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning Firestore ADR-0006 Firestore",
+          "filename": "ADR-0006.md",
+          "title": "ADR-0006",
+          "document_id": "doc-fact-004",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning Firestore ADR-0006 Firestore",
+          "filename": "ADR-0006.md",
+          "title": "ADR-0006",
+          "document_id": "doc-fact-004",
+          "score": 0.91
+        }
+      ]
+    },
+    "fact-005": {
+      "answer": "Based on published docs: published. See vector-search, ADR-0007.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning published vector-search ADR-0007",
+          "filename": "vector-search.md",
+          "title": "vector-search",
+          "document_id": "doc-fact-005",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning published vector-search ADR-0007",
+          "filename": "vector-search.md",
+          "title": "vector-search",
+          "document_id": "doc-fact-005",
+          "score": 0.91
+        }
+      ]
+    },
+    "list-001": {
+      "answer": "Based on published docs: 5.0, 5.1, 5.2, 5.3, 5.4. See phase-5, retrospectives.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning 5.0 5.1 5.2 5.3 5.4 phase-5 retrospectives",
+          "filename": "phase-5.md",
+          "title": "phase-5",
+          "document_id": "doc-list-001",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning 5.0 5.1 5.2 5.3 5.4 phase-5 retrospectives",
+          "filename": "phase-5.md",
+          "title": "phase-5",
+          "document_id": "doc-list-001",
+          "score": 0.91
+        }
+      ]
+    },
+    "list-002": {
+      "answer": "Based on published docs: viewer, content_admin, admin. See ADR-0009, auth.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning viewer content_admin admin ADR-0009 auth",
+          "filename": "ADR-0009.md",
+          "title": "ADR-0009",
+          "document_id": "doc-list-002",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning viewer content_admin admin ADR-0009 auth",
+          "filename": "ADR-0009.md",
+          "title": "ADR-0009",
+          "document_id": "doc-list-002",
+          "score": 0.91
+        }
+      ]
+    },
+    "list-003": {
+      "answer": "Based on published docs: rag-api, rag-ingest, rag-web. See architecture, cloud-run.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning rag-api rag-ingest rag-web architecture cloud-run",
+          "filename": "architecture.md",
+          "title": "architecture",
+          "document_id": "doc-list-003",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning rag-api rag-ingest rag-web architecture cloud-run",
+          "filename": "architecture.md",
+          "title": "architecture",
+          "document_id": "doc-list-003",
+          "score": 0.91
+        }
+      ]
+    },
+    "list-004": {
+      "answer": "Based on published docs: PDF, Markdown. See upload, document.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning PDF Markdown upload document",
+          "filename": "upload.md",
+          "title": "upload",
+          "document_id": "doc-list-004",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning PDF Markdown upload document",
+          "filename": "upload.md",
+          "title": "upload",
+          "document_id": "doc-list-004",
+          "score": 0.91
+        }
+      ]
+    },
+    "list-005": {
+      "answer": "Based on published docs: ready, published, retired. See lifecycle, version.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning ready published retired lifecycle version",
+          "filename": "lifecycle.md",
+          "title": "lifecycle",
+          "document_id": "doc-list-005",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning ready published retired lifecycle version",
+          "filename": "lifecycle.md",
+          "title": "lifecycle",
+          "document_id": "doc-list-005",
+          "score": 0.91
+        }
+      ]
+    },
+    "list-006": {
+      "answer": "Based on published docs: Recall@k, groundedness, completeness, refusal. See ADR-0011, eval.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning Recall@k groundedness completeness refusal ADR-0011 eval",
+          "filename": "ADR-0011.md",
+          "title": "ADR-0011",
+          "document_id": "doc-list-006",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning Recall@k groundedness completeness refusal ADR-0011 eval",
+          "filename": "ADR-0011.md",
+          "title": "ADR-0011",
+          "document_id": "doc-list-006",
+          "score": 0.91
+        }
+      ]
+    },
+    "refuse-001": {
+      "answer": "I do not have enough published evidence in the knowledge base to answer that question.",
+      "refused": true,
+      "refusal_reason": "no_usable_hits",
+      "hits": [],
+      "citations": []
+    },
+    "refuse-002": {
+      "answer": "I do not have enough published evidence in the knowledge base to answer that question.",
+      "refused": true,
+      "refusal_reason": "no_usable_hits",
+      "hits": [],
+      "citations": []
+    },
+    "refuse-003": {
+      "answer": "I do not have enough published evidence in the knowledge base to answer that question.",
+      "refused": true,
+      "refusal_reason": "no_usable_hits",
+      "hits": [],
+      "citations": []
+    },
+    "refuse-004": {
+      "answer": "I do not have enough published evidence in the knowledge base to answer that question.",
+      "refused": true,
+      "refusal_reason": "no_usable_hits",
+      "hits": [],
+      "citations": []
+    },
+    "doc-001": {
+      "answer": "Based on published docs: health, reload. See ADR-0010, version, health.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning health reload ADR-0010 version health",
+          "filename": "ADR-0010.md",
+          "title": "ADR-0010",
+          "document_id": "doc-doc-001",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning health reload ADR-0010 version health",
+          "filename": "ADR-0010.md",
+          "title": "ADR-0010",
+          "document_id": "doc-doc-001",
+          "score": 0.91
+        }
+      ]
+    },
+    "doc-002": {
+      "answer": "Based on published docs: users, Firestore. See ADR-0009, Firestore, users.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning users Firestore ADR-0009 Firestore users",
+          "filename": "ADR-0009.md",
+          "title": "ADR-0009",
+          "document_id": "doc-doc-002",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning users Firestore ADR-0009 Firestore users",
+          "filename": "ADR-0009.md",
+          "title": "ADR-0009",
+          "document_id": "doc-doc-002",
+          "score": 0.91
+        }
+      ]
+    },
+    "doc-003": {
+      "answer": "Based on published docs: text-embedding-005. See ADR-0007, embedding.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning text-embedding-005 ADR-0007 embedding",
+          "filename": "ADR-0007.md",
+          "title": "ADR-0007",
+          "document_id": "doc-doc-003",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning text-embedding-005 ADR-0007 embedding",
+          "filename": "ADR-0007.md",
+          "title": "ADR-0007",
+          "document_id": "doc-doc-003",
+          "score": 0.91
+        }
+      ]
+    },
+    "doc-004": {
+      "answer": "Based on published docs: 0.2. See ADR-0008, generation.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning 0.2 ADR-0008 generation",
+          "filename": "ADR-0008.md",
+          "title": "ADR-0008",
+          "document_id": "doc-doc-004",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning 0.2 ADR-0008 generation",
+          "filename": "ADR-0008.md",
+          "title": "ADR-0008",
+          "document_id": "doc-doc-004",
+          "score": 0.91
+        }
+      ]
+    },
+    "doc-005": {
+      "answer": "Based on published docs: 50. See upload, document.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning 50 upload document",
+          "filename": "upload.md",
+          "title": "upload",
+          "document_id": "doc-doc-005",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning 50 upload document",
+          "filename": "upload.md",
+          "title": "upload",
+          "document_id": "doc-doc-005",
+          "score": 0.91
+        }
+      ]
+    },
+    "doc-006": {
+      "answer": "Based on published docs: no, PWA. See phase-5, PWA, ADR-0010.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning no PWA phase-5 PWA ADR-0010",
+          "filename": "phase-5.md",
+          "title": "phase-5",
+          "document_id": "doc-doc-006",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning no PWA phase-5 PWA ADR-0010",
+          "filename": "phase-5.md",
+          "title": "phase-5",
+          "document_id": "doc-doc-006",
+          "score": 0.91
+        }
+      ]
+    },
+    "doc-007": {
+      "answer": "Based on published docs: RRF. See ADR-0011, RRF.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning RRF ADR-0011 RRF",
+          "filename": "ADR-0011.md",
+          "title": "ADR-0011",
+          "document_id": "doc-doc-007",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning RRF ADR-0011 RRF",
+          "filename": "ADR-0011.md",
+          "title": "ADR-0011",
+          "document_id": "doc-doc-007",
+          "score": 0.91
+        }
+      ]
+    },
+    "doc-008": {
+      "answer": "Based on published docs: ADMIN_EMAILS. See ADMIN_EMAILS, auth.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning ADMIN_EMAILS ADMIN_EMAILS auth",
+          "filename": "ADMIN_EMAILS.md",
+          "title": "ADMIN_EMAILS",
+          "document_id": "doc-doc-008",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning ADMIN_EMAILS ADMIN_EMAILS auth",
+          "filename": "ADMIN_EMAILS.md",
+          "title": "ADMIN_EMAILS",
+          "document_id": "doc-doc-008",
+          "score": 0.91
+        }
+      ]
+    },
+    "lex-001": {
+      "answer": "Based on published docs: datapoint, json. See vector-search, datapoint.json.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning datapoint json vector-search datapoint.json",
+          "filename": "vector-search.md",
+          "title": "vector-search",
+          "document_id": "doc-lex-001",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning datapoint json vector-search datapoint.json",
+          "filename": "vector-search.md",
+          "title": "vector-search",
+          "document_id": "doc-lex-001",
+          "score": 0.91
+        }
+      ]
+    },
+    "lex-002": {
+      "answer": "Based on published docs: rag-oauth-client-id, rag-oauth-client-secret. See secret, oauth.",
+      "refused": false,
+      "refusal_reason": null,
+      "hits": [
+        {
+          "text": "Evidence chunk mentioning rag-oauth-client-id rag-oauth-client-secret secret oauth",
+          "filename": "secret.md",
+          "title": "secret",
+          "document_id": "doc-lex-002",
+          "score": 0.91
+        }
+      ],
+      "citations": [
+        {
+          "snippet": "Evidence chunk mentioning rag-oauth-client-id rag-oauth-client-secret secret oauth",
+          "filename": "secret.md",
+          "title": "secret",
+          "document_id": "doc-lex-002",
+          "score": 0.91
+        }
+      ]
+    }
+  }
+}

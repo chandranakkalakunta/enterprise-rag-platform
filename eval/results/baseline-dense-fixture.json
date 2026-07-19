@@ -1,0 +1,401 @@
+{
+  "total": 25,
+  "errors": 0,
+  "refusal_accuracy": 1.0,
+  "refusal_n": 25,
+  "recall_rate": 1.0,
+  "recall_n": 21,
+  "mean_list_completeness": 1.0,
+  "list_n": 21,
+  "mode": "fixture",
+  "top_k": 5,
+  "cases": [
+    {
+      "case_id": "fact-001",
+      "category": "factoid",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "asia-south1"
+      ],
+      "must_include_misses": [],
+      "notes": "Region lock from foundation docs",
+      "error": null
+    },
+    {
+      "case_id": "fact-002",
+      "category": "factoid",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "chandraailabs.com",
+        "gmail.com"
+      ],
+      "must_include_misses": [],
+      "notes": "Auth allowlist",
+      "error": null
+    },
+    {
+      "case_id": "fact-003",
+      "category": "factoid",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "5"
+      ],
+      "must_include_misses": [],
+      "notes": "RETRIEVAL_TOP_K product default",
+      "error": null
+    },
+    {
+      "case_id": "fact-004",
+      "category": "factoid",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "Firestore"
+      ],
+      "must_include_misses": [],
+      "notes": "ADR-0006",
+      "error": null
+    },
+    {
+      "case_id": "fact-005",
+      "category": "definition",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "published"
+      ],
+      "must_include_misses": [],
+      "notes": "Published/active filter",
+      "error": null
+    },
+    {
+      "case_id": "list-001",
+      "category": "list",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "5.0",
+        "5.1",
+        "5.2",
+        "5.3",
+        "5.4"
+      ],
+      "must_include_misses": [],
+      "notes": "List completeness — phase slices",
+      "error": null
+    },
+    {
+      "case_id": "list-002",
+      "category": "list",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "viewer",
+        "content_admin",
+        "admin"
+      ],
+      "must_include_misses": [],
+      "notes": "Role vocabulary",
+      "error": null
+    },
+    {
+      "case_id": "list-003",
+      "category": "list",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "rag-api",
+        "rag-ingest",
+        "rag-web"
+      ],
+      "must_include_misses": [],
+      "notes": "Service names",
+      "error": null
+    },
+    {
+      "case_id": "list-004",
+      "category": "list",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "PDF",
+        "Markdown"
+      ],
+      "must_include_misses": [],
+      "notes": "Upload matrix",
+      "error": null
+    },
+    {
+      "case_id": "list-005",
+      "category": "list",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "ready",
+        "published",
+        "retired"
+      ],
+      "must_include_misses": [],
+      "notes": "Lifecycle states (subset)",
+      "error": null
+    },
+    {
+      "case_id": "list-006",
+      "category": "list_table",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "Recall@k",
+        "groundedness",
+        "completeness",
+        "refusal"
+      ],
+      "must_include_misses": [],
+      "notes": "Eval metric list from ADR",
+      "error": null
+    },
+    {
+      "case_id": "refuse-001",
+      "category": "refusal",
+      "should_refuse": true,
+      "refused": true,
+      "refusal_ok": true,
+      "recall_ok": null,
+      "list_completeness": null,
+      "must_include_hits": [],
+      "must_include_misses": [],
+      "notes": "PII / not in corpus — must refuse",
+      "error": null
+    },
+    {
+      "case_id": "refuse-002",
+      "category": "refusal",
+      "should_refuse": true,
+      "refused": true,
+      "refusal_ok": true,
+      "recall_ok": null,
+      "list_completeness": null,
+      "must_include_hits": [],
+      "must_include_misses": [],
+      "notes": "Missing phase — refuse",
+      "error": null
+    },
+    {
+      "case_id": "refuse-003",
+      "category": "refusal",
+      "should_refuse": true,
+      "refused": true,
+      "refusal_ok": true,
+      "recall_ok": null,
+      "list_completeness": null,
+      "must_include_hits": [],
+      "must_include_misses": [],
+      "notes": "External market data not in KB",
+      "error": null
+    },
+    {
+      "case_id": "refuse-004",
+      "category": "refusal",
+      "should_refuse": true,
+      "refused": true,
+      "refusal_ok": true,
+      "recall_ok": null,
+      "list_completeness": null,
+      "must_include_hits": [],
+      "must_include_misses": [],
+      "notes": "HR facts not published",
+      "error": null
+    },
+    {
+      "case_id": "doc-001",
+      "category": "doc_specific",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "health",
+        "reload"
+      ],
+      "must_include_misses": [],
+      "notes": "PWA version auto-reload",
+      "error": null
+    },
+    {
+      "case_id": "doc-002",
+      "category": "doc_specific",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "users",
+        "Firestore"
+      ],
+      "must_include_misses": [],
+      "notes": "users/{uid}",
+      "error": null
+    },
+    {
+      "case_id": "doc-003",
+      "category": "doc_specific",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "text-embedding-005"
+      ],
+      "must_include_misses": [],
+      "notes": "Default embed model id",
+      "error": null
+    },
+    {
+      "case_id": "doc-004",
+      "category": "doc_specific",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "0.2"
+      ],
+      "must_include_misses": [],
+      "notes": "GENERATION_TEMPERATURE",
+      "error": null
+    },
+    {
+      "case_id": "doc-005",
+      "category": "doc_specific",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "50"
+      ],
+      "must_include_misses": [],
+      "notes": "50MB limit",
+      "error": null
+    },
+    {
+      "case_id": "doc-006",
+      "category": "doc_specific",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "no",
+        "PWA"
+      ],
+      "must_include_misses": [],
+      "notes": "PWA only — no native stores",
+      "error": null
+    },
+    {
+      "case_id": "doc-007",
+      "category": "doc_specific",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "RRF"
+      ],
+      "must_include_misses": [],
+      "notes": "Reciprocal Rank Fusion",
+      "error": null
+    },
+    {
+      "case_id": "doc-008",
+      "category": "doc_specific",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "ADMIN_EMAILS"
+      ],
+      "must_include_misses": [],
+      "notes": "Config bootstrap",
+      "error": null
+    },
+    {
+      "case_id": "lex-001",
+      "category": "lexical",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "datapoint",
+        "json"
+      ],
+      "must_include_misses": [],
+      "notes": "Dense-miss risk for exact filenames; lexical hybrid target",
+      "error": null
+    },
+    {
+      "case_id": "lex-002",
+      "category": "lexical",
+      "should_refuse": false,
+      "refused": false,
+      "refusal_ok": true,
+      "recall_ok": true,
+      "list_completeness": 1.0,
+      "must_include_hits": [
+        "rag-oauth-client-id",
+        "rag-oauth-client-secret"
+      ],
+      "must_include_misses": [],
+      "notes": "Exact secret id strings",
+      "error": null
+    }
+  ]
+}
