@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-19 (**Phase 4.0** — ADR-0011 eval + hybrid retrieval)
+Last updated: 2026-07-19 (**Phase 4.1** — eval harness + dense baseline)
 
 ---
 
@@ -120,7 +120,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | ID | Item | Status | Target | Notes |
 |----|------|--------|--------|-------|
 | BL-RAG-18 | **ADR-0011** eval + hybrid design | Done | ✓ Done — Phase 4.0 | Eval first; BM25+dense+RRF; LangGraph retrieve |
-| BL-RAG-19 | **Eval harness + golden set + dense baseline** | Todo | **Phase 4.1** | Recall@k, groundedness, list completeness, refusal |
+| BL-RAG-19 | **Eval harness + golden set + dense baseline** | Done | ✓ Done — Phase 4.1 | `eval/` harness; fixture baseline; live optional |
 | BL-RAG-01 | Hybrid BM25 + dense retrieval | Todo | **Phase 4.2** | In-process BM25 MVP (ADR-0011) |
 | BL-RAG-02 | RRF fusion | Todo | **Phase 4.2** | Fuse dense + BM25 ranks |
 | BL-RAG-20 | Citation dedupe by document_id | Todo | **Phase 4.x** | Reduce same-doc citation spam |
@@ -170,7 +170,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 |----|------|--------|------------|-------|
 | BL-ANL-01 | BigQuery query metadata pipeline | Todo | Phase 6 | |
 | BL-ANL-02 | Latency percentile dashboards | Todo | Phase 6 | Basic earlier |
-| BL-ANL-03 | Held-out evaluation set + quality gate | In Progress | **Phase 4.1** (harness); Phase 6 ops | ADR-0011 golden set |
+| BL-ANL-03 | Held-out evaluation set + quality gate | Done | ✓ Done — Phase 4.1 harness; Phase 6 ops polish | Golden set + fixture baseline |
 | BL-ANL-04 | Token / cost dashboards | Deferred | Phase 6 | |
 | BL-ANL-05 | Cache hit metrics | Todo | Phase 3–6 | With semantic cache |
 
@@ -211,6 +211,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-19** — **Phase 4.1:** Golden set (25) + dense eval harness + fixture baseline; hybrid still off.
 - **2026-07-19** — **Phase 4.0:** ADR-0011 RAG evaluation + hybrid BM25+dense RRF (Accepted).
 - **2026-07-19** — **Phase 5 complete:** 5.4 PWA install + polish; retro + eng report; next Phase 4.
 - **2026-07-19** — **Phase 5.3:** Admin upload/list/publish/retire UI; chat ↑ history + `/clear`; GET documents APIs.
