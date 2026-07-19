@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+import threading
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator
 
@@ -41,6 +42,25 @@ def _health_payload(status: str) -> dict[str, Any]:
     }
 
 
+def _bm25_warm_start_background() -> None:
+    """Rebuild in-process BM25 from published corpus (never crashes the process)."""
+    try:
+        from app.core.config import get_settings
+        from app.services.bm25_ops import rebuild_bm25_from_published
+
+        settings = get_settings()
+        if not settings.bm25_warm_start:
+            logger.info("bm25_warm_start_disabled")
+            return
+        if not settings.hybrid_retrieval_enabled and not settings.bm25_always_index:
+            logger.info("bm25_warm_start_skipped hybrid_off")
+            return
+        result = rebuild_bm25_from_published(settings=settings)
+        logger.info("bm25_warm_start_result %s", result)
+    except Exception:  # noqa: BLE001
+        logger.exception("bm25_warm_start_thread_failed")
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     logger.info(
@@ -48,6 +68,13 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         SERVICE_NAME,
         _app_version(),
     )
+    # Phase 4.3: warm BM25 without blocking readiness
+    warm = threading.Thread(
+        target=_bm25_warm_start_background,
+        name="bm25-warm-start",
+        daemon=True,
+    )
+    warm.start()
     yield
 
 

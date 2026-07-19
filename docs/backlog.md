@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-19 (**Phase 4.2** — hybrid BM25 + dense RRF)
+Last updated: 2026-07-19 (**Phase 4.3** — citation dedupe + BM25 warm-start)
 
 ---
 
@@ -123,7 +123,8 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-RAG-19 | **Eval harness + golden set + dense baseline** | Done | ✓ Done — Phase 4.1 | `eval/` harness; fixture baseline; live optional |
 | BL-RAG-01 | Hybrid BM25 + dense retrieval | Done | ✓ Done — Phase 4.2 | In-process Okapi BM25 + hybrid_search |
 | BL-RAG-02 | RRF fusion | Done | ✓ Done — Phase 4.2 | `rrf.py` fuse_rrf; RRF_K default 60 |
-| BL-RAG-20 | Citation dedupe by document_id | Todo | **Phase 4.x** | Reduce same-doc citation spam |
+| BL-RAG-20 | Citation dedupe by document_id | Done | ✓ Done — Phase 4.3 | CITATION_MAX_PER_DOC + FE safety net |
+| BL-RAG-22 | BM25 warm-start from published corpus | Done | ✓ Done — Phase 4.3 | Startup background rebuild |
 | BL-RAG-21 | Optional managed OpenSearch for BM25 | Todo | **Later** | If in-process scale insufficient |
 | BL-RAG-05 | ACL-aware retrieval (deep) | Todo | **Phase 4+** | Beyond published-only |
 | BL-RAG-06 | Multi-turn conversation memory | Deferred | **Phase 4+** | |
@@ -211,6 +212,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-19** — **Phase 4.3:** Citation dedupe by document_id; BM25 warm-start on API startup.
 - **2026-07-19** — **Phase 4.2:** Hybrid BM25+dense RRF; publish/retire BM25 hooks; feature flag.
 - **2026-07-19** — **Phase 4.1:** Golden set (25) + dense eval harness + fixture baseline; hybrid still off.
 - **2026-07-19** — **Phase 4.0:** ADR-0011 RAG evaluation + hybrid BM25+dense RRF (Accepted).

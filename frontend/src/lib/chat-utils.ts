@@ -4,18 +4,46 @@
 
 import type { AnswerCitation, AnswerResponse, ChatMessage } from "@/lib/types";
 
+/**
+ * Safety-net dedupe by document_id (API also dedupes; keep max score).
+ * maxPerDoc default 1 matches CITATION_MAX_PER_DOC.
+ */
+export function dedupeCitationsByDocument(
+  citations: AnswerCitation[],
+  maxPerDoc: number = 1,
+): AnswerCitation[] {
+  if (maxPerDoc < 1 || !citations.length) return [];
+  const groups = new Map<string, AnswerCitation[]>();
+  const order: string[] = [];
+  for (const c of citations) {
+    const key = (c.document_id || "").trim() || `__nodoc__:${order.length}`;
+    if (!groups.has(key)) {
+      groups.set(key, []);
+      order.push(key);
+    }
+    groups.get(key)!.push(c);
+  }
+  const out: AnswerCitation[] = [];
+  for (const key of order) {
+    const group = (groups.get(key) || []).slice().sort((a, b) => b.score - a.score);
+    out.push(...group.slice(0, maxPerDoc));
+  }
+  return out;
+}
+
 export function buildAssistantMessage(
   result: AnswerResponse,
   id: string,
   createdAt: number = Date.now(),
 ): ChatMessage {
+  const raw = result.refused ? [] : (result.citations ?? []);
   return {
     id,
     role: "assistant",
     content: result.answer,
     refused: result.refused,
     refusalReason: result.refusal_reason,
-    citations: result.refused ? [] : (result.citations ?? []),
+    citations: dedupeCitationsByDocument(raw, 1),
     createdAt,
   };
 }

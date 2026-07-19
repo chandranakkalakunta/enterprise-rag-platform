@@ -38,6 +38,7 @@ Update when a phase opens or closes.
 | **4.0** | ADR-0011 Eval + Hybrid retrieval design | ✅ **Accepted** | [ADR-0011](./adr/0011-rag-evaluation-and-hybrid-retrieval.md) |
 | **4.1** | Eval harness + golden set + dense baseline | ✅ **Complete** | [eval runbook](./runbooks/rag-eval-harness.md) · [baseline](./eval/baseline-dense.md) |
 | **4.2** | Hybrid MVP (in-process BM25 + RRF in LangGraph retrieve) | ✅ **Complete** | `hybrid_search` · BM25 index · RRF |
+| **4.3** | Citation dedupe + BM25 warm-start | ✅ **Complete** | `CITATION_MAX_PER_DOC` · startup rebuild |
 | **6** | Analytics & Evaluation ops (+ Binary Auth / LB hardening) | Planned | BigQuery; NFR-SEC-14; HTTPS LB + Cloud Armor |
 
 ## Delivery order (Coordinator — post–Phase 3)
@@ -112,4 +113,10 @@ Phase 5 delivers a **full Progressive Web App**: responsive on **desktop, tablet
 - In-process Okapi BM25; RRF (`RRF_K=60`); publish upsert / retire remove  
 - APIs: `/query/search` + `/query/answer` retrieve via `hybrid_search`  
 
-Last updated: 2026-07-19 (Phase 4.2 hybrid retrieval)
+### Phase 4.3 implementation links
+
+- Citation dedupe by `document_id` (`CITATION_MAX_PER_DOC`, merge snippets)  
+- BM25 warm-start on API startup from published versions  
+- Runbook: [citation-dedupe-bm25-warm.md](./runbooks/citation-dedupe-bm25-warm.md)  
+
+Last updated: 2026-07-19 (Phase 4.3 citation dedupe + BM25 warm)

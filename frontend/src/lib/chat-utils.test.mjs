@@ -4,14 +4,35 @@
  * logic is inlined below to avoid TS loader).
  */
 
+function dedupeCitationsByDocument(citations, maxPerDoc = 1) {
+  if (maxPerDoc < 1 || !citations.length) return [];
+  const groups = new Map();
+  const order = [];
+  for (const c of citations) {
+    const key = (c.document_id || "").trim() || `__nodoc__:${order.length}`;
+    if (!groups.has(key)) {
+      groups.set(key, []);
+      order.push(key);
+    }
+    groups.get(key).push(c);
+  }
+  const out = [];
+  for (const key of order) {
+    const group = (groups.get(key) || []).slice().sort((a, b) => b.score - a.score);
+    out.push(...group.slice(0, maxPerDoc));
+  }
+  return out;
+}
+
 function buildAssistantMessage(result, id, createdAt = Date.now()) {
+  const raw = result.refused ? [] : result.citations ?? [];
   return {
     id,
     role: "assistant",
     content: result.answer,
     refused: result.refused,
     refusalReason: result.refusal_reason,
-    citations: result.refused ? [] : result.citations ?? [],
+    citations: dedupeCitationsByDocument(raw, 1),
     createdAt,
   };
 }
@@ -51,6 +72,25 @@ const refused = buildAssistantMessage(
 assert(refused.refused === true, "refused flag");
 assert(refused.citations.length === 0, "no fake citations on refusal");
 assert(refused.refusalReason === "no_hits", "refusal reason");
+
+const multi = buildAssistantMessage(
+  {
+    query: "q",
+    answer: "A",
+    refused: false,
+    refusal_reason: null,
+    citations: [
+      { snippet: "a", score: 0.5, document_id: "d1", version_id: "v", chunk_index: 0, title: "T", filename: "f.md" },
+      { snippet: "b", score: 0.9, document_id: "d1", version_id: "v", chunk_index: 1, title: "T", filename: "f.md" },
+      { snippet: "c", score: 0.7, document_id: "d2", version_id: "v", chunk_index: 0, title: "U", filename: "g.md" },
+    ],
+    retrieval: { top_k: 5, hit_count: 3 },
+  },
+  "id-3",
+  3,
+);
+assert(multi.citations.length === 2, "dedupe to two docs");
+assert(multi.citations.find((c) => c.document_id === "d1").score === 0.9, "best score kept");
 
 function meaningfulCitationField(value) {
   const t = value?.trim?.() ?? (typeof value === "string" ? value.trim() : value);
