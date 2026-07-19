@@ -1,11 +1,10 @@
 # Architecture Overview — Enterprise RAG Platform
 
-**Version:** 1.4 (Phase 5.1 auth + app shell)  
+**Version:** 1.5 (Phase 4.0 hybrid + eval ADR)  
 **Date:** 2026-07-19  
-**Status:** Phase 3 complete; Phase 5.1 Google auth, `/me`, Next.js shell, version watcher  
+**Status:** Phase 5 complete; Phase 4.0 quality track (eval + hybrid design)  
 
-
-Governing ADRs: [0001](../adr/0001-high-level-architecture.md) · [0002](../adr/0002-tech-stack.md) · [0003](../adr/0003-document-versioning.md) · [0004](../adr/0004-guardrails-architecture.md) · [0005](../adr/0005-security-posture.md) · [0006](../adr/0006-metadata-store-firestore.md) · [0007](../adr/0007-embedding-and-vector-search.md) · [0008](../adr/0008-retrieval-and-grounded-generation.md) · [0009](../adr/0009-authn-authz-user-profiles.md) · [0010](../adr/0010-pwa-shell-version-reload.md)
+Governing ADRs: [0001](../adr/0001-high-level-architecture.md) · [0002](../adr/0002-tech-stack.md) · [0003](../adr/0003-document-versioning.md) · [0004](../adr/0004-guardrails-architecture.md) · [0005](../adr/0005-security-posture.md) · [0006](../adr/0006-metadata-store-firestore.md) · [0007](../adr/0007-embedding-and-vector-search.md) · [0008](../adr/0008-retrieval-and-grounded-generation.md) · [0009](../adr/0009-authn-authz-user-profiles.md) · [0010](../adr/0010-pwa-shell-version-reload.md) · [0011](../adr/0011-rag-evaluation-and-hybrid-retrieval.md)
 
 ---
 
@@ -158,9 +157,10 @@ Enqueue mechanism (Cloud Tasks vs Pub/Sub) remains a small open decision; **work
 
 ## 5. LangGraph query path
 
-**Phase 3.0 lock:** [ADR-0008](../adr/0008-retrieval-and-grounded-generation.md). **MVP graph is dense-only** (Vector Search); hybrid BM25 + RRF deferred to later 3.x / Phase 4.
+**Phase 3.0 lock:** [ADR-0008](../adr/0008-retrieval-and-grounded-generation.md) (dense-only MVP).  
+**Phase 4.0 lock:** [ADR-0011](../adr/0011-rag-evaluation-and-hybrid-retrieval.md) — **eval first**, then hybrid BM25 + dense + **RRF** inside `retrieve`.
 
-### 5.1 MVP graph (first implementation)
+### 5.1 Phase 3 MVP graph (shipped)
 
 ```text
  START → authz_ok → retrieve (Vector Search, published/active only, top_k=5)
@@ -169,8 +169,8 @@ Enqueue mechanism (Cloud Tasks vs Pub/Sub) remains a small open decision; **work
                  → package_citations → END
 ```
 
-| Node | Responsibility (MVP) |
-|------|----------------------|
+| Node | Responsibility (Phase 3) |
+|------|--------------------------|
 | `retrieve` | Embed query → Vertex Vector Search; filter active/published versions only |
 | `evidence_check` | Minimal: no/weak hits → refuse (do not invent) |
 | `generate` | Gemini via `GENERATION_MODEL_ID`; context = retrieved chunk text |
@@ -178,14 +178,33 @@ Enqueue mechanism (Cloud Tasks vs Pub/Sub) remains a small open decision; **work
 
 Config: `EMBEDDING_MODEL_ID`, `GENERATION_MODEL_ID`, `RETRIEVAL_TOP_K` (default **5**), `GENERATION_TEMPERATURE` (default **0.2**). See ADR-0007 / ADR-0008.
 
-### 5.2 Target graph (later)
+### 5.2 Phase 4 retrieve extension (ADR-0011)
+
+Same outer graph; **`retrieve` expands**:
+
+```text
+ retrieve:
+   dense (Vector Search)  ──┐
+   BM25 (published chunks) ─┴─→ RRF fuse → top_k fused hits
+ → evidence_check → generate | refuse
+```
+
+| Item | Choice |
+|------|--------|
+| Eval | Golden set + Recall@k, groundedness, list completeness, refusal correctness **before** default hybrid |
+| BM25 MVP | In-process index; reload on publish/retire |
+| BM25 later | Optional managed OpenSearch if scale requires |
+| Product APIs | Unchanged (`/query/search`, `/query/answer`) |
+| Rollback | Dense-only via config flag |
+
+### 5.3 Longer-term graph (still deferred)
 
 ```text
  START → authz_ok → input_guard → cache_lookup ─┬─ hit → output_guard → END
                     │                           │
                     │                        miss
                     │                           ▼
-                    │              retrieve (filters + hybrid BM25 + dense + RRF)
+                    │              retrieve (hybrid + RRF as 5.2)
                     │                           ▼
                     │                    grounding_gate → generate → citations
                     │                           ▼
@@ -327,7 +346,8 @@ Environments supply `gcp_project_id` via tfvars (not committed secrets).
 | ~~Retrieval + grounded generation MVP flow~~ | **Resolved** | [ADR-0008](../adr/0008-retrieval-and-grounded-generation.md) |
 | ~~AuthN/AuthZ + Firestore user profiles~~ | **Resolved** | [ADR-0009](../adr/0009-authn-authz-user-profiles.md) |
 | ~~PWA shell + backend version auto-reload~~ | **Resolved** | [ADR-0010](../adr/0010-pwa-shell-version-reload.md) |
-| Semantic cache store (Memorystore vs other) | BL-DEC-06 | Phase 4 |
+| ~~Eval methodology + hybrid BM25/dense/RRF~~ | **Resolved** | [ADR-0011](../adr/0011-rag-evaluation-and-hybrid-retrieval.md) |
+| Semantic cache store (Memorystore vs other) | BL-DEC-06 | Phase 4+ |
 | Hybrid BM25 + RRF | BL-RAG-01/02 | Phase 4 |
 | STT/TTS provider | BL-DEC-04 | Phase 5 (voice sub-track) |
 | Ingest enqueue: Cloud Tasks vs Pub/Sub | BL-DEC-05 | Backlog (worker) |
