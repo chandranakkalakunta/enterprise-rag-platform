@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-19 (**Phase 5.0** — ADR-0009 auth/roles + ADR-0010 PWA version reload)
+Last updated: 2026-07-19 (**Phase 5.1** — Google auth, `/me`, frontend shell, version watcher)
 
 ---
 
@@ -61,8 +61,8 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-SEC-01 | Google OAuth + domain allowlist (chandraailabs.com, gmail.com) | In Progress | **Phase 5.0–5.1** | ADR-0009 Accepted; implement 5.1 |
-| BL-SEC-02 | Role model: viewer / content_admin / admin (Firestore) | Done | ✓ Done — Phase 5.0 / ADR-0009 | Replaces earlier user/operator labels |
+| BL-SEC-01 | Google OAuth + domain allowlist (chandraailabs.com, gmail.com) | Done | ✓ Done — Phase 5.1 | ID token verify + domain gate; Coordinator fills OAuth secrets |
+| BL-SEC-02 | Role model: viewer / content_admin / admin (Firestore) | Done | ✓ Done — Phase 5.0–5.1 | ADR-0009 + users/{uid} upsert |
 | BL-SEC-03 | Secret Manager shells + CMEK | Done | ✓ Done — Phase 1.3 / PR #5 | Values via runbook later |
 | BL-SEC-04 | Non-root Docker images (uid 1001) | Done | ✓ Done — Phase 1.7 / PR #9 | API Dockerfile |
 | BL-SEC-05 | PII-free structured logging | Todo | Backlog | Baseline JSON logging exists |
@@ -70,9 +70,9 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-SEC-07 | Custom SAs per service + least privilege | Done | ✓ Done — Phase 1.2 / PR #4 | Baseline roles |
 | BL-SEC-08 | Enforce zero JSON SA keys (WIF only for CI) | Done | ✓ Done — Phase 1.2 / PR #4 | NFR-SEC-10 |
 | BL-SEC-09 | **Binary Authorization for Cloud Run** | Todo | **P1 / Phase 6+** | NFR-SEC-14; deferred supply-chain hardening |
-| BL-SEC-10 | **Real content_admin auth on ingest endpoints** | Todo | **Phase 5.1+** | Replace AUTH_DEV_BYPASS; enforce via ADR-0009 roles |
-| BL-SEC-11 | **ADR-0009 AuthN/AuthZ + Firestore users/{uid}** | Done | ✓ Done — Phase 5.0 | Google OAuth; ADMIN_EMAILS bootstrap |
-| BL-SEC-12 | **GET /api/v1/me** + session/token validation | Todo | **Phase 5.1** | UI source for role display |
+| BL-SEC-10 | **Real content_admin auth on ingest endpoints** | Done | ✓ Done — Phase 5.1 | content_admin\|admin on upload/publish/retire; AUTH_DEV_BYPASS tests-only |
+| BL-SEC-11 | **ADR-0009 AuthN/AuthZ + Firestore users/{uid}** | Done | ✓ Done — Phase 5.0–5.1 | Google OAuth; ADMIN_EMAILS bootstrap |
+| BL-SEC-12 | **GET /api/v1/me** + session/token validation | Done | ✓ Done — Phase 5.1 | UI source for role display |
 
 ## Ingestion & Versioning
 
@@ -155,10 +155,10 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-VOICE-01 | STT integration | Deferred | Phase 5 | In-PWA only |
 | BL-VOICE-02 | TTS integration | Deferred | Phase 5 | In-PWA only |
 | BL-PWA-00 | **ADR-0010 PWA shell + backend version auto-reload** | Done | ✓ Done — Phase 5.0 | Poll /health; hard reload on version change |
-| BL-PWA-01 | Installable PWA shell (manifest + SW) | Todo | **Phase 5.1+** | Desktop/tablet/mobile browser |
-| BL-PWA-02 | Offline UI shell | Todo | **Phase 5** | P2; shell only, not offline RAG |
-| BL-PWA-03 | Responsive desktop/tablet/mobile layouts | Todo | **Phase 5.1+** | Full PWA profile |
-| BL-PWA-04 | Health poll + force reload on version/deployed_at change | Todo | **Phase 5.1** | ADR-0010 mandatory |
+| BL-PWA-01 | Installable PWA shell (manifest + SW) | In Progress | **Phase 5.1** | Manifest + icon done; full SW → 5.2 |
+| BL-PWA-02 | Offline UI shell | Todo | **Phase 5.2** | P2; shell only, not offline RAG |
+| BL-PWA-03 | Responsive desktop/tablet/mobile layouts | In Progress | **Phase 5.1** | Shell responsive baseline |
+| BL-PWA-04 | Health poll + force reload on version/deployed_at change | Done | ✓ Done — Phase 5.1 | ADR-0010 VersionWatcher |
 
 ## Analytics & Evaluation
 
@@ -174,15 +174,15 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-FE-01 | Next.js app scaffold beyond placeholder | Todo | **Phase 5.1** | `frontend/` · ADR-0010 |
-| BL-FE-02 | shadcn/ui + app shell per ui-specs | Todo | **Phase 5.1** | Spec locked Phase 0 |
-| BL-FE-03 | Chat UI + citations rendering | Todo | **Phase 5.1+** | Calls `/query/answer` + `/query/search` |
-| BL-FE-04 | Admin document management UI | Todo | **Phase 5** | Upload/publish APIs already exist |
+| BL-FE-01 | Next.js app scaffold beyond placeholder | Done | ✓ Done — Phase 5.1 | `frontend/` · Tailwind · App Router |
+| BL-FE-02 | shadcn/ui + app shell per ui-specs | In Progress | **Phase 5.1** | Button + nav shell; fuller components later |
+| BL-FE-03 | Chat UI + citations rendering | Todo | **Phase 5.2+** | Calls `/query/answer` + `/query/search` |
+| BL-FE-04 | Admin document management UI | Todo | **Phase 5.2+** | Upload/publish APIs already exist |
 | BL-FE-05 | History + settings screens | Todo | **Phase 5** | |
 | BL-FE-06 | Analytics dashboard UI | Todo | Phase 6 | |
 | BL-FE-07 | A11y pass on primary flows | Todo | **Phase 5** | |
 | BL-FE-08 | Multimodal table/image rendering | Todo | Phase 4–5 | P1 · US-MM-02 |
-| BL-FE-09 | Domain-denied login state | Todo | **Phase 5** (with OAuth) | |
+| BL-FE-09 | Domain-denied login state | Done | ✓ Done — Phase 5.1 | API 403 surfaced on login error |
 
 ## Open decisions (need ADR soon)
 
@@ -207,6 +207,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 ## Recently completed
 
+- **2026-07-19** — **Phase 5.1:** Google auth + `/me` + Next.js shell + version watcher (ADR-0009/0010 implementation).
 - **2026-07-19** — **Phase 5.0:** ADR-0009 AuthN/AuthZ + Firestore users; ADR-0010 PWA + backend version auto-reload.
 - **2026-07-19** — **Phase 3 complete:** retrospective + engineering report; next track Phase 5 then Phase 4.
 - **2026-07-19** — **Phase 3.4:** Grounded answer `POST /api/v1/query/answer` (LangGraph + Gemini + citations + refusal).

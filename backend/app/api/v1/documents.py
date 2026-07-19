@@ -183,7 +183,7 @@ async def publish_document_version(
     Transition version ready → published and set document.active_version_id.
 
     If another version was published (active), it is set to retired atomically.
-    Temporary auth only — content_admin role check comes later.
+    Requires content_admin or admin (ADR-0009).
     """
     try:
         client = firestore.Client(project=settings.gcp_project_id)

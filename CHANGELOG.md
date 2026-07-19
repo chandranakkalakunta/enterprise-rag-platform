@@ -10,17 +10,20 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- **Phase 5.1:** OAuth + `/api/v1/me`, Next.js app shell, PWA SW, health version auto-reload implementation
-- **Phase 5:** chat UI, admin UI, citations rendering (no native apps)
+- **Phase 5.2+:** chat composer + citations UI; admin upload UI; fuller PWA service worker
 - **Phase 4 (after Phase 5):** hybrid BM25 + RRF, multi-turn, ACL depth, fuller guardrails, semantic cache
 - **Phase 6+:** HTTPS LB + Cloud Armor; Binary Auth; analytics
 - Backlog: inactive vector hard-delete (BL-RAG-16); async worker; live E2E hardening
-- Coordinator: OAuth secret versions; detect-secrets (BL-FND-08)
+- Coordinator: OAuth secret versions + consent screen; detect-secrets (BL-FND-08)
 
 ### Added
-- **Phase 5.0:** [ADR-0009](docs/adr/0009-authn-authz-user-profiles.md) — Google OAuth, domain allowlist, Firestore `users/{uid}` roles (`viewer` / `content_admin` / `admin`), `ADMIN_EMAILS` bootstrap
-- **Phase 5.0:** [ADR-0010](docs/adr/0010-pwa-shell-version-reload.md) — Next.js PWA shell; poll `/health`; force reload on `version`/`deployed_at` change; LB deferred
-- **Phase 3 closure:** [Retrospective](docs/retrospectives/phase-3.md) · [Engineering report](docs/reports/phase-3-engineering-report.md); delivery order **Phase 5 then Phase 4**
+- **Phase 5.1:** Google ID token AuthN; domain allowlist; Firestore `users/{uid}` + role bootstrap (`ADMIN_EMAILS` / `CONTENT_ADMIN_EMAILS`)
+- **Phase 5.1:** `GET /api/v1/me`; protect upload/publish/retire (content_admin|admin) and search/answer (authenticated); public `/health`/`/ready`
+- **Phase 5.1:** Next.js 15 shell — GIS login, Chat home, Admin nav by role, health version auto-reload, PWA manifest placeholder
+- **Phase 5.1:** Runbook [oauth-and-frontend-auth.md](docs/runbooks/oauth-and-frontend-auth.md)
+- **Phase 5.0:** [ADR-0009](docs/adr/0009-authn-authz-user-profiles.md) — Google OAuth, domain allowlist, Firestore roles
+- **Phase 5.0:** [ADR-0010](docs/adr/0010-pwa-shell-version-reload.md) — PWA shell + mandatory version auto-reload
+- **Phase 3 closure:** delivery order **Phase 5 then Phase 4**
 
 ---
 

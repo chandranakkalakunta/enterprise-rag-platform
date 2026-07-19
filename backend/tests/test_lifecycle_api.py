@@ -65,7 +65,7 @@ def test_publish_ready_success(client: TestClient) -> None:
     kwargs = pub.call_args.kwargs
     assert kwargs["document_id"] == "doc-1"
     assert kwargs["version_id"] == "ver-1"
-    assert kwargs["actor"] == "dev-bypass"
+    assert kwargs["actor"] == "dev@chandraailabs.com"
 
 
 def test_publish_supersedes_previous(client: TestClient) -> None:
@@ -208,22 +208,40 @@ def test_publish_requires_auth_when_bypass_off(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("AUTH_DEV_BYPASS", "false")
-    monkeypatch.setenv("UPLOAD_BEARER_TOKEN", "secret")
+    monkeypatch.setenv("GOOGLE_OAUTH_CLIENT_ID", "client-id")
+    monkeypatch.setenv("ALLOWED_EMAIL_DOMAINS", "gmail.com")
     get_settings.cache_clear()
     local = TestClient(app)
 
     denied = local.post("/api/v1/documents/d1/versions/v1/publish")
     assert denied.status_code == 401
 
+    claims = {
+        "iss": "https://accounts.google.com",
+        "sub": "uid-pub",
+        "email": "admin@gmail.com",
+        "email_verified": True,
+        "name": "Admin",
+    }
+    profile = {
+        "uid": "uid-pub",
+        "email": "admin@gmail.com",
+        "display_name": "Admin",
+        "photo_url": None,
+        "role": "content_admin",
+    }
     result = LifecycleResult(
         document_id="d1",
         version_id="v1",
         status="published",
         active_version_id="v1",
         published_at=NOW,
-        published_by="bearer-token",
+        published_by="admin@gmail.com",
     )
     with (
+        patch("app.core.auth.verify_google_id_token", return_value=claims),
+        patch("app.core.auth.resolve_or_create_user", return_value=profile),
+        patch("app.core.auth.firestore.Client", return_value=MagicMock()),
         patch("app.api.v1.documents.firestore.Client", return_value=MagicMock()),
         patch("app.api.v1.documents.publish_version", return_value=result) as pub,
         patch("google.cloud.storage.Client", return_value=MagicMock()),
@@ -234,7 +252,7 @@ def test_publish_requires_auth_when_bypass_off(
     ):
         ok = local.post(
             "/api/v1/documents/d1/versions/v1/publish",
-            headers={"Authorization": "Bearer secret"},
+            headers={"Authorization": "Bearer google-id-token"},
         )
     assert ok.status_code == 200
-    assert pub.call_args.kwargs["actor"] == "bearer-token"
+    assert pub.call_args.kwargs["actor"] == "admin@gmail.com"

@@ -1,16 +1,36 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+
+import { AppShell } from "@/components/app-shell";
+
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Enterprise RAG Platform",
-  description: "Production-grade enterprise retrieval-augmented generation",
+  description:
+    "Production-grade enterprise retrieval-augmented generation — chat and content admin",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/icon.svg",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "ERP RAG",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0f172a",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body style={{ fontFamily: "system-ui, sans-serif", margin: 0 }}>
-        {children}
+      <body>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

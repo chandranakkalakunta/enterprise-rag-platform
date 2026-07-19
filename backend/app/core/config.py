@@ -9,7 +9,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Runtime configuration for rag-api (Phase 2.1 upload path)."""
+    """Runtime configuration for rag-api (Phase 5.1 auth + prior features)."""
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -34,19 +34,40 @@ class Settings(BaseSettings):
         description="Max upload size in bytes (default 50 MiB)",
     )
 
-    # Temporary auth (full OAuth + content_admin in later phase)
+    # Auth (Phase 5.1 / ADR-0009)
     auth_dev_bypass: bool = Field(
         default=True,
         description=(
-            "If true, upload endpoints skip Bearer checks (local/dev only). "
+            "If true, skip Google token verification and inject a local admin "
+            "context (automated tests / local only). "
             "Set AUTH_DEV_BYPASS=false in shared environments."
         ),
     )
-    upload_bearer_token: str = Field(
+    google_oauth_client_id: str = Field(
         default="",
         description=(
-            "When AUTH_DEV_BYPASS=false, require Authorization: Bearer <this value>. "
-            "Empty token with bypass=false rejects all requests."
+            "Google OAuth 2.0 Web client ID (audience for ID token verify). "
+            "Env: GOOGLE_OAUTH_CLIENT_ID. Secret shell: rag-oauth-client-id."
+        ),
+    )
+    admin_emails: str = Field(
+        default="",
+        description=(
+            "Comma-separated emails elevated to role admin on login (ADMIN_EMAILS)"
+        ),
+    )
+    content_admin_emails: str = Field(
+        default="",
+        description=(
+            "Comma-separated emails elevated to content_admin if not admin "
+            "(CONTENT_ADMIN_EMAILS)"
+        ),
+    )
+    allowed_email_domains: str = Field(
+        default="chandraailabs.com,gmail.com",
+        description=(
+            "Comma-separated allowed email domains (ALLOWED_EMAIL_DOMAINS). "
+            "Default: chandraailabs.com,gmail.com"
         ),
     )
 
@@ -132,3 +153,10 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Cached settings singleton."""
     return Settings()
+
+
+def parse_csv_set(raw: str) -> set[str]:
+    """Parse comma-separated config into a lowercased stripped set."""
+    if not raw or not raw.strip():
+        return set()
+    return {part.strip().lower() for part in raw.split(",") if part.strip()}
