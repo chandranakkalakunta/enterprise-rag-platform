@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { MessageSquare } from "lucide-react";
 
+import { ChatPanel } from "@/components/chat/chat-panel";
 import { useAuth } from "@/lib/auth-context";
-import { getApiBaseUrl } from "@/lib/config";
 
 export default function ChatHomePage() {
   const { user, loading } = useAuth();
@@ -34,30 +34,20 @@ export default function ChatHomePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
-          <MessageSquare className="h-6 w-6 text-primary" aria-hidden />
-          Chat
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Signed in as {user.email} ({user.role}). Full message UI lands in Phase
-          5.2+; API is ready at{" "}
-          <code className="rounded bg-muted px-1 text-xs">
-            POST {getApiBaseUrl()}/api/v1/query/answer
-          </code>
-          .
-        </p>
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h1 className="flex items-center gap-2 text-xl font-semibold tracking-tight sm:text-2xl">
+            <MessageSquare className="h-5 w-5 text-primary sm:h-6 sm:w-6" aria-hidden />
+            Chat
+          </h1>
+          <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
+            Grounded answers with citations · {user.email}
+          </p>
+        </div>
       </div>
 
-      <div className="rounded-lg border border-dashed border-border bg-muted/40 p-8 text-center">
-        <p className="text-sm text-muted-foreground">
-          Chat composer and citation rendering arrive next. Backend{" "}
-          <code className="text-xs">/api/v1/query/search</code> and{" "}
-          <code className="text-xs">/answer</code> require a Google ID token
-          (viewer+).
-        </p>
-      </div>
+      <ChatPanel />
     </div>
   );
 }

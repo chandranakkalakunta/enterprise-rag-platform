@@ -12,7 +12,24 @@
  */
 
 import { getApiBaseUrl } from "@/lib/config";
-import type { HealthResponse, MeResponse } from "@/lib/types";
+import type {
+  AnswerRequest,
+  AnswerResponse,
+  HealthResponse,
+  MeResponse,
+} from "@/lib/types";
+
+export class ApiError extends Error {
+  readonly status: number;
+  readonly detail: string;
+
+  constructor(status: number, detail: string) {
+    super(detail || `Request failed (${status})`);
+    this.name = "ApiError";
+    this.status = status;
+    this.detail = detail;
+  }
+}
 
 const TOKEN_KEY = "erp_google_id_token";
 
@@ -74,10 +91,71 @@ export async function apiFetch(
   });
 }
 
+/**
+ * Grounded answer (Phase 3.4 API / Phase 5.2 UI).
+ * Requires Google ID token (viewer+).
+ */
+export async function postAnswer(
+  body: AnswerRequest,
+  idToken?: string | null,
+): Promise<AnswerResponse> {
+  const token = idToken ?? getStoredIdToken();
+  if (!token) {
+    throw new ApiError(401, "Not signed in — please sign in again");
+  }
+
+  const res = await apiFetch(
+    "/api/v1/query/answer",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: body.query,
+        ...(body.top_k != null ? { top_k: body.top_k } : {}),
+        ...(body.collection ? { collection: body.collection } : {}),
+      }),
+      cache: "no-store",
+    },
+    token,
+  );
+
+  if (!res.ok) {
+    const detail = await safeDetail(res);
+    if (res.status === 401) {
+      throw new ApiError(
+        401,
+        detail || "Session expired or invalid — please sign in again",
+      );
+    }
+    if (res.status === 403) {
+      throw new ApiError(403, detail || "Access denied for this account");
+    }
+    if (res.status === 503) {
+      throw new ApiError(
+        503,
+        detail || "Answer service temporarily unavailable",
+      );
+    }
+    throw new ApiError(res.status, detail || `Answer failed (${res.status})`);
+  }
+
+  return res.json() as Promise<AnswerResponse>;
+}
+
 async function safeDetail(res: Response): Promise<string> {
   try {
-    const body = (await res.json()) as { detail?: string };
-    return typeof body.detail === "string" ? body.detail : "";
+    const body = (await res.json()) as { detail?: unknown };
+    if (typeof body.detail === "string") return body.detail;
+    if (Array.isArray(body.detail)) {
+      return body.detail
+        .map((d) =>
+          typeof d === "object" && d && "msg" in d
+            ? String((d as { msg: string }).msg)
+            : JSON.stringify(d),
+        )
+        .join("; ");
+    }
+    return "";
   } catch {
     return "";
   }
