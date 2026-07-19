@@ -10,23 +10,33 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- Later 3.x / Phase 4: hybrid BM25 + RRF, semantic cache, full guardrail stack
-- Backlog: inactive vector hard-delete (BL-RAG-16); async worker; content_admin auth
+- **Phase 5 (next major track):** full responsive PWA/UI (chat, admin, citations; no native apps)
+- **Phase 4 (after Phase 5):** hybrid BM25 + RRF, multi-turn, ACL depth, fuller guardrails, semantic cache
+- Backlog: inactive vector hard-delete (BL-RAG-16); async worker; content_admin auth; live E2E hardening
 - Coordinator: OAuth secret versions; Binary Auth (Phase 6+); detect-secrets (BL-FND-08)
-- Phase 5: full PWA (desktop/tablet/mobile browser + installable); no native apps
-- Optional Phase 3.5: live E2E index activation hardening / eval smoke
-
-### Fixed
-- **Phase 3.2 hotfix:** Vector Search index bootstrap — replace `.keep` with env-aware valid `datapoint.json` under `contents_delta_uri` (Vertex rejects unknown formats / `FAILED_PRECONDITION`). Dimension from `var.vector_search_dimensions`. See [vector-search runbook](docs/runbooks/vector-search.md).
 
 ### Added
-- **Phase 3.4:** `POST /api/v1/query/answer` — LangGraph retrieve → evidence check → Gemini (`GENERATION_MODEL_ID`, temp **0.2**) → citations; refuse on insufficient evidence; [grounded-answer runbook](docs/runbooks/grounded-answer-api.md)
-- **Phase 3.3:** `POST /api/v1/query/search` — embed query, dense FindNeighbors with `active=true` (+ optional collection), citation-ready results; no generation; [dense-search runbook](docs/runbooks/dense-search-api.md)
-- **Phase 3.2:** Vertex Vector Search (STREAM_UPDATE, SHARD_SIZE_SMALL, public endpoint); upsert on ready (`active=false`); activate on publish / deactivate on retire; metadata filters `active|collection|document_id|version_id`; [vector-search runbook](docs/runbooks/vector-search.md)
-- **Phase 3.1:** Vertex embedding pipeline on version ready — `embeddings.jsonl` under `processed/`; Firestore `embeddings_status` / model / URI; content `status=ready` independent of embed failure; default `EMBEDDING_MODEL_ID=text-embedding-005`
-- **Phase 3.0:** [ADR-0007](docs/adr/0007-embedding-and-vector-search.md) — Vertex embeddings + Vector Search; embed on ready / activate on publish / deactivate on retire; chunk text in datapoint; `EMBEDDING_MODEL_ID`, `RETRIEVAL_TOP_K` (default 5)
-- **Phase 3.0:** [ADR-0008](docs/adr/0008-retrieval-and-grounded-generation.md) — LangGraph MVP retrieve → evidence check → Gemini generate; published-only; `GENERATION_MODEL_ID`, temperature default 0.2; hybrid/RRF and full guards deferred
-- **Phase 2 closure:** [Retrospective](docs/retrospectives/phase-2.md) · [Engineering report](docs/reports/phase-2-engineering-report.md); backlog tidy; Phase 5 PWA scope lock
+- **Phase 3 closure:** [Retrospective](docs/retrospectives/phase-3.md) · [Engineering report](docs/reports/phase-3-engineering-report.md); delivery order **Phase 5 then Phase 4**
+
+---
+
+## [3.0.0] — 2026-07-19 — Phase 3: Retrieval MVP + Grounded Q&A (**Complete**)
+
+**PR range:** [#17](https://github.com/chandranakkalakunta/enterprise-rag-platform/pull/17)–[#22](https://github.com/chandranakkalakunta/enterprise-rag-platform/pull/22)  
+**Closure:** [Retrospective](docs/retrospectives/phase-3.md) · [Engineering report](docs/reports/phase-3-engineering-report.md)
+
+### Summary
+Dense published-only retrieval and grounded answers: embeddings → Vector Search → search API → LangGraph retrieve/check/generate with citations and minimal refusal.
+
+### Added
+- **Phase 3.4:** `POST /api/v1/query/answer` — LangGraph + Gemini + citations + refusal
+- **Phase 3.3:** `POST /api/v1/query/search` — active-only dense neighbors
+- **Phase 3.2:** Vector Search STREAM_UPDATE upsert + activate/deactivate on publish/retire
+- **Phase 3.1:** Embed on ready → `embeddings.jsonl` + `embeddings_status`
+- **Phase 3.0:** ADR-0007 / ADR-0008
+
+### Fixed
+- **Phase 3.2 hotfix:** Vector Search bootstrap `datapoint.json` (never `.keep` under `contents_delta_uri`)
 
 ---
 

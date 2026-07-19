@@ -21,40 +21,40 @@ Update when a phase opens or closes.
 | **2.2** | Firestore DB + text extraction + status | ✅ **Complete** | [Firestore](./runbooks/firestore-metadata.md) |
 | **2.3** | Chunking + processed/ storage + CR lifecycle | ✅ **Complete** | processed/full.txt + chunks.jsonl |
 | **2.4** | Publish + retire version lifecycle | ✅ **Complete** | [Lifecycle runbook](./runbooks/version-lifecycle.md) |
-| **3** | Retrieval Foundation + grounded Q&A | ✅ **MVP Complete** (3.0–3.4) | Dense path; hybrid deferred |
+| **3** | **Retrieval Foundation + grounded Q&A (MVP)** | ✅ **Complete** — PRs [#17](https://github.com/chandranakkalakunta/enterprise-rag-platform/pull/17)–[#22](https://github.com/chandranakkalakunta/enterprise-rag-platform/pull/22) | [retro](./retrospectives/phase-3.md) · [eng report](./reports/phase-3-engineering-report.md) |
 | **3.0** | ADR-0007 + ADR-0008 | ✅ **Accepted** | [Embeddings/VS](./adr/0007-embedding-and-vector-search.md) · [Retrieval/gen](./adr/0008-retrieval-and-grounded-generation.md) |
 | **3.1** | Embedding pipeline on ready | ✅ **Complete** | `embeddings.jsonl` + `embeddings_status` |
 | **3.2** | Vector Search upsert + activate/deactivate | ✅ **Complete** | [vector-search runbook](./runbooks/vector-search.md) |
+| **3.2h** | Bootstrap datapoint.json hotfix | ✅ **Complete** | Never `.keep` under `contents_delta_uri` |
 | **3.3** | Dense Search API | ✅ **Complete** | [dense-search runbook](./runbooks/dense-search-api.md) |
 | **3.4** | Grounded Answer API (LangGraph + Gemini) | ✅ **Complete** | [grounded-answer runbook](./runbooks/grounded-answer-api.md) |
-| **4** | Multi-turn & ACL depth (+ hybrid/RRF stretch) | Planned | Conversations, collections, safety tuning |
-| **5** | Voice + **full PWA** | Planned | Desktop/tablet/mobile browser + installable PWA; **no native apps** |
+| **5** | Voice + **full PWA** | 🔜 **Next major track** | Desktop/tablet/mobile browser + installable; **no native apps** |
+| **4** | Multi-turn & ACL depth (+ hybrid/RRF, fuller guards) | Planned **after Phase 5** | RAG quality track |
 | **6** | Analytics & Evaluation (+ Binary Auth hardening) | Planned | BigQuery; NFR-SEC-14 / BL-SEC-09 |
 
-## Phase 0 closure links
+## Delivery order (Coordinator — post–Phase 3)
 
-- Retrospective: [docs/retrospectives/phase-0.md](./retrospectives/phase-0.md)
-- Engineering report: [docs/reports/phase-0-engineering-report.md](./reports/phase-0-engineering-report.md)
+Phase **numbers** are stable product tracks. **Execution order after Phase 3:**
 
-## Phase 1 closure links
+1. **Phase 5** — full responsive PWA / UI (consume search + answer APIs)  
+2. **Phase 4** — RAG quality (hybrid BM25+RRF, multi-turn, ACL depth, fuller guardrails)  
+3. **Phase 6** — analytics / eval / Binary Auth  
 
-- Retrospective: [docs/retrospectives/phase-1.md](./retrospectives/phase-1.md)
-- Engineering report: [docs/reports/phase-1-engineering-report.md](./reports/phase-1-engineering-report.md)
+## Phase 0–2 closure links
 
-## Phase 2 closure links
+- Phase 0: [retro](./retrospectives/phase-0.md) · [report](./reports/phase-0-engineering-report.md)  
+- Phase 1: [retro](./retrospectives/phase-1.md) · [report](./reports/phase-1-engineering-report.md)  
+- Phase 2: [retro](./retrospectives/phase-2.md) · [report](./reports/phase-2-engineering-report.md)  
 
-- Retrospective: [docs/retrospectives/phase-2.md](./retrospectives/phase-2.md)
-- Engineering report: [docs/reports/phase-2-engineering-report.md](./reports/phase-2-engineering-report.md)
-- Backlog: [docs/backlog.md](./backlog.md) (worker / job visibility / real auth moved out of Phase 2)
-- Protocol: [docs/grok-three-agent-protocol.md](./grok-three-agent-protocol.md)
+## Phase 3 closure links
 
-## Phase 3.0 decision links
-
-- [ADR-0007 Embedding & Vector Search](./adr/0007-embedding-and-vector-search.md) — Vertex embeddings; embed on ready; activate on publish  
-- [ADR-0008 Retrieval & Grounded Generation](./adr/0008-retrieval-and-grounded-generation.md) — LangGraph MVP; dense retrieve; Gemini; top_k=5; temp=0.2  
+- Retrospective: [docs/retrospectives/phase-3.md](./retrospectives/phase-3.md)  
+- Engineering report: [docs/reports/phase-3-engineering-report.md](./reports/phase-3-engineering-report.md)  
+- Backlog: [docs/backlog.md](./backlog.md) (hybrid / cache / guards / hard-delete remain open)  
+- Protocol: [docs/grok-three-agent-protocol.md](./grok-three-agent-protocol.md)  
 
 ## Phase 5 scope note
 
 Phase 5 delivers a **full Progressive Web App**: responsive on **desktop, tablet, and mobile browsers**, plus **installable** PWA shell (and optional voice). **Native App Store / Play Store apps are out of scope.**
 
-Last updated: 2026-07-18 (Phase 3.1 embedding pipeline)
+Last updated: 2026-07-19 (Phase 3 closure)
