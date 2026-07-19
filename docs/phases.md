@@ -28,17 +28,19 @@ Update when a phase opens or closes.
 | **3.2h** | Bootstrap datapoint.json hotfix | ✅ **Complete** | Never `.keep` under `contents_delta_uri` |
 | **3.3** | Dense Search API | ✅ **Complete** | [dense-search runbook](./runbooks/dense-search-api.md) |
 | **3.4** | Grounded Answer API (LangGraph + Gemini) | ✅ **Complete** | [grounded-answer runbook](./runbooks/grounded-answer-api.md) |
-| **5** | Voice + **full PWA** | 🔜 **Next major track** | Desktop/tablet/mobile browser + installable; **no native apps** |
+| **5** | Voice + **full PWA** | 🔄 **In progress** | Desktop/tablet/mobile browser + installable; **no native apps** |
+| **5.0** | ADR-0009 Auth/Roles + ADR-0010 PWA shell & version reload | ✅ **Accepted** | [Auth](./adr/0009-authn-authz-user-profiles.md) · [PWA/reload](./adr/0010-pwa-shell-version-reload.md) |
+| **5.1** | OAuth + `/me` + app shell (implementation) | 🔜 **Next** | After 5.0 merge |
 | **4** | Multi-turn & ACL depth (+ hybrid/RRF, fuller guards) | Planned **after Phase 5** | RAG quality track |
-| **6** | Analytics & Evaluation (+ Binary Auth hardening) | Planned | BigQuery; NFR-SEC-14 / BL-SEC-09 |
+| **6** | Analytics & Evaluation (+ Binary Auth / LB hardening) | Planned | BigQuery; NFR-SEC-14; HTTPS LB + Cloud Armor |
 
 ## Delivery order (Coordinator — post–Phase 3)
 
 Phase **numbers** are stable product tracks. **Execution order after Phase 3:**
 
-1. **Phase 5** — full responsive PWA / UI (consume search + answer APIs)  
+1. **Phase 5** — full responsive PWA / UI (consume search + answer APIs) — **started 5.0**  
 2. **Phase 4** — RAG quality (hybrid BM25+RRF, multi-turn, ACL depth, fuller guardrails)  
-3. **Phase 6** — analytics / eval / Binary Auth  
+3. **Phase 6** — analytics / eval / Binary Auth / **HTTPS LB + Cloud Armor**  
 
 ## Phase 0–2 closure links
 
@@ -57,4 +59,9 @@ Phase **numbers** are stable product tracks. **Execution order after Phase 3:**
 
 Phase 5 delivers a **full Progressive Web App**: responsive on **desktop, tablet, and mobile browsers**, plus **installable** PWA shell (and optional voice). **Native App Store / Play Store apps are out of scope.**
 
-Last updated: 2026-07-19 (Phase 3 closure)
+### Phase 5.0 decision links
+
+- [ADR-0009 AuthN/AuthZ + Firestore user profiles](./adr/0009-authn-authz-user-profiles.md) — Google OAuth; domain allowlist; roles `viewer` / `content_admin` / `admin`; `ADMIN_EMAILS` bootstrap  
+- [ADR-0010 PWA shell + backend version auto-reload](./adr/0010-pwa-shell-version-reload.md) — poll `/health`; reload on `version` / `deployed_at` change; LB deferred  
+
+Last updated: 2026-07-19 (Phase 5.0 ADRs)

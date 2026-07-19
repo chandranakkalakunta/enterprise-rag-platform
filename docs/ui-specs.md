@@ -332,16 +332,17 @@ UI talks only to backend voice endpoints (or approved browser STT for prototype)
 
 ## 7. PWA requirements
 
-### Phase 5 delivery profile (locked at Phase 2 closure)
+### Phase 5 delivery profile (locked; ADR-0010)
 
 | In scope | Out of scope |
 |----------|--------------|
 | Responsive web UI on **desktop, tablet, and mobile browsers** | Native iOS App Store apps |
 | **Installable PWA** (manifest + service worker app shell) | Native Android Play Store apps |
 | Optional voice (STT/TTS) inside the PWA | Separate native codebases |
-| Offline **shell** (not full offline RAG) | |
+| Offline **shell** (not full offline RAG) | Offline answers |
+| **Backend version auto-reload** (poll `/health`; hard reload on change) | Soft “please refresh” only |
 
-One web stack (Next.js PWA). No dual native product track.
+One web stack (Next.js PWA). No dual native product track. Auth: Google OAuth + domain allowlist; roles from backend — [ADR-0009](./adr/0009-authn-authz-user-profiles.md) · [ADR-0010](./adr/0010-pwa-shell-version-reload.md).
 
 ### 7.1 Manifest (minimum)
 

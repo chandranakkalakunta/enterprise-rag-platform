@@ -10,12 +10,16 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- **Phase 5 (next major track):** full responsive PWA/UI (chat, admin, citations; no native apps)
+- **Phase 5.1:** OAuth + `/api/v1/me`, Next.js app shell, PWA SW, health version auto-reload implementation
+- **Phase 5:** chat UI, admin UI, citations rendering (no native apps)
 - **Phase 4 (after Phase 5):** hybrid BM25 + RRF, multi-turn, ACL depth, fuller guardrails, semantic cache
-- Backlog: inactive vector hard-delete (BL-RAG-16); async worker; content_admin auth; live E2E hardening
-- Coordinator: OAuth secret versions; Binary Auth (Phase 6+); detect-secrets (BL-FND-08)
+- **Phase 6+:** HTTPS LB + Cloud Armor; Binary Auth; analytics
+- Backlog: inactive vector hard-delete (BL-RAG-16); async worker; live E2E hardening
+- Coordinator: OAuth secret versions; detect-secrets (BL-FND-08)
 
 ### Added
+- **Phase 5.0:** [ADR-0009](docs/adr/0009-authn-authz-user-profiles.md) — Google OAuth, domain allowlist, Firestore `users/{uid}` roles (`viewer` / `content_admin` / `admin`), `ADMIN_EMAILS` bootstrap
+- **Phase 5.0:** [ADR-0010](docs/adr/0010-pwa-shell-version-reload.md) — Next.js PWA shell; poll `/health`; force reload on `version`/`deployed_at` change; LB deferred
 - **Phase 3 closure:** [Retrospective](docs/retrospectives/phase-3.md) · [Engineering report](docs/reports/phase-3-engineering-report.md); delivery order **Phase 5 then Phase 4**
 
 ---

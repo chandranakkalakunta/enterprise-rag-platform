@@ -1,10 +1,10 @@
 # Architecture Overview — Enterprise RAG Platform
 
-**Version:** 1.2 (Phase 3.0 retrieval ADRs)  
-**Date:** 2026-07-18  
-**Status:** Phase 2 complete; Phase 3 retrieval foundation decisions locked  
+**Version:** 1.3 (Phase 5.0 frontend/auth ADRs)  
+**Date:** 2026-07-19  
+**Status:** Phase 3 complete; Phase 5 PWA/UI track open (auth + shell ADRs)  
 
-Governing ADRs: [0001](../adr/0001-high-level-architecture.md) · [0002](../adr/0002-tech-stack.md) · [0003](../adr/0003-document-versioning.md) · [0004](../adr/0004-guardrails-architecture.md) · [0005](../adr/0005-security-posture.md) · [0006](../adr/0006-metadata-store-firestore.md) · [0007](../adr/0007-embedding-and-vector-search.md) · [0008](../adr/0008-retrieval-and-grounded-generation.md)
+Governing ADRs: [0001](../adr/0001-high-level-architecture.md) · [0002](../adr/0002-tech-stack.md) · [0003](../adr/0003-document-versioning.md) · [0004](../adr/0004-guardrails-architecture.md) · [0005](../adr/0005-security-posture.md) · [0006](../adr/0006-metadata-store-firestore.md) · [0007](../adr/0007-embedding-and-vector-search.md) · [0008](../adr/0008-retrieval-and-grounded-generation.md) · [0009](../adr/0009-authn-authz-user-profiles.md) · [0010](../adr/0010-pwa-shell-version-reload.md)
 
 ---
 
@@ -144,11 +144,13 @@ Enqueue mechanism (Cloud Tasks vs Pub/Sub) remains a small open decision; **work
 
 | Concern | Implementation sketch |
 |---------|----------------------|
-| AuthN | Google OAuth → domain allowlist → JWT/session |
-| AuthZ | RBAC + ACL metadata filters |
+| AuthN | Google OAuth → domain allowlist (`chandraailabs.com`, `gmail.com`) — [ADR-0009](../adr/0009-authn-authz-user-profiles.md) |
+| AuthZ | RBAC (`viewer` / `content_admin` / `admin`) in Firestore `users/{uid}`; backend enforces; UI from `/api/v1/me` |
+| PWA | Next.js shell + installable SW; offline shell only; poll `/health` for version auto-reload — [ADR-0010](../adr/0010-pwa-shell-version-reload.md) |
 | Security | Zero JSON keys; WIF/OIDC; defence-in-depth ([ADR-0005](../adr/0005-security-posture.md)) |
 | Observability | JSON logs, metrics, correlation id, health version |
-| Config | Env + Secret Manager; model IDs pinned per env |
+| Config | Env + Secret Manager; model IDs pinned per env; `ADMIN_EMAILS` bootstrap |
+| Edge / LB | Cloud Run URLs for Phase 5; **HTTPS LB + Cloud Armor later** (Phase 6+ / pre-prod) |
 | IaC | Terraform modules under `terraform/` |
 
 ---
@@ -322,15 +324,16 @@ Environments supply `gcp_project_id` via tfvars (not committed secrets).
 | ~~Firestore vs Cloud SQL for metadata~~ | **Resolved** | [ADR-0006](../adr/0006-metadata-store-firestore.md) |
 | ~~Embedding provider / Vector Search / lifecycle~~ | **Resolved** | [ADR-0007](../adr/0007-embedding-and-vector-search.md) |
 | ~~Retrieval + grounded generation MVP flow~~ | **Resolved** | [ADR-0008](../adr/0008-retrieval-and-grounded-generation.md) |
-| Exact GA model id pin + index dimensions at create | Implement | Phase 3.1 (`EMBEDDING_MODEL_ID`) |
-| Semantic cache store (Memorystore vs other) | BL-DEC-06 | Later 3.x / Phase 4 |
-| Hybrid BM25 + RRF | BL-RAG-01/02 | Later 3.x / Phase 4 |
-| STT/TTS provider | BL-DEC-04 | Phase 5 ADR |
+| ~~AuthN/AuthZ + Firestore user profiles~~ | **Resolved** | [ADR-0009](../adr/0009-authn-authz-user-profiles.md) |
+| ~~PWA shell + backend version auto-reload~~ | **Resolved** | [ADR-0010](../adr/0010-pwa-shell-version-reload.md) |
+| Semantic cache store (Memorystore vs other) | BL-DEC-06 | Phase 4 |
+| Hybrid BM25 + RRF | BL-RAG-01/02 | Phase 4 |
+| STT/TTS provider | BL-DEC-04 | Phase 5 (voice sub-track) |
 | Ingest enqueue: Cloud Tasks vs Pub/Sub | BL-DEC-05 | Backlog (worker) |
-| Streaming tokens to client | BL-RAG-08 | Phase 3+ |
-| HTTPS LB + Cloud Armor | deferred | Pre-prod hardening |
+| Streaming tokens to client | BL-RAG-08 | Phase 4+ |
+| HTTPS LB + Cloud Armor | BL-FND-16 | **Phase 6+ / pre-prod** — not Phase 5 gate |
 
-**Locked:** LangGraph; Vertex embeddings + Vector Search; embed-on-ready / activate-on-publish; dense-first query path; `top_k=5`, temperature `0.2`; Firestore metadata; zero JSON keys + WIF.
+**Locked:** LangGraph; Vertex embeddings + Vector Search; dense grounded Q&A; Firestore metadata; Google OAuth + domain allowlist + Firestore roles; installable PWA + health version reload; zero JSON keys + WIF.
 
 ---
 
