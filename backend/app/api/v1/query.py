@@ -1,4 +1,4 @@
-"""Dense search API — Phase 3.3 (no generation)."""
+"""Query APIs — dense search (3.3) + grounded answer (3.4)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,15 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.auth import AuthContext, require_content_auth
 from app.core.config import Settings, get_settings
-from app.models.query import SearchHit, SearchRequest, SearchResponseBody
+from app.models.query import (
+    AnswerCitation,
+    AnswerResponseBody,
+    AnswerRetrievalMeta,
+    SearchHit,
+    SearchRequest,
+    SearchResponseBody,
+)
+from app.services.answer_graph import run_grounded_answer
 from app.services.search import (
     SearchServiceError,
     SearchValidationError,
@@ -40,7 +48,6 @@ async def search_chunks(
     Embed the query and retrieve top-k neighbors from Vertex Vector Search.
 
     Always filters ``active=true`` (published-only). Optional ``collection`` filter.
-    Does **not** call Gemini — generation is Phase 3.4.
     """
     try:
         result = dense_search(
@@ -82,4 +89,70 @@ async def search_chunks(
             )
             for r in result.results
         ],
+    )
+
+
+@router.post(
+    "/answer",
+    response_model=AnswerResponseBody,
+    summary="Grounded answer (retrieve → evidence check → Gemini)",
+    responses={
+        400: {"description": "Invalid query / top_k"},
+        401: {"description": "Unauthorized"},
+        503: {"description": "Retrieval or generation unavailable"},
+    },
+)
+async def answer_query(
+    body: SearchRequest,
+    auth: Annotated[AuthContext, Depends(require_content_auth)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> AnswerResponseBody:
+    """
+    LangGraph pipeline: dense retrieve (active-only) → evidence check → generate.
+
+    Refuses when no usable published evidence. Citations come from retrieval hits.
+    """
+    try:
+        result = run_grounded_answer(
+            settings=settings,
+            query=body.query,
+            top_k=body.top_k,
+            collection=body.collection,
+        )
+    except SearchValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=exc.message
+        ) from exc
+    except SearchServiceError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=exc.message
+        ) from exc
+
+    logger.info(
+        "answer_ok auth_mode=%s refused=%s citations=%s",
+        auth.auth_mode,
+        result.refused,
+        len(result.citations),
+    )
+    return AnswerResponseBody(
+        query=result.query,
+        answer=result.answer,
+        refused=result.refused,
+        refusal_reason=result.refusal_reason,
+        citations=[
+            AnswerCitation(
+                document_id=c.document_id,
+                version_id=c.version_id,
+                chunk_index=c.chunk_index,
+                title=c.title,
+                filename=c.filename,
+                snippet=c.snippet,
+                score=c.score,
+            )
+            for c in result.citations
+        ],
+        retrieval=AnswerRetrievalMeta(
+            top_k=result.top_k,
+            hit_count=result.hit_count,
+        ),
     )

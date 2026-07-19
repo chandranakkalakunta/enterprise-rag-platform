@@ -12,8 +12,12 @@ python-multipart==0.0.20
 google-cloud-storage==2.19.0
 google-cloud-firestore==2.19.0
 
-# Vertex AI embeddings (Phase 3.1)
+# Vertex AI embeddings + Gemini (Phase 3.1 / 3.4)
 google-cloud-aiplatform==1.74.0
+
+# Query orchestration (Phase 3.4 / ADR-0008)
+langgraph==0.2.60
+langchain-core==0.3.28
 
 # Text extraction (Phase 2.2 — isolated for future ingest-worker move)
 pdfminer.six==20250327

@@ -99,4 +99,5 @@ async def root() -> dict[str, str]:
         "ready": "/ready",
         "upload": "/api/v1/documents/upload",
         "search": "/api/v1/query/search",
+        "answer": "/api/v1/query/answer",
     }

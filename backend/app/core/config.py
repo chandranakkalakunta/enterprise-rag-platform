@@ -108,6 +108,25 @@ class Settings(BaseSettings):
         description="Default neighbor count for dense search (RETRIEVAL_TOP_K)",
     )
 
+    # Grounded generation (Phase 3.4 / ADR-0008)
+    generation_model_id: str = Field(
+        default="gemini-2.0-flash-001",
+        description="Vertex Gemini model id (GENERATION_MODEL_ID)",
+    )
+    generation_temperature: float = Field(
+        default=0.2,
+        ge=0.0,
+        le=2.0,
+        description="Generation temperature (GENERATION_TEMPERATURE)",
+    )
+    evidence_min_score: float | None = Field(
+        default=None,
+        description=(
+            "Optional minimum neighbor score; if set and all hits are below, refuse. "
+            "None = only refuse on zero usable hits (EVIDENCE_MIN_SCORE)."
+        ),
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:
