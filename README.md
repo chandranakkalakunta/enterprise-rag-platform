@@ -3,7 +3,8 @@
 Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
-**Status:** **Phase 4.3** — citation dedupe + BM25 warm-start  
+**Status:** **Phase 4 complete** — RAG quality MVP; **next ops: Cloud Run zero-touch UI cutover**  
+
 
 
 
@@ -32,18 +33,16 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 | **3.0–3.4** | ADRs, embeddings, index, search API, LangGraph+Gemini answer | ✅ **Complete** |
 | **5** | Voice + **full PWA** (desktop/tablet/mobile browser + installable) | ✅ **Complete** — **no native apps** |
 | **5.0–5.4** | Auth, chat, admin, PWA install, closeout | ✅ **Complete** |
-| **4** | **RAG quality** (eval + hybrid + later multi-turn/ACL) | 🔄 **In progress** |
-| **4.0** | ADR-0011 Eval + Hybrid Retrieval | ✅ **Accepted** |
-| **4.1** | Eval harness + golden set + dense baseline | ✅ **Complete** |
-| **4.2** | Hybrid MVP (BM25 + dense + RRF) | ✅ **Complete** |
-| **4.3** | Citation dedupe + BM25 warm-start | ✅ **Complete** |
+| **4** | **RAG quality MVP** (eval + hybrid + dedupe + BM25 warm) | ✅ **Complete** |
+| **4.0–4.3** | ADR-0011, eval, hybrid RRF, citation dedupe, BM25 warm-start | ✅ **Complete** |
 | **6** | Analytics, eval ops, Binary Auth, **HTTPS LB + Cloud Armor** | Planned |
 
 ### Delivery order (post–Phase 3)
 
 1. **Phase 5** — full responsive PWA / UI — ✅ **Complete**  
-2. **Phase 4** — RAG quality (eval → hybrid → multi-turn/ACL/guards) — **started 4.0**  
-3. **Phase 6** — analytics / evaluation / Binary Auth / LB + Armor  
+2. **Phase 4** — RAG quality MVP — ✅ **Complete**  
+3. **Ops:** Cloud Run zero-touch UI cutover (OAuth origins, secrets, hybrid flags)  
+4. **Phase 6** — analytics / evaluation / Binary Auth / LB + Armor (when scheduled)  
 
 Full index: [docs/phases.md](docs/phases.md)  
 Phase 0: [retro](docs/retrospectives/phase-0.md) · [report](docs/reports/phase-0-engineering-report.md)  
@@ -51,13 +50,14 @@ Phase 1: [retro](docs/retrospectives/phase-1.md) · [report](docs/reports/phase-
 Phase 2: [retro](docs/retrospectives/phase-2.md) · [report](docs/reports/phase-2-engineering-report.md)  
 Phase 3: [retro](docs/retrospectives/phase-3.md) · [report](docs/reports/phase-3-engineering-report.md)  
 Phase 5: [retro](docs/retrospectives/phase-5.md) · [report](docs/reports/phase-5-engineering-report.md) · [PWA install](docs/runbooks/pwa-install.md)  
+Phase 4: [retro](docs/retrospectives/phase-4.md) · [report](docs/reports/phase-4-engineering-report.md)  
 
-### Phase 4 quality decisions
+### Phase 4 quality (complete)
 
-- [ADR-0011](docs/adr/0011-rag-evaluation-and-hybrid-retrieval.md) — **eval first**; hybrid **BM25 + dense + RRF** inside LangGraph `retrieve`; in-process BM25 MVP → optional OpenSearch later  
-- **Phase 4.1:** [eval harness](eval/README.md) · [baseline-dense](docs/eval/baseline-dense.md) · [runbook](docs/runbooks/rag-eval-harness.md)  
-- **Phase 4.2:** Hybrid `HYBRID_RETRIEVAL_ENABLED` — BM25 + dense + RRF; publish/retire index hooks  
-- **Phase 4.3:** `CITATION_MAX_PER_DOC` SOURCES dedupe; BM25 warm-start on API startup  
+- [ADR-0011](docs/adr/0011-rag-evaluation-and-hybrid-retrieval.md) — eval first; hybrid BM25 + dense + RRF  
+- Eval: [eval/](eval/) · [baseline](docs/eval/baseline-dense.md) · [eval runbook](docs/runbooks/rag-eval-harness.md)  
+- Hybrid + dedupe + warm-start: [citation-dedupe-bm25-warm](docs/runbooks/citation-dedupe-bm25-warm.md)  
+- Deferred: multi-turn, OpenSearch, streaming, semantic cache, deep refusal/ACL → [backlog](docs/backlog.md)  
 
 
 
