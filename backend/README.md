@@ -38,11 +38,12 @@ See [docs/runbooks/document-upload-api.md](../docs/runbooks/document-upload-api.
 
 See [docs/runbooks/version-lifecycle.md](../docs/runbooks/version-lifecycle.md).
 
-### Dense search (Phase 3.3)
+### Dense search + grounded answer (Phase 3.3–3.4)
 
-`POST /api/v1/query/search` — embed query, retrieve top-k **active** chunks from Vector Search.
+- `POST /api/v1/query/search` — top-k **active** chunks  
+- `POST /api/v1/query/answer` — LangGraph retrieve → evidence → Gemini + citations  
 
-See [docs/runbooks/dense-search-api.md](../docs/runbooks/dense-search-api.md).
+See [dense-search](../docs/runbooks/dense-search-api.md) · [grounded-answer](../docs/runbooks/grounded-answer-api.md).
 
 ### Health contract (Phase 1.5)
 

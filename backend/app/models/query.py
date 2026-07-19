@@ -1,4 +1,4 @@
-"""Pydantic models for dense search API (Phase 3.3)."""
+"""Pydantic models for dense search + grounded answer APIs (Phase 3.3–3.4)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class SearchRequest(BaseModel):
-    """POST /api/v1/query/search body."""
+    """POST /api/v1/query/search and /answer body."""
 
     query: str = Field(..., min_length=1, description="Natural-language search query")
     top_k: int | None = Field(
@@ -42,3 +42,31 @@ class SearchResponseBody(BaseModel):
     query: str
     top_k: int
     results: list[SearchHit]
+
+
+class AnswerCitation(BaseModel):
+    """Citation derived from a retrieved chunk."""
+
+    document_id: str | None = None
+    version_id: str | None = None
+    chunk_index: int | None = None
+    title: str | None = None
+    filename: str | None = None
+    snippet: str
+    score: float
+
+
+class AnswerRetrievalMeta(BaseModel):
+    top_k: int
+    hit_count: int
+
+
+class AnswerResponseBody(BaseModel):
+    """Grounded answer response (Phase 3.4)."""
+
+    query: str
+    answer: str
+    refused: bool
+    refusal_reason: str | None = None
+    citations: list[AnswerCitation]
+    retrieval: AnswerRetrievalMeta

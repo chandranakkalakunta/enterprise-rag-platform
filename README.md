@@ -3,7 +3,7 @@
 Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
-**Status:** **Phase 3.3 complete** — dense search API; **Phase 3.4 next** (grounded generation)  
+**Status:** **Phase 3.4 complete** — grounded answer API; Phase 3 MVP retrieval path closed  
 **GCP project:** set via `var.gcp_project_id` / `GCP_PROJECT_ID` (never hard-coded in app code)  
 **Project ID:** `enterprise-rag-platform-502711` (number `642114828076`)  
 
@@ -26,7 +26,7 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 | **3.1** | Embedding pipeline (`embeddings.jsonl` on ready) | ✅ **Complete** |
 | **3.2** | Vector Search upsert + activate/deactivate | ✅ **Complete** |
 | **3.3** | Dense Search API | ✅ **Complete** |
-| **3.4** | Grounded generation + citations | 🔜 **Next** |
+| **3.4** | Grounded Answer API (LangGraph + Gemini) | ✅ **Complete** |
 | **4** | Multi-turn, ACL depth, hybrid/RRF stretch | Planned |
 | **5** | Voice + **full PWA** (desktop/tablet/mobile browser + installable) | Planned — **no native apps** |
 | **6** | Analytics, eval gates, cost dashboards | Planned |
@@ -51,13 +51,14 @@ Runbooks: [upload](docs/runbooks/document-upload-api.md) · [lifecycle](docs/run
 - [ADR-0007](docs/adr/0007-embedding-and-vector-search.md) — Vertex embeddings + Vector Search; embed on **ready**, activate on **publish**
 - [ADR-0008](docs/adr/0008-retrieval-and-grounded-generation.md) — LangGraph dense retrieve → evidence check → Gemini; `top_k=5`, temperature `0.2`
 
-### Dense search (Phase 3.3)
+### Dense search + grounded answer (Phase 3.3–3.4)
 
 ```text
-POST /api/v1/query/search  →  active-only Vector Search hits (no generation)
+POST /api/v1/query/search  →  active-only Vector Search hits
+POST /api/v1/query/answer  →  retrieve → evidence check → Gemini → citations
 ```
 
-Runbook: [dense-search-api.md](docs/runbooks/dense-search-api.md)
+Runbooks: [dense-search](docs/runbooks/dense-search-api.md) · [grounded-answer](docs/runbooks/grounded-answer-api.md)
 
 ---
 
