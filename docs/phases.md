@@ -37,7 +37,7 @@ Update when a phase opens or closes.
 | **4** | **RAG quality** (eval + hybrid + multi-turn/ACL later) | 🔄 **In progress** | Starts with ADR-0011 |
 | **4.0** | ADR-0011 Eval + Hybrid retrieval design | ✅ **Accepted** | [ADR-0011](./adr/0011-rag-evaluation-and-hybrid-retrieval.md) |
 | **4.1** | Eval harness + golden set + dense baseline | ✅ **Complete** | [eval runbook](./runbooks/rag-eval-harness.md) · [baseline](./eval/baseline-dense.md) |
-| **4.2** | Hybrid MVP (in-process BM25 + RRF in LangGraph retrieve) | 🔜 **Next** | After 4.1 merge |
+| **4.2** | Hybrid MVP (in-process BM25 + RRF in LangGraph retrieve) | ✅ **Complete** | `hybrid_search` · BM25 index · RRF |
 | **6** | Analytics & Evaluation ops (+ Binary Auth / LB hardening) | Planned | BigQuery; NFR-SEC-14; HTTPS LB + Cloud Armor |
 
 ## Delivery order (Coordinator — post–Phase 3)
@@ -106,4 +106,10 @@ Phase 5 delivers a **full Progressive Web App**: responsive on **desktop, tablet
 - Baseline notes: [docs/eval/baseline-dense.md](./eval/baseline-dense.md)  
 - Runbook: [rag-eval-harness.md](./runbooks/rag-eval-harness.md)  
 
-Last updated: 2026-07-19 (Phase 4.1 eval harness)
+### Phase 4.2 implementation links
+
+- `HYBRID_RETRIEVAL_ENABLED` (default true); dense-only fallback if BM25 empty  
+- In-process Okapi BM25; RRF (`RRF_K=60`); publish upsert / retire remove  
+- APIs: `/query/search` + `/query/answer` retrieve via `hybrid_search`  
+
+Last updated: 2026-07-19 (Phase 4.2 hybrid retrieval)

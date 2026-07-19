@@ -55,6 +55,13 @@ Artifact: `eval/results/baseline-dense-fixture.json` (regenerate via CLI).
 | doc_specific | 8 | version reload, embeddings model, PWA native-out |
 | lexical | 2 | Vector Search bootstrap filename, OAuth secret ids |
 
-## Gate for Phase 4.2
+## Gate / comparison for hybrid (Phase 4.2)
 
-Hybrid (BM25 + RRF) may default-on only after live (or corpus-aligned) eval shows **non-regression** on refusal accuracy and **improvement** on recall_rate and/or mean_list_completeness vs this dense baseline.
+Hybrid is implemented with `HYBRID_RETRIEVAL_ENABLED` (default true in code; set false for dense-only rollback).  
+Re-run live eval after hybrid deploy:
+
+```bash
+python -m eval.harness --mode live --path answer --out eval/results/baseline-hybrid-live.json
+```
+
+Expect improvement on **recall_rate** and **mean_list_completeness** vs dense baseline (~0.48 / ~0.04 live reported) with limited refusal degradation.

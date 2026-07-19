@@ -1,4 +1,7 @@
-"""Dense search orchestration (Phase 3.3 / ADR-0008) — no generation."""
+"""Dense search orchestration (Phase 3.3 / ADR-0008) — no generation.
+
+Hybrid entrypoint: ``app.services.hybrid_search.hybrid_search`` (Phase 4.2).
+"""
 
 from __future__ import annotations
 

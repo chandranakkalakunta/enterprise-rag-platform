@@ -20,12 +20,12 @@ from app.services.generation import (
     TextGenerator,
     generate_grounded_answer,
 )
+from app.services.hybrid_search import hybrid_search
 from app.services.search import (
     SearchResponse,
     SearchResultItem,
     SearchServiceError,
     SearchValidationError,
-    dense_search,
 )
 from app.services.embeddings import TextEmbedder
 from app.services.vector_search import VectorQueryClient
@@ -124,7 +124,8 @@ def build_answer_graph(
 ):
     """Compile LangGraph: retrieve → evidence_check → generate_or_refuse."""
 
-    search = search_fn or dense_search
+    # Phase 4.2: hybrid dense+BM25+RRF when enabled; dense-only when flag off
+    search = search_fn or hybrid_search
 
     def retrieve(state: AnswerGraphState) -> AnswerGraphState:
         result = search(

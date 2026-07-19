@@ -18,10 +18,10 @@ from app.models.query import (
     SearchResponseBody,
 )
 from app.services.answer_graph import run_grounded_answer
+from app.services.hybrid_search import hybrid_search
 from app.services.search import (
     SearchServiceError,
     SearchValidationError,
-    dense_search,
 )
 
 logger = logging.getLogger("erp.api.query")
@@ -32,7 +32,7 @@ router = APIRouter(prefix="/query", tags=["query"])
 @router.post(
     "/search",
     response_model=SearchResponseBody,
-    summary="Dense search over published (active) chunks",
+    summary="Hybrid (or dense-only) search over published (active) chunks",
     responses={
         400: {"description": "Invalid query / top_k"},
         401: {"description": "Unauthorized"},
@@ -45,12 +45,13 @@ async def search_chunks(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> SearchResponseBody:
     """
-    Embed the query and retrieve top-k neighbors from Vertex Vector Search.
+    Retrieve top-k chunks: dense Vector Search and optional BM25 fused via RRF.
 
-    Always filters ``active=true`` (published-only). Optional ``collection`` filter.
+    Always filters dense channel to ``active=true`` (published-only).
+    BM25 indexes published versions only (Phase 4.2). Optional ``collection`` filter.
     """
     try:
-        result = dense_search(
+        result = hybrid_search(
             settings=settings,
             query=body.query,
             top_k=body.top_k,
