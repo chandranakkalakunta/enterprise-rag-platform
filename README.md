@@ -3,7 +3,8 @@
 Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
-**Status:** **Phase 4.2** — hybrid BM25 + dense RRF retrieval  
+**Status:** **Phase 4.3** — citation dedupe + BM25 warm-start  
+
 
 
 
@@ -35,6 +36,7 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 | **4.0** | ADR-0011 Eval + Hybrid Retrieval | ✅ **Accepted** |
 | **4.1** | Eval harness + golden set + dense baseline | ✅ **Complete** |
 | **4.2** | Hybrid MVP (BM25 + dense + RRF) | ✅ **Complete** |
+| **4.3** | Citation dedupe + BM25 warm-start | ✅ **Complete** |
 | **6** | Analytics, eval ops, Binary Auth, **HTTPS LB + Cloud Armor** | Planned |
 
 ### Delivery order (post–Phase 3)
@@ -55,6 +57,8 @@ Phase 5: [retro](docs/retrospectives/phase-5.md) · [report](docs/reports/phase-
 - [ADR-0011](docs/adr/0011-rag-evaluation-and-hybrid-retrieval.md) — **eval first**; hybrid **BM25 + dense + RRF** inside LangGraph `retrieve`; in-process BM25 MVP → optional OpenSearch later  
 - **Phase 4.1:** [eval harness](eval/README.md) · [baseline-dense](docs/eval/baseline-dense.md) · [runbook](docs/runbooks/rag-eval-harness.md)  
 - **Phase 4.2:** Hybrid `HYBRID_RETRIEVAL_ENABLED` — BM25 + dense + RRF; publish/retire index hooks  
+- **Phase 4.3:** `CITATION_MAX_PER_DOC` SOURCES dedupe; BM25 warm-start on API startup  
+
 
 
 

@@ -20,6 +20,7 @@ from app.services.generation import (
     TextGenerator,
     generate_grounded_answer,
 )
+from app.services.citations import dedupe_citations_by_document
 from app.services.hybrid_search import hybrid_search
 from app.services.search import (
     SearchResponse,
@@ -184,6 +185,13 @@ def build_answer_graph(
                 "answer": "",
                 "citations": [],
             }
+        # Full hits still used for generation; SOURCES list is document-deduped
+        raw_citations = hits_to_citations(hits)
+        deduped = dedupe_citations_by_document(
+            raw_citations,
+            max_per_doc=settings.citation_max_per_doc,
+            merge_snippets=settings.citation_merge_snippets,
+        )
         citations = [
             {
                 "document_id": c.document_id,
@@ -194,7 +202,7 @@ def build_answer_graph(
                 "snippet": c.snippet,
                 "score": c.score,
             }
-            for c in hits_to_citations(hits)
+            for c in deduped
         ]
         return {
             **state,

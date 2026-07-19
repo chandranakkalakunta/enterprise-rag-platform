@@ -161,3 +161,131 @@ def bm25_remove_version(
             exc,
         )
         return "failed"
+
+
+def list_published_pointers(
+    fs_client: Any,
+    *,
+    max_docs: int = 200,
+) -> list[dict[str, Any]]:
+    """Return {document_id, version_id, title, collection, filename?} for active pubs."""
+    from app.services.firestore_repo import DOCUMENTS_COLLECTION, VERSIONS_SUBCOLLECTION
+
+    out: list[dict[str, Any]] = []
+    col = fs_client.collection(DOCUMENTS_COLLECTION)
+    # Prefer documents that have an active published pointer
+    try:
+        snaps = list(col.limit(max(1, max_docs)).stream())
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("bm25_list_docs_failed err=%s", exc)
+        return []
+
+    for snap in snaps:
+        data = snap.to_dict() or {}
+        active = data.get("active_version_id")
+        if not active:
+            continue
+        version_id = str(active)
+        document_id = str(snap.id)
+        filename = None
+        try:
+            v_snap = (
+                col.document(document_id)
+                .collection(VERSIONS_SUBCOLLECTION)
+                .document(version_id)
+                .get()
+            )
+            if v_snap.exists:
+                v_data = v_snap.to_dict() or {}
+                filename = v_data.get("filename")
+                # Only index if version still published
+                if (v_data.get("status") or "") not in ("published",):
+                    continue
+        except Exception:  # noqa: BLE001
+            pass
+        out.append(
+            {
+                "document_id": document_id,
+                "version_id": version_id,
+                "title": data.get("title"),
+                "collection": data.get("collection"),
+                "filename": filename,
+            }
+        )
+        if len(out) >= max_docs:
+            break
+    return out
+
+
+def rebuild_bm25_from_published(
+    *,
+    settings: Settings,
+    gcs_client: storage.Client | None = None,
+    fs_client: Any | None = None,
+    index: InProcessBM25Index | None = None,
+) -> dict[str, Any]:
+    """
+    Rebuild in-process BM25 from all currently published versions.
+
+    Never raises to callers when used from startup (returns status dict).
+    """
+    if not settings.hybrid_retrieval_enabled and not settings.bm25_always_index:
+        return {"status": "skipped", "reason": "hybrid_disabled", "documents": 0, "chunks": 0}
+
+    idx = index or get_bm25_index()
+    try:
+        from google.cloud import firestore as fs_mod
+
+        gcs = gcs_client or storage.Client(project=settings.gcp_project_id)
+        firestore_client = fs_client or fs_mod.Client(project=settings.gcp_project_id)
+        pointers = list_published_pointers(
+            firestore_client, max_docs=settings.bm25_warm_start_max_docs
+        )
+        idx.clear()
+        total_chunks = 0
+        ok_docs = 0
+        failed_docs = 0
+        for p in pointers:
+            try:
+                chunks = load_version_bm25_chunks(
+                    gcs_client=gcs,
+                    bucket_name=settings.gcs_docs_bucket,
+                    document_id=p["document_id"],
+                    version_id=p["version_id"],
+                    title=p.get("title"),
+                    filename=p.get("filename"),
+                    collection=p.get("collection"),
+                )
+                total_chunks += idx.upsert_chunks(chunks)
+                ok_docs += 1
+            except Exception as exc:  # noqa: BLE001
+                failed_docs += 1
+                logger.warning(
+                    "bm25_warm_doc_failed document_id=%s version_id=%s err=%s",
+                    p.get("document_id"),
+                    p.get("version_id"),
+                    exc,
+                )
+        result = {
+            "status": "ok",
+            "documents": ok_docs,
+            "failed_documents": failed_docs,
+            "chunks": total_chunks,
+            "index_size": idx.size(),
+        }
+        logger.info(
+            "bm25_warm_start_complete documents=%s failed=%s chunks=%s index_size=%s",
+            ok_docs,
+            failed_docs,
+            total_chunks,
+            idx.size(),
+        )
+        return result
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("bm25_warm_start_failed err=%s", exc)
+        return {
+            "status": "failed",
+            "error": str(exc),
+            "documents": 0,
+            "chunks": 0,
+        }

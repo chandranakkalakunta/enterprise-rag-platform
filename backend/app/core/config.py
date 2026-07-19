@@ -168,6 +168,37 @@ class Settings(BaseSettings):
             "(BM25_ALWAYS_INDEX). Useful for warm standby."
         ),
     )
+    bm25_warm_start: bool = Field(
+        default=True,
+        description=(
+            "On API startup, rebuild BM25 from published versions "
+            "(BM25_WARM_START). Failures are logged; API still starts."
+        ),
+    )
+    bm25_warm_start_max_docs: int = Field(
+        default=200,
+        ge=1,
+        le=5000,
+        description="Max documents to scan on BM25 warm-start (BM25_WARM_START_MAX_DOCS)",
+    )
+
+    # Citations (Phase 4.3)
+    citation_max_per_doc: int = Field(
+        default=1,
+        ge=1,
+        le=10,
+        description=(
+            "Max citation cards per document_id in answer responses "
+            "(CITATION_MAX_PER_DOC). Default 1 reduces SOURCES spam."
+        ),
+    )
+    citation_merge_snippets: bool = Field(
+        default=True,
+        description=(
+            "When CITATION_MAX_PER_DOC=1, merge one extra distinct snippet "
+            "into the winning card (CITATION_MERGE_SNIPPETS)."
+        ),
+    )
 
     # Grounded generation (Phase 3.4 / ADR-0008)
     # Model runs in VERTEX_LOCATION (same region as embeddings unless overridden).
