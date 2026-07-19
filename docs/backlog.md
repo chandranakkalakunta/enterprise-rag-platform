@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-19 (**Phase 3.4** — grounded answer API)
+Last updated: 2026-07-19 (**Phase 3 Complete** — next delivery: Phase 5 PWA, then Phase 4 RAG quality)
 
 ---
 
@@ -42,6 +42,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-FND-07 | Cloud Build/GHA + WIF keyless CI (pool + provider + SA) | Done | ✓ Done — Phase 1.2 / PR #4 | Identity foundation |
 | BL-FND-08 | detect-secrets in CI | Todo | Post–Phase 2 | Residual follow-up |
 | BL-FND-32 | Phase 2 closure (retro, eng report, backlog tidy) | Done | ✓ Done — Phase 2 closure | |
+| BL-FND-33 | Phase 3 closure (retro, eng report, next-order 5→4) | Done | ✓ Done — Phase 3 closure | |
 | BL-FND-14 | Three Cloud Run services (rag-api, rag-ingest, rag-web) | Done | ✓ Done — Phase 1.6 / PR #8 | Stubs + SAs |
 | BL-FND-15 | Health returns version + deployed_at | Done | ✓ Done — Phase 1.5 / PR #7 | APP_VERSION / DEPLOYED_AT |
 | BL-FND-16 | HTTPS LB + Cloud Armor | Deferred | Pre-prod | Explicitly later |
@@ -112,30 +113,36 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-RAG-03 | Gemini generation with citations | Done | ✓ Done — Phase 3.4 | `GENERATION_MODEL_ID`, temp 0.2 |
 | BL-RAG-04 | Insufficient-evidence refusal (minimal) | Done | ✓ Done — Phase 3.4 | Zero hits / empty text / optional min score |
 | BL-RAG-10 | Metadata filtering at index (published/active) | Done | ✓ Done — Phase 3.2–3.3 | active=true on upsert/query |
-| BL-RAG-01 | Hybrid BM25 + dense retrieval | Todo | **Later 3.x / Phase 4** | Deferred by ADR-0008 |
-| BL-RAG-02 | RRF fusion | Todo | **Later 3.x / Phase 4** | Deferred by ADR-0008 |
-| BL-RAG-05 | ACL-aware retrieval (deep) | Todo | Phase 3–4 | Beyond published-only |
-| BL-RAG-06 | Multi-turn conversation memory | Deferred | Phase 4 | |
-| BL-RAG-07 | Collection / filter scope (UX) | Deferred | Phase 4 | US-QA-05 |
-| BL-RAG-08 | Optional token streaming to client | Deferred | Phase 3+ | |
-| BL-RAG-11 | Semantic caching | Todo | Later 3.x / Phase 4 | P1 · BL-DEC-06 |
+### Phase 3 MVP complete — remaining retrieval quality (not incomplete Phase 3)
+
+| ID | Item | Status | Target | Notes |
+|----|------|--------|--------|-------|
+| BL-RAG-01 | Hybrid BM25 + dense retrieval | Todo | **Phase 4** | Deferred by ADR-0008 |
+| BL-RAG-02 | RRF fusion | Todo | **Phase 4** | Deferred by ADR-0008 |
+| BL-RAG-05 | ACL-aware retrieval (deep) | Todo | **Phase 4** | Beyond published-only |
+| BL-RAG-06 | Multi-turn conversation memory | Deferred | **Phase 4** | |
+| BL-RAG-07 | Collection / filter scope (UX) | Deferred | **Phase 4 / 5** | US-QA-05 |
+| BL-RAG-08 | Optional token streaming to client | Deferred | Phase 4+ | |
+| BL-RAG-11 | Semantic caching | Todo | **Phase 4** | P1 · BL-DEC-06 |
+| BL-RAG-17 | Live E2E wiring / eval smoke (search+answer) | Todo | **Backlog** | Ops hardening after UI exists |
+| BL-ING-10 | Async worker for embed/upsert | Todo | **Backlog** | Offload from rag-api |
 
 ## Feedback
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-FB-01 | 5-star feedback API + persistence | Todo | Phase 3 | P0 · US-QA-06 |
-| BL-FB-02 | StarRating UI under assistant messages | Todo | Phase 3 | ui-specs §15 |
+| BL-FB-01 | 5-star feedback API + persistence | Todo | **Phase 5** (with chat UI) | P0 · US-QA-06 |
+| BL-FB-02 | StarRating UI under assistant messages | Todo | **Phase 5** | ui-specs §15 |
 | BL-FB-03 | Aggregate star analytics | Todo | Phase 6 | US-ANL-05 · P1 |
 
 ## Guardrails
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-GRD-01 | Prompt-injection defenses | Todo | Later 3.x / Phase 4 | Full stack deferred; MVP = minimal evidence gate |
-| BL-GRD-02 | Output grounding / citation checks | Todo | Later 3.x / Phase 4 | |
-| BL-GRD-03 | Configurable safety policies | Deferred | Phase 4 | |
-| BL-GRD-04 | Guardrail metrics counters | Todo | Phase 3+ | |
+| BL-GRD-01 | Prompt-injection defenses | Todo | **Phase 4** | MVP = minimal evidence gate only |
+| BL-GRD-02 | Output grounding / citation checks | Todo | **Phase 4** | |
+| BL-GRD-03 | Configurable safety policies | Deferred | **Phase 4** | |
+| BL-GRD-04 | Guardrail metrics counters | Todo | **Phase 4+** | |
 
 ## Voice & PWA (Phase 5 = full PWA; no native apps)
 
@@ -145,9 +152,9 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 |----|------|--------|------------|-------|
 | BL-VOICE-01 | STT integration | Deferred | Phase 5 | In-PWA only |
 | BL-VOICE-02 | TTS integration | Deferred | Phase 5 | In-PWA only |
-| BL-PWA-01 | Installable PWA shell (manifest + SW) | Deferred | Phase 5 | Desktop/tablet/mobile browser |
-| BL-PWA-02 | Offline UI shell | Deferred | Phase 5 | P2; shell only, not offline RAG |
-| BL-PWA-03 | Responsive desktop/tablet/mobile layouts | Deferred | Phase 5 | Full PWA profile |
+| BL-PWA-01 | Installable PWA shell (manifest + SW) | Todo | **Phase 5 (next)** | Desktop/tablet/mobile browser |
+| BL-PWA-02 | Offline UI shell | Todo | **Phase 5** | P2; shell only, not offline RAG |
+| BL-PWA-03 | Responsive desktop/tablet/mobile layouts | Todo | **Phase 5 (next)** | Full PWA profile |
 
 ## Analytics & Evaluation
 
@@ -163,15 +170,15 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-FE-01 | Next.js app scaffold beyond placeholder | Todo | Backlog / Phase 3 UI | |
-| BL-FE-02 | shadcn/ui + app shell per ui-specs | Todo | Backlog / Phase 3 UI | Spec locked Phase 0 |
-| BL-FE-03 | Chat UI + citations rendering | Todo | Phase 3 | |
-| BL-FE-04 | Admin document management UI | Todo | Backlog | Upload/publish can use API/OpenAPI until UI |
-| BL-FE-05 | History + settings screens | Todo | Phase 3–4 | |
+| BL-FE-01 | Next.js app scaffold beyond placeholder | Todo | **Phase 5 (next)** | |
+| BL-FE-02 | shadcn/ui + app shell per ui-specs | Todo | **Phase 5 (next)** | Spec locked Phase 0 |
+| BL-FE-03 | Chat UI + citations rendering | Todo | **Phase 5 (next)** | Calls `/query/answer` + `/query/search` |
+| BL-FE-04 | Admin document management UI | Todo | **Phase 5** | Upload/publish APIs already exist |
+| BL-FE-05 | History + settings screens | Todo | **Phase 5** | |
 | BL-FE-06 | Analytics dashboard UI | Todo | Phase 6 | |
-| BL-FE-07 | A11y pass on primary flows | Todo | Phase 3+ | |
-| BL-FE-08 | Multimodal table/image rendering | Todo | Phase 3–4 | P1 · US-MM-02 |
-| BL-FE-09 | Domain-denied login state | Todo | Backlog (with OAuth) | |
+| BL-FE-07 | A11y pass on primary flows | Todo | **Phase 5** | |
+| BL-FE-08 | Multimodal table/image rendering | Todo | Phase 4–5 | P1 · US-MM-02 |
+| BL-FE-09 | Domain-denied login state | Todo | **Phase 5** (with OAuth) | |
 
 ## Open decisions (need ADR soon)
 
@@ -183,17 +190,19 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-DEC-07 | Retrieval/gen flow + knobs (top_k, temperature) | Done | ✓ Done — Phase 3.0 / ADR-0008 | LangGraph MVP; temp 0.2; top_k 5 |
 | BL-DEC-04 | STT/TTS provider selection | Deferred | Phase 5 ADR | |
 | BL-DEC-05 | Ingest enqueue: Cloud Tasks vs Pub/Sub | Todo | Backlog ADR (with BL-ING-10) | |
-| BL-DEC-06 | Semantic cache backing store | Todo | Later 3.x / Phase 4 | Deferred with hybrid/cache |
+| BL-DEC-06 | Semantic cache backing store | Todo | **Phase 4** | Deferred with hybrid/cache |
 
 **Resolved in Phase 0–1:** LangGraph; Vertex AI Vector Search product; Cloud Run split; zero JSON keys + WIF; audience allowlist; CMEK; CI.  
 **Resolved in Phase 2:** Firestore metadata; MVP ingest lifecycle.  
-**Resolved in Phase 3.0:** ADR-0007 + ADR-0008 — embed/VS lifecycle; dense LangGraph query; hybrid/RRF/full guards deferred.  
+**Resolved in Phase 3:** Dense retrieval MVP + grounded answer (3.0–3.4); hybrid/RRF/full guards/hard-delete remain backlog.  
+**Delivery order after Phase 3:** **Phase 5 (PWA/UI) → Phase 4 (RAG quality) → Phase 6.**  
 **Phase 5 scope:** Full PWA only — no native apps.
 
 ---
 
 ## Recently completed
 
+- **2026-07-19** — **Phase 3 complete:** retrospective + engineering report; next track Phase 5 then Phase 4.
 - **2026-07-19** — **Phase 3.4:** Grounded answer `POST /api/v1/query/answer` (LangGraph + Gemini + citations + refusal).
 - **2026-07-19** — **Phase 3.3:** Dense search API `POST /api/v1/query/search` (active-only neighbors; no generation).
 - **2026-07-18** — **Phase 3.2:** Vector Search index (dev STREAM_UPDATE); upsert on ready; activate/deactivate on publish/retire; BL-RAG-16 hard-delete backlog.

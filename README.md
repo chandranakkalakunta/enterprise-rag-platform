@@ -3,7 +3,7 @@
 Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
-**Status:** **Phase 3.4 complete** — grounded answer API; Phase 3 MVP retrieval path closed  
+**Status:** **Phase 3 Complete** — retrieval MVP + grounded answer; **next: Phase 5 (PWA/UI), then Phase 4 (RAG quality)**  
 **GCP project:** set via `var.gcp_project_id` / `GCP_PROJECT_ID` (never hard-coded in app code)  
 **Project ID:** `enterprise-rag-platform-502711` (number `642114828076`)  
 
@@ -20,45 +20,40 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 | **0.1** | GCP project ID switch | ✅ **Complete** |
 | **1** | **GCP Foundation** (1.1–1.7) | ✅ **Complete** (PRs #3–#9) |
 | **2** | **Ingestion MVP** (upload → extract → chunk → publish/retire) | ✅ **Complete** (PRs #11–#15) |
-| **2.0–2.4** | ADR-0006, upload, Firestore, chunking, lifecycle | ✅ **Complete** |
-| **3** | Retrieval foundation + grounded Q&A | 🔄 **In progress** |
-| **3.0** | ADR-0007 embeddings/VS + ADR-0008 retrieval/gen | ✅ **Accepted** |
-| **3.1** | Embedding pipeline (`embeddings.jsonl` on ready) | ✅ **Complete** |
-| **3.2** | Vector Search upsert + activate/deactivate | ✅ **Complete** |
-| **3.3** | Dense Search API | ✅ **Complete** |
-| **3.4** | Grounded Answer API (LangGraph + Gemini) | ✅ **Complete** |
-| **4** | Multi-turn, ACL depth, hybrid/RRF stretch | Planned |
-| **5** | Voice + **full PWA** (desktop/tablet/mobile browser + installable) | Planned — **no native apps** |
+| **3** | **Retrieval MVP** (embed → Vector Search → search + grounded answer) | ✅ **Complete** (PRs #17–#22) |
+| **3.0–3.4** | ADRs, embeddings, index, search API, LangGraph+Gemini answer | ✅ **Complete** |
+| **5** | Voice + **full PWA** (desktop/tablet/mobile browser + installable) | 🔜 **Next major track** — **no native apps** |
+| **4** | Multi-turn, ACL depth, hybrid/RRF, fuller guardrails | Planned **after Phase 5** |
 | **6** | Analytics, eval gates, cost dashboards | Planned |
+
+### Delivery order (post–Phase 3)
+
+1. **Phase 5** — full responsive PWA / UI (chat, admin, citations UI)  
+2. **Phase 4** — RAG quality (hybrid BM25+RRF, multi-turn, ACL, fuller guards)  
+3. **Phase 6** — analytics / evaluation / Binary Auth  
 
 Full index: [docs/phases.md](docs/phases.md)  
 Phase 0: [retro](docs/retrospectives/phase-0.md) · [report](docs/reports/phase-0-engineering-report.md)  
 Phase 1: [retro](docs/retrospectives/phase-1.md) · [report](docs/reports/phase-1-engineering-report.md)  
-Phase 2: [retro](docs/retrospectives/phase-2.md) · [report](docs/reports/phase-2-engineering-report.md)
+Phase 2: [retro](docs/retrospectives/phase-2.md) · [report](docs/reports/phase-2-engineering-report.md)  
+Phase 3: [retro](docs/retrospectives/phase-3.md) · [report](docs/reports/phase-3-engineering-report.md)
 
-### Phase 2 MVP lifecycle (API)
+### Core APIs (backend MVP)
 
 ```text
 POST /api/v1/documents/upload
 POST /api/v1/documents/{id}/versions/{vid}/publish
 POST /api/v1/documents/{id}/versions/{vid}/retire
+POST /api/v1/query/search
+POST /api/v1/query/answer
 ```
 
-Runbooks: [upload](docs/runbooks/document-upload-api.md) · [lifecycle](docs/runbooks/version-lifecycle.md)
+Runbooks: [upload](docs/runbooks/document-upload-api.md) · [lifecycle](docs/runbooks/version-lifecycle.md) · [vector-search](docs/runbooks/vector-search.md) · [dense-search](docs/runbooks/dense-search-api.md) · [grounded-answer](docs/runbooks/grounded-answer-api.md)
 
-### Phase 3.0 retrieval decisions
+### Phase 3 retrieval decisions
 
-- [ADR-0007](docs/adr/0007-embedding-and-vector-search.md) — Vertex embeddings + Vector Search; embed on **ready**, activate on **publish**
-- [ADR-0008](docs/adr/0008-retrieval-and-grounded-generation.md) — LangGraph dense retrieve → evidence check → Gemini; `top_k=5`, temperature `0.2`
-
-### Dense search + grounded answer (Phase 3.3–3.4)
-
-```text
-POST /api/v1/query/search  →  active-only Vector Search hits
-POST /api/v1/query/answer  →  retrieve → evidence check → Gemini → citations
-```
-
-Runbooks: [dense-search](docs/runbooks/dense-search-api.md) · [grounded-answer](docs/runbooks/grounded-answer-api.md)
+- [ADR-0007](docs/adr/0007-embedding-and-vector-search.md) — Vertex embeddings + Vector Search; embed on **ready**, activate on **publish**  
+- [ADR-0008](docs/adr/0008-retrieval-and-grounded-generation.md) — LangGraph dense retrieve → evidence check → Gemini; `top_k=5`, temperature `0.2`  
 
 ---
 
@@ -73,7 +68,7 @@ Runbooks: [dense-search](docs/runbooks/dense-search-api.md) · [grounded-answer]
         (async MM+index) Search + BM25     (metadata only)
 ```
 
-Details: [docs/architecture/overview.md](docs/architecture/overview.md) · ADRs [0001](docs/adr/0001-high-level-architecture.md)–[0005](docs/adr/0005-security-posture.md)
+Details: [docs/architecture/overview.md](docs/architecture/overview.md) · ADRs [0001](docs/adr/0001-high-level-architecture.md)–[0008](docs/adr/0008-retrieval-and-grounded-generation.md)
 
 ---
 
@@ -86,7 +81,7 @@ Details: [docs/architecture/overview.md](docs/architecture/overview.md) · ADRs 
 | [docs/architecture/overview.md](docs/architecture/overview.md) | Services, LangGraph, cache, multimodal |
 | [docs/adr/](docs/adr/) | Architecture Decision Records (0001–0008) |
 | [docs/backlog.md](docs/backlog.md) | Living backlog |
-| [docs/phases.md](docs/phases.md) | Phase index |
+| [docs/phases.md](docs/phases.md) | Phase index + delivery order |
 | [docs/grok-three-agent-protocol.md](docs/grok-three-agent-protocol.md) | How we build |
 | [docs/retrospectives/](docs/retrospectives/) | Phase retrospectives |
 | [docs/reports/](docs/reports/) | Engineering reports |
@@ -100,7 +95,7 @@ Details: [docs/architecture/overview.md](docs/architecture/overview.md) · ADRs 
 enterprise-rag-platform/
 ├── backend/          # FastAPI + LangGraph (api / ingest-worker)
 ├── frontend/         # Next.js PWA (web)
-├── terraform/        # GCP IaC skeleton (var.gcp_project_id)
+├── terraform/        # GCP IaC (var.gcp_project_id)
 ├── docs/             # Requirements, ADRs, backlog, retros, reports
 ├── scripts/          # Ops scripts (later)
 ├── config/           # Non-secret samples
@@ -143,68 +138,7 @@ Open http://localhost:3000
 
 ```bash
 cp .env.example .env
-# set GCP_PROJECT_ID and other local values — never commit .env
+# Set GCP_PROJECT_ID, VECTOR_SEARCH_*, GENERATION_MODEL_ID for live query path
 ```
 
-### Terraform (multi-env — Phase 1.1)
-
-Layout: `terraform/` with `environments/{dev,test,prod}/` (`terraform.tfvars` + `backend.hcl`).
-
-```bash
-cd terraform
-# After bootstrap (state already in gs://enterprise-rag-tfstate-dev):
-terraform init -reconfigure -backend-config=environments/dev/backend.hcl
-terraform plan  -var-file=environments/dev/terraform.tfvars
-# terraform apply -var-file=environments/dev/terraform.tfvars
-```
-
-State buckets: `enterprise-rag-tfstate-dev|test|prod` (versioning + uniform access + soft-delete).  
-Full bootstrap / migrate steps: [docs/runbooks/terraform-bootstrap.md](docs/runbooks/terraform-bootstrap.md)
-
----
-
-## Security highlights
-
-- **Zero JSON service-account keys** — forever; CI uses GitHub OIDC + WIF only  
-  - SAs: `sa-rag-api`, `sa-rag-ingest`, `sa-rag-web`, `sa-rag-ci`  
-  - Pool: `rag-github-pool` · Provider: `github-oidc`  
-  - Runbook: [docs/runbooks/github-actions-wif.md](docs/runbooks/github-actions-wif.md)  
-  - ADR: [docs/adr/0005-security-posture.md](docs/adr/0005-security-posture.md)
-- Secrets in **Secret Manager** only; `.env` gitignored
-- Least-privilege **custom SAs** (CI vs runtime); tighten storage.admin on CI later
-- **CMEK:** `rag-keyring` / `rag-secrets-key` (secrets) + `rag-gcs-key` (docs buckets) — [secrets](docs/runbooks/secret-manager-cmek.md) · [docs buckets](docs/runbooks/gcs-document-buckets.md)
-- **Document storage:** `rag-docs-{dev,test,prod}` with prefixes `raw/`, `versions/`, `assets/`, `processed/`
-- Non-root containers (uid/gid **1001**)
-- No PII in logs/analytics by default (hashed subject IDs)
-- Auth domain allowlist: `chandraailabs.com`, `gmail.com`
-
----
-
-## CI / CD
-
-- Workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)  
-- Runbook: [docs/runbooks/github-actions-ci.md](docs/runbooks/github-actions-ci.md)  
-- **Keyless only:** WIF provider  
-  `projects/642114828076/locations/global/workloadIdentityPools/rag-github-pool/providers/github-oidc`  
-- Artifact Registry: `asia-south1-docker.pkg.dev/enterprise-rag-platform-502711/rag-containers`  
-- Deploy target on `main` push: Cloud Run **`rag-api`**
-
-```text
-![CI](https://github.com/chandranakkalakunta/enterprise-rag-platform/actions/workflows/ci.yml/badge.svg)
-```
-
-## Contributing / protocol
-
-We follow the **Grok Three-Agent Protocol** ([docs/grok-three-agent-protocol.md](docs/grok-three-agent-protocol.md)):
-
-- Feature branches only — never push feature work directly to `main`
-- ADRs for significant decisions
-- Living `docs/backlog.md` and `CHANGELOG.md`
-- Root cause over silent workarounds
-- Fail-fast verification every phase
-
----
-
-## License
-
-Proprietary — **Chandra AI Labs** / project owner.
+Never commit secrets. Production secrets live in Secret Manager.
