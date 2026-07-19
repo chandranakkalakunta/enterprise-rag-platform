@@ -25,7 +25,8 @@ Update when a phase opens or closes.
 | **3.0** | ADR-0007 + ADR-0008 | ✅ **Accepted** | [Embeddings/VS](./adr/0007-embedding-and-vector-search.md) · [Retrieval/gen](./adr/0008-retrieval-and-grounded-generation.md) |
 | **3.1** | Embedding pipeline on ready | ✅ **Complete** | `embeddings.jsonl` + `embeddings_status` |
 | **3.2** | Vector Search upsert + activate/deactivate | ✅ **Complete** | [vector-search runbook](./runbooks/vector-search.md) |
-| **3.3** | Search / query API (LangGraph dense path) | 🔜 **Next** | ADR-0008 |
+| **3.3** | Dense Search API | ✅ **Complete** | [dense-search runbook](./runbooks/dense-search-api.md) |
+| **3.4** | Grounded generation + citations | 🔜 **Next** | ADR-0008 |
 | **4** | Multi-turn & ACL depth (+ hybrid/RRF stretch) | Planned | Conversations, collections, safety tuning |
 | **5** | Voice + **full PWA** | Planned | Desktop/tablet/mobile browser + installable PWA; **no native apps** |
 | **6** | Analytics & Evaluation (+ Binary Auth hardening) | Planned | BigQuery; NFR-SEC-14 / BL-SEC-09 |

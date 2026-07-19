@@ -55,7 +55,8 @@ app = FastAPI(
     title="Enterprise RAG Platform API",
     description=(
         "Production-grade Enterprise RAG API. "
-        "Phase 2.1: POST /api/v1/documents/upload (PDF/Markdown → GCS + Firestore)."
+        "Upload/lifecycle, embeddings, Vector Search; "
+        "POST /api/v1/query/search (dense retrieval, published-only)."
     ),
     version=_app_version(),
     docs_url="/docs",
@@ -97,4 +98,5 @@ async def root() -> dict[str, str]:
         "health": "/health",
         "ready": "/ready",
         "upload": "/api/v1/documents/upload",
+        "search": "/api/v1/query/search",
     }
