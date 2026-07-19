@@ -34,7 +34,7 @@ Update when a phase opens or closes.
 | **5.2** | Chat UI — answer, refusal, citations | ✅ **Complete** | ChatPanel → `POST /api/v1/query/answer` |
 | **5.3** | Admin UI + chat ↑ / `/clear` | ✅ **Complete** | Upload/list/publish/retire; GET documents |
 | **5.4** | PWA install + closeout polish | ✅ **Complete** | [PWA runbook](./runbooks/pwa-install.md) |
-| **4** | **RAG quality** (eval + hybrid + multi-turn/ACL later) | 🔄 **In progress** | Starts with ADR-0011 |
+| **4** | **RAG quality MVP** (eval + hybrid + dedupe + BM25 warm) | ✅ **Complete** | [retro](./retrospectives/phase-4.md) · [eng report](./reports/phase-4-engineering-report.md) |
 | **4.0** | ADR-0011 Eval + Hybrid retrieval design | ✅ **Accepted** | [ADR-0011](./adr/0011-rag-evaluation-and-hybrid-retrieval.md) |
 | **4.1** | Eval harness + golden set + dense baseline | ✅ **Complete** | [eval runbook](./runbooks/rag-eval-harness.md) · [baseline](./eval/baseline-dense.md) |
 | **4.2** | Hybrid MVP (in-process BM25 + RRF in LangGraph retrieve) | ✅ **Complete** | `hybrid_search` · BM25 index · RRF |
@@ -46,8 +46,11 @@ Update when a phase opens or closes.
 Phase **numbers** are stable product tracks. **Execution order after Phase 3:**
 
 1. **Phase 5** — full responsive PWA / UI — ✅ **Complete**  
-2. **Phase 4** — RAG quality (eval → hybrid BM25+RRF → multi-turn/ACL/guards) — **started 4.0**  
-3. **Phase 6** — analytics / eval / Binary Auth / **HTTPS LB + Cloud Armor**  
+2. **Phase 4** — RAG quality MVP — ✅ **Complete**  
+3. **Ops next:** Cloud Run zero-touch UI cutover (OAuth origins, secrets, env flags)  
+4. **Phase 6** — analytics / eval / Binary Auth / **HTTPS LB + Cloud Armor** (when scheduled)  
+
+Deferred Phase 4 themes (multi-turn, OpenSearch, streaming, semantic cache, deep refusal/ACL) remain in [backlog](./backlog.md).
 
 ## Phase 0–2 closure links
 
@@ -119,4 +122,10 @@ Phase 5 delivers a **full Progressive Web App**: responsive on **desktop, tablet
 - BM25 warm-start on API startup from published versions  
 - Runbook: [citation-dedupe-bm25-warm.md](./runbooks/citation-dedupe-bm25-warm.md)  
 
-Last updated: 2026-07-19 (Phase 4.3 citation dedupe + BM25 warm)
+### Phase 4 closure
+
+- Retrospective: [retrospectives/phase-4.md](./retrospectives/phase-4.md)  
+- Engineering report: [reports/phase-4-engineering-report.md](./reports/phase-4-engineering-report.md)  
+- **Next ops:** Cloud Run env + OAuth JS origins for zero-touch UI (not a new product phase)  
+
+Last updated: 2026-07-19 (Phase 4 closure)

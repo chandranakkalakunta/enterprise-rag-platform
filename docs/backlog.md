@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-19 (**Phase 4.3** — citation dedupe + BM25 warm-start)
+Last updated: 2026-07-19 (**Phase 4 complete** — quality MVP closed; next ops: Cloud Run UI cutover)
 
 ---
 
@@ -115,7 +115,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-RAG-03 | Gemini generation with citations | Done | ✓ Done — Phase 3.4 | `GENERATION_MODEL_ID`, temp 0.2 |
 | BL-RAG-04 | Insufficient-evidence refusal (minimal) | Done | ✓ Done — Phase 3.4 | Zero hits / empty text / optional min score |
 | BL-RAG-10 | Metadata filtering at index (published/active) | Done | ✓ Done — Phase 3.2–3.3 | active=true on upsert/query |
-### Phase 3 MVP complete — remaining retrieval quality (Phase 4 track)
+### Phase 4 quality MVP — complete (4.0–4.3)
 
 | ID | Item | Status | Target | Notes |
 |----|------|--------|--------|-------|
@@ -125,13 +125,18 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-RAG-02 | RRF fusion | Done | ✓ Done — Phase 4.2 | `rrf.py` fuse_rrf; RRF_K default 60 |
 | BL-RAG-20 | Citation dedupe by document_id | Done | ✓ Done — Phase 4.3 | CITATION_MAX_PER_DOC + FE safety net |
 | BL-RAG-22 | BM25 warm-start from published corpus | Done | ✓ Done — Phase 4.3 | Startup background rebuild |
-| BL-RAG-21 | Optional managed OpenSearch for BM25 | Todo | **Later** | If in-process scale insufficient |
-| BL-RAG-05 | ACL-aware retrieval (deep) | Todo | **Phase 4+** | Beyond published-only |
-| BL-RAG-06 | Multi-turn conversation memory | Deferred | **Phase 4+** | |
-| BL-RAG-07 | Collection / filter scope (UX) | Deferred | **Phase 4+** | US-QA-05 |
-| BL-RAG-08 | Optional token streaming to client | Deferred | Phase 4+ | |
-| BL-RAG-11 | Semantic caching | Todo | **Phase 4+** | P1 · BL-DEC-06 |
-| BL-RAG-17 | Live E2E wiring / eval smoke (search+answer) | Todo | **Phase 4.1+** | Wire into harness where practical |
+
+### Deferred from Phase 4 MVP (living backlog)
+
+| ID | Item | Status | Target | Notes |
+|----|------|--------|--------|-------|
+| BL-RAG-06 | Multi-turn conversation memory | Deferred | **Backlog** | Not Phase 4 MVP |
+| BL-RAG-21 | Optional managed OpenSearch for BM25 | Deferred | **Backlog** | If in-process scale insufficient |
+| BL-RAG-08 | Optional token streaming to client | Deferred | **Backlog** | |
+| BL-RAG-11 | Semantic caching | Deferred | **Backlog** | P1 · BL-DEC-06 |
+| BL-RAG-05 | ACL-aware retrieval (deep) | Deferred | **Backlog** | Beyond published-only |
+| BL-RAG-07 | Collection / filter scope (UX) | Deferred | **Backlog** | US-QA-05 |
+| BL-RAG-17 | Live E2E / eval corpus alignment ops | Todo | **Ops** | Golden set vs published docs |
 | BL-ING-10 | Async worker for embed/upsert | Todo | **Backlog** | Offload from rag-api |
 
 ## Feedback
@@ -146,10 +151,10 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-GRD-01 | Prompt-injection defenses | Todo | **Phase 4** | MVP = minimal evidence gate only |
-| BL-GRD-02 | Output grounding / citation checks | Todo | **Phase 4** | |
-| BL-GRD-03 | Configurable safety policies | Deferred | **Phase 4** | |
-| BL-GRD-04 | Guardrail metrics counters | Todo | **Phase 4+** | |
+| BL-GRD-01 | Prompt-injection defenses | Todo | **Backlog** | MVP = minimal evidence gate only |
+| BL-GRD-02 | Output grounding / citation checks | Todo | **Backlog** | Stronger refusal tuning deferred |
+| BL-GRD-03 | Configurable safety policies | Deferred | **Backlog** | |
+| BL-GRD-04 | Guardrail metrics counters | Todo | **Backlog** | |
 
 ## Voice & PWA (Phase 5 = full PWA; no native apps)
 
@@ -199,19 +204,20 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-DEC-07 | Retrieval/gen flow + knobs (top_k, temperature) | Done | ✓ Done — Phase 3.0 / ADR-0008 | LangGraph MVP; temp 0.2; top_k 5 |
 | BL-DEC-04 | STT/TTS provider selection | Deferred | Phase 5 ADR | |
 | BL-DEC-05 | Ingest enqueue: Cloud Tasks vs Pub/Sub | Todo | Backlog ADR (with BL-ING-10) | |
-| BL-DEC-06 | Semantic cache backing store | Todo | **Phase 4** | Deferred with hybrid/cache |
+| BL-DEC-06 | Semantic cache backing store | Deferred | **Backlog** | With BL-RAG-11 |
 
 **Resolved in Phase 0–1:** LangGraph; Vertex AI Vector Search product; Cloud Run split; zero JSON keys + WIF; audience allowlist; CMEK; CI.  
 **Resolved in Phase 2:** Firestore metadata; MVP ingest lifecycle.  
 **Resolved in Phase 3:** Dense retrieval MVP + grounded answer (3.0–3.4).  
 **Resolved in Phase 5:** Auth, chat, admin, installable PWA (5.0–5.4).  
-**Resolved in Phase 4.0:** ADR-0011 — eval-first quality program; hybrid BM25+dense+RRF design.  
-**Delivery order:** Phase 5 ✅ → **Phase 4 (in progress)** → Phase 6.
+**Resolved in Phase 4:** Eval harness; hybrid BM25+dense+RRF; citation dedupe; BM25 warm-start (MVP complete).  
+**Next ops:** Cloud Run zero-touch UI cutover → then Phase 6 / backlog as prioritized.
 
 ---
 
 ## Recently completed
 
+- **2026-07-19** — **Phase 4 complete:** retro + eng report; quality MVP closed; deferred multi-turn/OpenSearch/streaming/cache/guards to backlog; next ops Cloud Run UI cutover.
 - **2026-07-19** — **Phase 4.3:** Citation dedupe by document_id; BM25 warm-start on API startup.
 - **2026-07-19** — **Phase 4.2:** Hybrid BM25+dense RRF; publish/retire BM25 hooks; feature flag.
 - **2026-07-19** — **Phase 4.1:** Golden set (25) + dense eval harness + fixture baseline; hybrid still off.

@@ -10,13 +10,14 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- **Phase 4+:** multi-turn, ACL depth, fuller guardrails, semantic cache, optional OpenSearch BM25
+- **Ops:** Cloud Run zero-touch UI cutover (OAuth JS origins, Secret Manager values, hybrid/BM25/citation env)
+- **Backlog (ex–Phase 4 deferred):** multi-turn (BL-RAG-06), OpenSearch BM25 (BL-RAG-21), streaming (BL-RAG-08), semantic cache (BL-RAG-11), deep ACL/guards (BL-RAG-05, BL-GRD-*)
 - **Phase 6+:** HTTPS LB + Cloud Armor; Binary Auth; analytics
-- Voice / star feedback / streaming (deferred from Phase 5)
-- Backlog: inactive vector hard-delete (BL-RAG-16); async worker; live E2E hardening
-- Coordinator: re-run live eval hybrid vs dense; OAuth secrets; detect-secrets (BL-FND-08)
+- Voice / star feedback (deferred from Phase 5)
+- Backlog: inactive vector hard-delete (BL-RAG-16); async worker; detect-secrets (BL-FND-08)
 
 ### Added
+- **Phase 4 closure:** [Retrospective](docs/retrospectives/phase-4.md) · [Engineering report](docs/reports/phase-4-engineering-report.md) — quality MVP complete
 - **Phase 4.3:** Citation dedupe by `document_id` (`CITATION_MAX_PER_DOC`); optional snippet merge; BM25 warm-start from published corpus on API startup; frontend safety-net dedupe
 - **Phase 4.2:** Hybrid retrieval — in-process Okapi BM25 over published chunks, RRF fusion with Vertex dense, LangGraph/`/query/*` wired; flags `HYBRID_RETRIEVAL_ENABLED`, `RRF_K`, per-channel top_k; publish/retire BM25 hooks
 - **Phase 4.1:** Golden set (`eval/golden/golden_set.jsonl`, 25 cases) + dense-only eval harness (`python -m eval.harness`); metrics: refusal correctness, Recall@k proxy, list completeness; fixture baseline + [runbook](docs/runbooks/rag-eval-harness.md)
