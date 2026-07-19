@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-19 (**Phase 3 Complete** — next delivery: Phase 5 PWA, then Phase 4 RAG quality)
+Last updated: 2026-07-19 (**Phase 5.0** — ADR-0009 auth/roles + ADR-0010 PWA version reload)
 
 ---
 
@@ -61,8 +61,8 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-SEC-01 | Google OAuth + domain allowlist (chandraailabs.com, gmail.com) | Todo | Backlog (post–Phase 2) | Spec documented Phase 1.6; not Phase 3 gate |
-| BL-SEC-02 | Role model: user / content_admin / operator | Todo | Backlog (post–Phase 2) | |
+| BL-SEC-01 | Google OAuth + domain allowlist (chandraailabs.com, gmail.com) | In Progress | **Phase 5.0–5.1** | ADR-0009 Accepted; implement 5.1 |
+| BL-SEC-02 | Role model: viewer / content_admin / admin (Firestore) | Done | ✓ Done — Phase 5.0 / ADR-0009 | Replaces earlier user/operator labels |
 | BL-SEC-03 | Secret Manager shells + CMEK | Done | ✓ Done — Phase 1.3 / PR #5 | Values via runbook later |
 | BL-SEC-04 | Non-root Docker images (uid 1001) | Done | ✓ Done — Phase 1.7 / PR #9 | API Dockerfile |
 | BL-SEC-05 | PII-free structured logging | Todo | Backlog | Baseline JSON logging exists |
@@ -70,7 +70,9 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-SEC-07 | Custom SAs per service + least privilege | Done | ✓ Done — Phase 1.2 / PR #4 | Baseline roles |
 | BL-SEC-08 | Enforce zero JSON SA keys (WIF only for CI) | Done | ✓ Done — Phase 1.2 / PR #4 | NFR-SEC-10 |
 | BL-SEC-09 | **Binary Authorization for Cloud Run** | Todo | **P1 / Phase 6+** | NFR-SEC-14; deferred supply-chain hardening |
-| BL-SEC-10 | **Real content_admin auth on ingest endpoints** | Todo | **Backlog** (was Phase 2 residual) | Replace AUTH_DEV_BYPASS / Bearer stub on upload/publish/retire |
+| BL-SEC-10 | **Real content_admin auth on ingest endpoints** | Todo | **Phase 5.1+** | Replace AUTH_DEV_BYPASS; enforce via ADR-0009 roles |
+| BL-SEC-11 | **ADR-0009 AuthN/AuthZ + Firestore users/{uid}** | Done | ✓ Done — Phase 5.0 | Google OAuth; ADMIN_EMAILS bootstrap |
+| BL-SEC-12 | **GET /api/v1/me** + session/token validation | Todo | **Phase 5.1** | UI source for role display |
 
 ## Ingestion & Versioning
 
@@ -152,9 +154,11 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 |----|------|--------|------------|-------|
 | BL-VOICE-01 | STT integration | Deferred | Phase 5 | In-PWA only |
 | BL-VOICE-02 | TTS integration | Deferred | Phase 5 | In-PWA only |
-| BL-PWA-01 | Installable PWA shell (manifest + SW) | Todo | **Phase 5 (next)** | Desktop/tablet/mobile browser |
+| BL-PWA-00 | **ADR-0010 PWA shell + backend version auto-reload** | Done | ✓ Done — Phase 5.0 | Poll /health; hard reload on version change |
+| BL-PWA-01 | Installable PWA shell (manifest + SW) | Todo | **Phase 5.1+** | Desktop/tablet/mobile browser |
 | BL-PWA-02 | Offline UI shell | Todo | **Phase 5** | P2; shell only, not offline RAG |
-| BL-PWA-03 | Responsive desktop/tablet/mobile layouts | Todo | **Phase 5 (next)** | Full PWA profile |
+| BL-PWA-03 | Responsive desktop/tablet/mobile layouts | Todo | **Phase 5.1+** | Full PWA profile |
+| BL-PWA-04 | Health poll + force reload on version/deployed_at change | Todo | **Phase 5.1** | ADR-0010 mandatory |
 
 ## Analytics & Evaluation
 
@@ -170,9 +174,9 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 | ID | Item | Status | Phase / PR | Notes |
 |----|------|--------|------------|-------|
-| BL-FE-01 | Next.js app scaffold beyond placeholder | Todo | **Phase 5 (next)** | |
-| BL-FE-02 | shadcn/ui + app shell per ui-specs | Todo | **Phase 5 (next)** | Spec locked Phase 0 |
-| BL-FE-03 | Chat UI + citations rendering | Todo | **Phase 5 (next)** | Calls `/query/answer` + `/query/search` |
+| BL-FE-01 | Next.js app scaffold beyond placeholder | Todo | **Phase 5.1** | `frontend/` · ADR-0010 |
+| BL-FE-02 | shadcn/ui + app shell per ui-specs | Todo | **Phase 5.1** | Spec locked Phase 0 |
+| BL-FE-03 | Chat UI + citations rendering | Todo | **Phase 5.1+** | Calls `/query/answer` + `/query/search` |
 | BL-FE-04 | Admin document management UI | Todo | **Phase 5** | Upload/publish APIs already exist |
 | BL-FE-05 | History + settings screens | Todo | **Phase 5** | |
 | BL-FE-06 | Analytics dashboard UI | Todo | Phase 6 | |
@@ -195,13 +199,15 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 **Resolved in Phase 0–1:** LangGraph; Vertex AI Vector Search product; Cloud Run split; zero JSON keys + WIF; audience allowlist; CMEK; CI.  
 **Resolved in Phase 2:** Firestore metadata; MVP ingest lifecycle.  
 **Resolved in Phase 3:** Dense retrieval MVP + grounded answer (3.0–3.4); hybrid/RRF/full guards/hard-delete remain backlog.  
-**Delivery order after Phase 3:** **Phase 5 (PWA/UI) → Phase 4 (RAG quality) → Phase 6.**  
+**Resolved in Phase 5.0:** ADR-0009 (Google OAuth + Firestore roles); ADR-0010 (PWA shell + health version auto-reload).  
+**Delivery order after Phase 3:** **Phase 5 (PWA/UI) → Phase 4 (RAG quality) → Phase 6 (incl. LB/Armor).**  
 **Phase 5 scope:** Full PWA only — no native apps.
 
 ---
 
 ## Recently completed
 
+- **2026-07-19** — **Phase 5.0:** ADR-0009 AuthN/AuthZ + Firestore users; ADR-0010 PWA + backend version auto-reload.
 - **2026-07-19** — **Phase 3 complete:** retrospective + engineering report; next track Phase 5 then Phase 4.
 - **2026-07-19** — **Phase 3.4:** Grounded answer `POST /api/v1/query/answer` (LangGraph + Gemini + citations + refusal).
 - **2026-07-19** — **Phase 3.3:** Dense search API `POST /api/v1/query/search` (active-only neighbors; no generation).
