@@ -7,7 +7,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.core.auth import AuthContext, require_content_auth
+from app.core.auth import AuthContext, require_user
 from app.core.config import Settings, get_settings
 from app.models.query import (
     AnswerCitation,
@@ -41,7 +41,7 @@ router = APIRouter(prefix="/query", tags=["query"])
 )
 async def search_chunks(
     body: SearchRequest,
-    auth: Annotated[AuthContext, Depends(require_content_auth)],
+    auth: Annotated[AuthContext, Depends(require_user)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> SearchResponseBody:
     """
@@ -104,7 +104,7 @@ async def search_chunks(
 )
 async def answer_query(
     body: SearchRequest,
-    auth: Annotated[AuthContext, Depends(require_content_auth)],
+    auth: Annotated[AuthContext, Depends(require_user)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> AnswerResponseBody:
     """

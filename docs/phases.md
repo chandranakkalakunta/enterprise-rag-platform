@@ -30,7 +30,7 @@ Update when a phase opens or closes.
 | **3.4** | Grounded Answer API (LangGraph + Gemini) | ✅ **Complete** | [grounded-answer runbook](./runbooks/grounded-answer-api.md) |
 | **5** | Voice + **full PWA** | 🔄 **In progress** | Desktop/tablet/mobile browser + installable; **no native apps** |
 | **5.0** | ADR-0009 Auth/Roles + ADR-0010 PWA shell & version reload | ✅ **Accepted** | [Auth](./adr/0009-authn-authz-user-profiles.md) · [PWA/reload](./adr/0010-pwa-shell-version-reload.md) |
-| **5.1** | OAuth + `/me` + app shell (implementation) | 🔜 **Next** | After 5.0 merge |
+| **5.1** | OAuth + `/me` + app shell + version watcher | 🔄 **In progress** | [Auth runbook](./runbooks/oauth-and-frontend-auth.md) |
 | **4** | Multi-turn & ACL depth (+ hybrid/RRF, fuller guards) | Planned **after Phase 5** | RAG quality track |
 | **6** | Analytics & Evaluation (+ Binary Auth / LB hardening) | Planned | BigQuery; NFR-SEC-14; HTTPS LB + Cloud Armor |
 
@@ -64,4 +64,10 @@ Phase 5 delivers a **full Progressive Web App**: responsive on **desktop, tablet
 - [ADR-0009 AuthN/AuthZ + Firestore user profiles](./adr/0009-authn-authz-user-profiles.md) — Google OAuth; domain allowlist; roles `viewer` / `content_admin` / `admin`; `ADMIN_EMAILS` bootstrap  
 - [ADR-0010 PWA shell + backend version auto-reload](./adr/0010-pwa-shell-version-reload.md) — poll `/health`; reload on `version` / `deployed_at` change; LB deferred  
 
-Last updated: 2026-07-19 (Phase 5.0 ADRs)
+### Phase 5.1 implementation links
+
+- [oauth-and-frontend-auth runbook](./runbooks/oauth-and-frontend-auth.md) — Coordinator OAuth client, secrets, `ADMIN_EMAILS`, local run  
+- Backend: Google ID token verify · domain gate · Firestore `users/{uid}` · `GET /api/v1/me` · role gates on APIs  
+- Frontend: Next.js shell · GIS login · Chat home · Admin nav by role · health version watcher · manifest placeholder  
+
+Last updated: 2026-07-19 (Phase 5.1 implementation)

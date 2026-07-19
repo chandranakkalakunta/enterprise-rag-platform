@@ -64,9 +64,19 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Frontend origins (local Next.js; extend via env later for Cloud Run web URL)
+_CORS_ORIGINS = [
+    o.strip()
+    for o in os.getenv(
+        "CORS_ALLOW_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000",
+    ).split(",")
+    if o.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=_CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -97,6 +107,7 @@ async def root() -> dict[str, str]:
         "docs": "/docs",
         "health": "/health",
         "ready": "/ready",
+        "me": "/api/v1/me",
         "upload": "/api/v1/documents/upload",
         "search": "/api/v1/query/search",
         "answer": "/api/v1/query/answer",

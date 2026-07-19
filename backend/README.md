@@ -27,9 +27,12 @@ Multipart form fields: `file` (required), `title`, `collection` (optional).
 - Processed: `full.txt` + `chunks.jsonl` + **`embeddings.jsonl`** (Phase 3.1)
 - Firestore: pointers + `text_preview`; **`embeddings_status`** separate from content `status`
 - Default model: `EMBEDDING_MODEL_ID=text-embedding-005`
-- Temp auth: `AUTH_DEV_BYPASS=true` (default) or Bearer `UPLOAD_BEARER_TOKEN`
+- Auth (Phase 5.1): Google ID token Bearer (`GOOGLE_OAUTH_CLIENT_ID`); domain allowlist; Firestore roles  
+- Upload/publish/retire require **content_admin** or **admin**  
+- `AUTH_DEV_BYPASS=true` for local/tests only (fake admin)  
+- Identity: `GET /api/v1/me`
 
-See [docs/runbooks/document-upload-api.md](../docs/runbooks/document-upload-api.md).
+See [docs/runbooks/document-upload-api.md](../docs/runbooks/document-upload-api.md) · [oauth-and-frontend-auth.md](../docs/runbooks/oauth-and-frontend-auth.md).
 
 ### Version lifecycle (Phase 2.4)
 

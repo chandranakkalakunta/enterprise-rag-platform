@@ -341,11 +341,13 @@ def test_upload_firestore_failure_returns_500(client: TestClient) -> None:
     assert "metadata" in response.json()["detail"].lower()
 
 
-def test_upload_requires_bearer_when_bypass_off(
+def test_upload_requires_auth_when_bypass_off(
     monkeypatch: pytest.MonkeyPatch, mock_embed_texts_success
 ) -> None:
+    """Without AUTH_DEV_BYPASS, missing Bearer → 401; valid Google admin → 201."""
     monkeypatch.setenv("AUTH_DEV_BYPASS", "false")
-    monkeypatch.setenv("UPLOAD_BEARER_TOKEN", "secret-token")
+    monkeypatch.setenv("GOOGLE_OAUTH_CLIENT_ID", "client-id")
+    monkeypatch.setenv("ALLOWED_EMAIL_DOMAINS", "gmail.com")
     get_settings.cache_clear()
     local = TestClient(app)
 
@@ -355,8 +357,25 @@ def test_upload_requires_bearer_when_bypass_off(
     )
     assert response.status_code == 401
 
+    claims = {
+        "iss": "https://accounts.google.com",
+        "sub": "uid-up",
+        "email": "admin@gmail.com",
+        "email_verified": True,
+        "name": "Admin",
+    }
+    profile = {
+        "uid": "uid-up",
+        "email": "admin@gmail.com",
+        "display_name": "Admin",
+        "photo_url": None,
+        "role": "admin",
+    }
     storage_client, firestore_client, _, _, _, _, _ = _mock_storage_and_firestore()
     with (
+        patch("app.core.auth.verify_google_id_token", return_value=claims),
+        patch("app.core.auth.resolve_or_create_user", return_value=profile),
+        patch("app.core.auth.firestore.Client", return_value=MagicMock()),
         patch("app.services.upload.storage.Client", return_value=storage_client),
         patch("app.services.upload.firestore.Client", return_value=firestore_client),
         patch("app.services.upload.new_ids", return_value=("d3", "v3")),
@@ -364,7 +383,7 @@ def test_upload_requires_bearer_when_bypass_off(
         ok = local.post(
             "/api/v1/documents/upload",
             files={"file": ("a.md", BytesIO(b"# a"), "text/markdown")},
-            headers={"Authorization": "Bearer secret-token"},
+            headers={"Authorization": "Bearer google-id-token"},
         )
     assert ok.status_code == 201
     assert ok.json()["status"] == "ready"

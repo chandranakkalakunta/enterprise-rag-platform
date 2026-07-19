@@ -1,6 +1,6 @@
 # Runbook: OAuth domain allowlist (prep — Phase 1.6)
 
-**Status:** Specification only in Phase 1.6 — application enforcement lands with auth implementation (BL-SEC-01).  
+**Status:** Spec from Phase 1.6 — **enforced in Phase 5.1** (see [oauth-and-frontend-auth.md](./oauth-and-frontend-auth.md)).  
 **Requirement:** NFR-SEC-13 · US-AUTH-01 · US-EU-01  
 
 ## Allowed email domains
@@ -12,14 +12,14 @@
 
 **All other domains:** deny after Google OAuth completes (clear error; no partial session).
 
-## Implementation notes (for later code)
+## Implementation notes (Phase 5.1)
 
-1. Complete Google OAuth / Identity Platform sign-in.  
-2. Read verified email from ID token claims.  
-3. Extract domain (`email.split("@")[-1].lower()`).  
-4. Allow only if domain ∈ configured allowlist.  
-5. Allowlist source: config / Secret Manager (not hard-coded secrets).  
-6. Log deny events with **hashed** subject id only (no raw email in analytics).
+1. Google Identity Services → ID token → API `Authorization: Bearer`.  
+2. Backend verifies token (`email_verified`, audience = OAuth client id).  
+3. Extract domain (`email.rsplit("@", 1)[-1].lower()`).  
+4. Allow only if domain ∈ `ALLOWED_EMAIL_DOMAINS`.  
+5. Allowlist source: env config (not hard-coded secrets).  
+6. Log deny events with domain only / hashed uid (no raw email in analytics logs).
 
 ## Secrets (shells exist — Phase 1.3)
 

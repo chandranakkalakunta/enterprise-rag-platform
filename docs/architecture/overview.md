@@ -1,8 +1,9 @@
 # Architecture Overview — Enterprise RAG Platform
 
-**Version:** 1.3 (Phase 5.0 frontend/auth ADRs)  
+**Version:** 1.4 (Phase 5.1 auth + app shell)  
 **Date:** 2026-07-19  
-**Status:** Phase 3 complete; Phase 5 PWA/UI track open (auth + shell ADRs)  
+**Status:** Phase 3 complete; Phase 5.1 Google auth, `/me`, Next.js shell, version watcher  
+
 
 Governing ADRs: [0001](../adr/0001-high-level-architecture.md) · [0002](../adr/0002-tech-stack.md) · [0003](../adr/0003-document-versioning.md) · [0004](../adr/0004-guardrails-architecture.md) · [0005](../adr/0005-security-posture.md) · [0006](../adr/0006-metadata-store-firestore.md) · [0007](../adr/0007-embedding-and-vector-search.md) · [0008](../adr/0008-retrieval-and-grounded-generation.md) · [0009](../adr/0009-authn-authz-user-profiles.md) · [0010](../adr/0010-pwa-shell-version-reload.md)
 
@@ -144,9 +145,9 @@ Enqueue mechanism (Cloud Tasks vs Pub/Sub) remains a small open decision; **work
 
 | Concern | Implementation sketch |
 |---------|----------------------|
-| AuthN | Google OAuth → domain allowlist (`chandraailabs.com`, `gmail.com`) — [ADR-0009](../adr/0009-authn-authz-user-profiles.md) |
+| AuthN | Google ID token (GIS) → verify audience + domain allowlist — [ADR-0009](../adr/0009-authn-authz-user-profiles.md) · [runbook](../runbooks/oauth-and-frontend-auth.md) |
 | AuthZ | RBAC (`viewer` / `content_admin` / `admin`) in Firestore `users/{uid}`; backend enforces; UI from `/api/v1/me` |
-| PWA | Next.js shell + installable SW; offline shell only; poll `/health` for version auto-reload — [ADR-0010](../adr/0010-pwa-shell-version-reload.md) |
+| PWA | Next.js shell + manifest; offline shell only; poll `/health` for version auto-reload — [ADR-0010](../adr/0010-pwa-shell-version-reload.md) |
 | Security | Zero JSON keys; WIF/OIDC; defence-in-depth ([ADR-0005](../adr/0005-security-posture.md)) |
 | Observability | JSON logs, metrics, correlation id, health version |
 | Config | Env + Secret Manager; model IDs pinned per env; `ADMIN_EMAILS` bootstrap |
