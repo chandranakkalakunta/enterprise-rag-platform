@@ -34,15 +34,18 @@ Update when a phase opens or closes.
 | **5.2** | Chat UI — answer, refusal, citations | ✅ **Complete** | ChatPanel → `POST /api/v1/query/answer` |
 | **5.3** | Admin UI + chat ↑ / `/clear` | ✅ **Complete** | Upload/list/publish/retire; GET documents |
 | **5.4** | PWA install + closeout polish | ✅ **Complete** | [PWA runbook](./runbooks/pwa-install.md) |
-| **4** | Multi-turn & ACL depth (+ hybrid/RRF, fuller guards) | 🔜 **Next** after Phase 5 | RAG quality track |
-| **6** | Analytics & Evaluation (+ Binary Auth / LB hardening) | Planned | BigQuery; NFR-SEC-14; HTTPS LB + Cloud Armor |
+| **4** | **RAG quality** (eval + hybrid + multi-turn/ACL later) | 🔄 **In progress** | Starts with ADR-0011 |
+| **4.0** | ADR-0011 Eval + Hybrid retrieval design | ✅ **Accepted** | [ADR-0011](./adr/0011-rag-evaluation-and-hybrid-retrieval.md) |
+| **4.1** | Eval harness + golden set + dense baseline | 🔜 **Next** | After 4.0 merge |
+| **4.2** | Hybrid MVP (in-process BM25 + RRF in LangGraph retrieve) | Planned | After baseline metrics |
+| **6** | Analytics & Evaluation ops (+ Binary Auth / LB hardening) | Planned | BigQuery; NFR-SEC-14; HTTPS LB + Cloud Armor |
 
 ## Delivery order (Coordinator — post–Phase 3)
 
 Phase **numbers** are stable product tracks. **Execution order after Phase 3:**
 
 1. **Phase 5** — full responsive PWA / UI — ✅ **Complete**  
-2. **Phase 4** — RAG quality (hybrid BM25+RRF, multi-turn, ACL depth, fuller guardrails) — **next**  
+2. **Phase 4** — RAG quality (eval → hybrid BM25+RRF → multi-turn/ACL/guards) — **started 4.0**  
 3. **Phase 6** — analytics / eval / Binary Auth / **HTTPS LB + Cloud Armor**  
 
 ## Phase 0–2 closure links
@@ -91,4 +94,9 @@ Phase 5 delivers a **full Progressive Web App**: responsive on **desktop, tablet
 - Citation title fallback; upload title defaults to filename; `GENERATION_MODEL_ID` default `gemini-2.5-flash`  
 - Closure: [retro](./retrospectives/phase-5.md) · [eng report](./reports/phase-5-engineering-report.md)  
 
-Last updated: 2026-07-19 (Phase 5 complete — 5.4 closeout)
+### Phase 4.0 decision links
+
+- [ADR-0011 RAG evaluation + hybrid retrieval](./adr/0011-rag-evaluation-and-hybrid-retrieval.md) — eval first; BM25 + dense + RRF inside LangGraph `retrieve`; in-process BM25 MVP then optional OpenSearch  
+- Order: **4.1** eval harness + dense baseline → **4.2** hybrid MVP  
+
+Last updated: 2026-07-19 (Phase 4.0 ADR-0011)

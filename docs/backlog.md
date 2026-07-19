@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-19 (**Phase 5 complete** — 5.4 PWA install + closeout)
+Last updated: 2026-07-19 (**Phase 4.0** — ADR-0011 eval + hybrid retrieval)
 
 ---
 
@@ -115,18 +115,22 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-RAG-03 | Gemini generation with citations | Done | ✓ Done — Phase 3.4 | `GENERATION_MODEL_ID`, temp 0.2 |
 | BL-RAG-04 | Insufficient-evidence refusal (minimal) | Done | ✓ Done — Phase 3.4 | Zero hits / empty text / optional min score |
 | BL-RAG-10 | Metadata filtering at index (published/active) | Done | ✓ Done — Phase 3.2–3.3 | active=true on upsert/query |
-### Phase 3 MVP complete — remaining retrieval quality (not incomplete Phase 3)
+### Phase 3 MVP complete — remaining retrieval quality (Phase 4 track)
 
 | ID | Item | Status | Target | Notes |
 |----|------|--------|--------|-------|
-| BL-RAG-01 | Hybrid BM25 + dense retrieval | Todo | **Phase 4** | Deferred by ADR-0008 |
-| BL-RAG-02 | RRF fusion | Todo | **Phase 4** | Deferred by ADR-0008 |
-| BL-RAG-05 | ACL-aware retrieval (deep) | Todo | **Phase 4** | Beyond published-only |
-| BL-RAG-06 | Multi-turn conversation memory | Deferred | **Phase 4** | |
-| BL-RAG-07 | Collection / filter scope (UX) | Deferred | **Phase 4 / 5** | US-QA-05 |
+| BL-RAG-18 | **ADR-0011** eval + hybrid design | Done | ✓ Done — Phase 4.0 | Eval first; BM25+dense+RRF; LangGraph retrieve |
+| BL-RAG-19 | **Eval harness + golden set + dense baseline** | Todo | **Phase 4.1** | Recall@k, groundedness, list completeness, refusal |
+| BL-RAG-01 | Hybrid BM25 + dense retrieval | Todo | **Phase 4.2** | In-process BM25 MVP (ADR-0011) |
+| BL-RAG-02 | RRF fusion | Todo | **Phase 4.2** | Fuse dense + BM25 ranks |
+| BL-RAG-20 | Citation dedupe by document_id | Todo | **Phase 4.x** | Reduce same-doc citation spam |
+| BL-RAG-21 | Optional managed OpenSearch for BM25 | Todo | **Later** | If in-process scale insufficient |
+| BL-RAG-05 | ACL-aware retrieval (deep) | Todo | **Phase 4+** | Beyond published-only |
+| BL-RAG-06 | Multi-turn conversation memory | Deferred | **Phase 4+** | |
+| BL-RAG-07 | Collection / filter scope (UX) | Deferred | **Phase 4+** | US-QA-05 |
 | BL-RAG-08 | Optional token streaming to client | Deferred | Phase 4+ | |
-| BL-RAG-11 | Semantic caching | Todo | **Phase 4** | P1 · BL-DEC-06 |
-| BL-RAG-17 | Live E2E wiring / eval smoke (search+answer) | Todo | **Backlog** | Ops hardening after UI exists |
+| BL-RAG-11 | Semantic caching | Todo | **Phase 4+** | P1 · BL-DEC-06 |
+| BL-RAG-17 | Live E2E wiring / eval smoke (search+answer) | Todo | **Phase 4.1+** | Wire into harness where practical |
 | BL-ING-10 | Async worker for embed/upsert | Todo | **Backlog** | Offload from rag-api |
 
 ## Feedback
@@ -166,7 +170,7 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 |----|------|--------|------------|-------|
 | BL-ANL-01 | BigQuery query metadata pipeline | Todo | Phase 6 | |
 | BL-ANL-02 | Latency percentile dashboards | Todo | Phase 6 | Basic earlier |
-| BL-ANL-03 | Held-out evaluation set + quality gate | Todo | Phase 6 | |
+| BL-ANL-03 | Held-out evaluation set + quality gate | In Progress | **Phase 4.1** (harness); Phase 6 ops | ADR-0011 golden set |
 | BL-ANL-04 | Token / cost dashboards | Deferred | Phase 6 | |
 | BL-ANL-05 | Cache hit metrics | Todo | Phase 3–6 | With semantic cache |
 
@@ -198,15 +202,16 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 
 **Resolved in Phase 0–1:** LangGraph; Vertex AI Vector Search product; Cloud Run split; zero JSON keys + WIF; audience allowlist; CMEK; CI.  
 **Resolved in Phase 2:** Firestore metadata; MVP ingest lifecycle.  
-**Resolved in Phase 3:** Dense retrieval MVP + grounded answer (3.0–3.4); hybrid/RRF/full guards/hard-delete remain backlog.  
-**Resolved in Phase 5.0:** ADR-0009 (Google OAuth + Firestore roles); ADR-0010 (PWA shell + health version auto-reload).  
-**Delivery order after Phase 3:** **Phase 5 (PWA/UI) → Phase 4 (RAG quality) → Phase 6 (incl. LB/Armor).**  
-**Phase 5 scope:** Full PWA only — no native apps.
+**Resolved in Phase 3:** Dense retrieval MVP + grounded answer (3.0–3.4).  
+**Resolved in Phase 5:** Auth, chat, admin, installable PWA (5.0–5.4).  
+**Resolved in Phase 4.0:** ADR-0011 — eval-first quality program; hybrid BM25+dense+RRF design.  
+**Delivery order:** Phase 5 ✅ → **Phase 4 (in progress)** → Phase 6.
 
 ---
 
 ## Recently completed
 
+- **2026-07-19** — **Phase 4.0:** ADR-0011 RAG evaluation + hybrid BM25+dense RRF (Accepted).
 - **2026-07-19** — **Phase 5 complete:** 5.4 PWA install + polish; retro + eng report; next Phase 4.
 - **2026-07-19** — **Phase 5.3:** Admin upload/list/publish/retire UI; chat ↑ history + `/clear`; GET documents APIs.
 - **2026-07-19** — **Phase 5.2:** Chat UI — answer, refusal, citations via `/api/v1/query/answer`.

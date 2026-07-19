@@ -64,7 +64,7 @@ Generation prompts must instruct the model to **use only provided evidence** and
 
 | Capability | Tracking |
 |------------|----------|
-| Hybrid **BM25 + dense** with **RRF** fusion | Later 3.x / Phase 4 — BL-RAG-01, BL-RAG-02 |
+| Hybrid **BM25 + dense** with **RRF** fusion | **Phase 4** — [ADR-0011](./0011-rag-evaluation-and-hybrid-retrieval.md); BL-RAG-01, BL-RAG-02 |
 | Semantic cache | BL-RAG-11 / BL-DEC-06 |
 | Full multi-layer guardrail stack | ADR-0004 expansion — BL-GRD-* |
 | Multi-turn conversation memory | Phase 4 — BL-RAG-06 |

@@ -10,13 +10,16 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- **Phase 4:** hybrid BM25 + RRF, multi-turn, ACL depth, fuller guardrails, semantic cache
+- **Phase 4.1:** eval harness + golden set + dense baseline metrics
+- **Phase 4.2:** hybrid MVP (in-process BM25 + RRF in LangGraph retrieve)
+- **Phase 4+:** multi-turn, ACL depth, fuller guardrails, semantic cache, citation dedupe
 - **Phase 6+:** HTTPS LB + Cloud Armor; Binary Auth; analytics
 - Voice / star feedback / streaming (deferred from Phase 5)
 - Backlog: inactive vector hard-delete (BL-RAG-16); async worker; live E2E hardening
 - Coordinator: OAuth secret versions + consent screen; detect-secrets (BL-FND-08)
 
 ### Added
+- **Phase 4.0:** [ADR-0011](docs/adr/0011-rag-evaluation-and-hybrid-retrieval.md) — eval-first quality program; hybrid BM25 + dense + RRF inside LangGraph `retrieve`; in-process BM25 MVP then optional OpenSearch
 - **Phase 5.4 / Phase 5 complete:** PWA SW + manifest installability (shell offline only); citation title→filename fallback; upload title defaults to filename; default `GENERATION_MODEL_ID=gemini-2.5-flash`
 - **Phase 5.4:** [pwa-install runbook](docs/runbooks/pwa-install.md) · [Phase 5 retro](docs/retrospectives/phase-5.md) · [eng report](docs/reports/phase-5-engineering-report.md)
 - **Phase 5.3:** Admin UI — upload PDF/MD, list/detail, publish/retire; `GET /api/v1/documents` + `GET /api/v1/documents/{id}`
