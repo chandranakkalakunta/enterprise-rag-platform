@@ -3,7 +3,7 @@
 **Living document** — update on every deferral and every completion (with phase/PR).  
 **Protocol ref:** §7.7 (Grok Three-Agent Protocol project adaptation)
 
-Last updated: 2026-07-19 (**Phase 4 complete** — quality MVP closed; next ops: Cloud Run UI cutover)
+Last updated: 2026-07-21 (**Phase 6.0** — ADR-0012 HTTPS LB + IAP edge)
 
 ---
 
@@ -45,7 +45,10 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 | BL-FND-33 | Phase 3 closure (retro, eng report, next-order 5→4) | Done | ✓ Done — Phase 3 closure | |
 | BL-FND-14 | Three Cloud Run services (rag-api, rag-ingest, rag-web) | Done | ✓ Done — Phase 1.6 / PR #8 | Stubs + SAs |
 | BL-FND-15 | Health returns version + deployed_at | Done | ✓ Done — Phase 1.5 / PR #7 | APP_VERSION / DEPLOYED_AT |
-| BL-FND-16 | HTTPS LB + Cloud Armor | Deferred | Pre-prod | Explicitly later |
+| BL-FND-16 | HTTPS LB + Cloud Armor | In Progress | **Phase 6** | ADR-0012: LB+IAP first; Armor residual |
+| BL-FND-34 | **ADR-0012** production edge (LB + IAP + serverless NEG) | Done | ✓ Done — Phase 6.0 | No allUsers invoker |
+| BL-FND-35 | Terraform LB + IAP + Cloud Run ingress lock | Todo | **Phase 6.1** | See ADR-0012 resource list |
+| BL-FND-36 | App IAP JWT AuthN → `/me` + same-origin UI | Todo | **Phase 6.2** | Prefer over public GIS-only prod path |
 | BL-FND-22 | Custom SAs per service (api/ingest/web/ci) | Done | ✓ Done — Phase 1.2 / PR #4 | ADR-0005 |
 | BL-FND-23 | WIF GitHub OIDC + workloadIdentityUser on sa-rag-ci | Done | ✓ Done — Phase 1.2 / PR #4 | Repo-restricted |
 | BL-FND-24 | Remove project-level storage.admin from sa-rag-ci | Done | ✓ Done — Phase 1.5 / PR #7 | Bucket objectAdmin remains |
@@ -211,12 +214,14 @@ Status legend: `Todo` | `In Progress` | `Deferred` | `Done` | `Won't Do`
 **Resolved in Phase 3:** Dense retrieval MVP + grounded answer (3.0–3.4).  
 **Resolved in Phase 5:** Auth, chat, admin, installable PWA (5.0–5.4).  
 **Resolved in Phase 4:** Eval harness; hybrid BM25+dense+RRF; citation dedupe; BM25 warm-start (MVP complete).  
-**Next ops:** Cloud Run zero-touch UI cutover → then Phase 6 / backlog as prioritized.
+**Resolved in Phase 6.0:** ADR-0012 — HTTPS LB + IAP edge; no public Cloud Run invoker.  
+**Next:** Phase 6.1 Terraform edge; then 6.2 app IAP wire-up.
 
 ---
 
 ## Recently completed
 
+- **2026-07-21** — **Phase 6.0:** ADR-0012 HTTPS LB + IAP production edge (Accepted); no allUsers invoker.
 - **2026-07-19** — **Phase 4 complete:** retro + eng report; quality MVP closed; deferred multi-turn/OpenSearch/streaming/cache/guards to backlog; next ops Cloud Run UI cutover.
 - **2026-07-19** — **Phase 4.3:** Citation dedupe by document_id; BM25 warm-start on API startup.
 - **2026-07-19** — **Phase 4.2:** Hybrid BM25+dense RRF; publish/retire BM25 hooks; feature flag.

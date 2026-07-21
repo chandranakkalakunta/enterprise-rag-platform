@@ -10,13 +10,15 @@ Phases map to project delivery, not strictly SemVer until first production relea
 ## [Unreleased]
 
 ### Planned
-- **Ops:** Cloud Run zero-touch UI cutover (OAuth JS origins, Secret Manager values, hybrid/BM25/citation env)
+- **Phase 6.1:** Terraform global HTTPS LB + serverless NEG + IAP + Cloud Run ingress lock (no allUsers)
+- **Phase 6.2:** App IAP JWT identity → `/me`; same-origin frontend base URL
 - **Backlog (ex–Phase 4 deferred):** multi-turn (BL-RAG-06), OpenSearch BM25 (BL-RAG-21), streaming (BL-RAG-08), semantic cache (BL-RAG-11), deep ACL/guards (BL-RAG-05, BL-GRD-*)
-- **Phase 6+:** HTTPS LB + Cloud Armor; Binary Auth; analytics
+- Phase 6 residual: Cloud Armor, Binary Auth, analytics
 - Voice / star feedback (deferred from Phase 5)
 - Backlog: inactive vector hard-delete (BL-RAG-16); async worker; detect-secrets (BL-FND-08)
 
 ### Added
+- **Phase 6.0:** [ADR-0012](docs/adr/0012-production-edge-lb-iap.md) — production browser access via **HTTPS LB + IAP + serverless NEG**; **no public `run.invoker`**; path-based same origin preferred; Terraform resource plan for 6.1
 - **Phase 4 closure:** [Retrospective](docs/retrospectives/phase-4.md) · [Engineering report](docs/reports/phase-4-engineering-report.md) — quality MVP complete
 - **Phase 4.3:** Citation dedupe by `document_id` (`CITATION_MAX_PER_DOC`); optional snippet merge; BM25 warm-start from published corpus on API startup; frontend safety-net dedupe
 - **Phase 4.2:** Hybrid retrieval — in-process Okapi BM25 over published chunks, RRF fusion with Vertex dense, LangGraph/`/query/*` wired; flags `HYBRID_RETRIEVAL_ENABLED`, `RRF_K`, per-channel top_k; publish/retire BM25 hooks

@@ -39,7 +39,11 @@ Update when a phase opens or closes.
 | **4.1** | Eval harness + golden set + dense baseline | ✅ **Complete** | [eval runbook](./runbooks/rag-eval-harness.md) · [baseline](./eval/baseline-dense.md) |
 | **4.2** | Hybrid MVP (in-process BM25 + RRF in LangGraph retrieve) | ✅ **Complete** | `hybrid_search` · BM25 index · RRF |
 | **4.3** | Citation dedupe + BM25 warm-start | ✅ **Complete** | `CITATION_MAX_PER_DOC` · startup rebuild |
-| **6** | Analytics & Evaluation ops (+ Binary Auth / LB hardening) | Planned | BigQuery; NFR-SEC-14; HTTPS LB + Cloud Armor |
+| **6** | **Production edge + ops hardening** | 🔄 **In progress** | Starts with ADR-0012 (LB + IAP) |
+| **6.0** | ADR-0012 HTTPS LB + IAP edge access | ✅ **Accepted** | [ADR-0012](./adr/0012-production-edge-lb-iap.md) |
+| **6.1** | Terraform: LB, serverless NEG, IAP, Cloud Run ingress | 🔜 **Next** | After 6.0 merge |
+| **6.2** | App IAP JWT identity wire-up + same-origin frontend | Planned | After 6.1 |
+| **6.x** | Analytics / Binary Auth / Cloud Armor (as prioritized) | Planned | Backlog |
 
 ## Delivery order (Coordinator — post–Phase 3)
 
@@ -47,8 +51,8 @@ Phase **numbers** are stable product tracks. **Execution order after Phase 3:**
 
 1. **Phase 5** — full responsive PWA / UI — ✅ **Complete**  
 2. **Phase 4** — RAG quality MVP — ✅ **Complete**  
-3. **Ops next:** Cloud Run zero-touch UI cutover (OAuth origins, secrets, env flags)  
-4. **Phase 6** — analytics / eval / Binary Auth / **HTTPS LB + Cloud Armor** (when scheduled)  
+3. **Phase 6** — production edge (**LB + IAP**, no `allUsers` invoker) — **started 6.0**  
+4. Analytics / Binary Auth / Armor as follow-on within Phase 6+  
 
 Deferred Phase 4 themes (multi-turn, OpenSearch, streaming, semantic cache, deep refusal/ACL) remain in [backlog](./backlog.md).
 
@@ -126,6 +130,10 @@ Phase 5 delivers a **full Progressive Web App**: responsive on **desktop, tablet
 
 - Retrospective: [retrospectives/phase-4.md](./retrospectives/phase-4.md)  
 - Engineering report: [reports/phase-4-engineering-report.md](./reports/phase-4-engineering-report.md)  
-- **Next ops:** Cloud Run env + OAuth JS origins for zero-touch UI (not a new product phase)  
 
-Last updated: 2026-07-19 (Phase 4 closure)
+### Phase 6.0 decision links
+
+- [ADR-0012 Production edge — HTTPS LB + IAP](./adr/0012-production-edge-lb-iap.md) — no public `run.invoker`; path-based same origin preferred; IAP AuthN; app roles in Firestore  
+- **6.1** Terraform resources listed in ADR; **6.2** IAP JWT app integration  
+
+Last updated: 2026-07-21 (Phase 6.0 ADR-0012)
