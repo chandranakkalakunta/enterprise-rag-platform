@@ -8,9 +8,9 @@ resource "google_firestore_database" "metadata" {
   type        = "FIRESTORE_NATIVE"
 
   # Native mode only (not Datastore mode)
-  concurrency_mode            = "PESSIMISTIC"
-  app_engine_integration_mode = "DISABLED"
-  delete_protection_state     = "DELETE_PROTECTION_ENABLED"
+  concurrency_mode                  = "PESSIMISTIC"
+  app_engine_integration_mode       = "DISABLED"
+  delete_protection_state           = "DELETE_PROTECTION_ENABLED"
   point_in_time_recovery_enablement = "POINT_IN_TIME_RECOVERY_DISABLED"
 
   depends_on = [google_project_service.required]

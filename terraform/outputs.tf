@@ -261,3 +261,62 @@ output "vector_search_public_endpoint_domain" {
     ""
   ) : ""
 }
+
+# ── Phase 6.1: Production edge (LB + IAP) ────────────────────────────────────
+
+output "edge_enabled" {
+  description = "Whether HTTPS LB + IAP edge resources are managed"
+  value       = var.enable_edge
+}
+
+output "edge_ip" {
+  description = "Global anycast IP for the edge load balancer (empty if enable_edge=false)"
+  value       = var.enable_edge ? google_compute_global_address.edge[0].address : ""
+}
+
+output "edge_url" {
+  description = "HTTPS base URL when edge_domain is set; otherwise empty (use edge_ip + Host header notes)"
+  value       = var.enable_edge && var.edge_domain != "" ? "https://${var.edge_domain}" : ""
+}
+
+output "edge_backend_service_web" {
+  description = "Backend service name for rag-web"
+  value       = var.enable_edge ? google_compute_backend_service.edge_web[0].name : ""
+}
+
+output "edge_backend_service_api" {
+  description = "Backend service name for rag-api"
+  value       = var.enable_edge ? google_compute_backend_service.edge_api[0].name : ""
+}
+
+output "edge_url_map" {
+  description = "URL map name (path rules)"
+  value       = var.enable_edge ? google_compute_url_map.edge[0].name : ""
+}
+
+output "edge_iap_service_account" {
+  description = "IAP service agent granted run.invoker (not public)"
+  value       = var.enable_edge ? local.iap_sa_member : ""
+}
+
+output "edge_path_routing" {
+  description = "Documented path split for single-host origin"
+  value = {
+    enabled       = var.enable_edge
+    api_paths     = var.enable_edge ? join(",", local.edge_api_paths) : ""
+    default       = var.enable_edge ? "rag-web" : ""
+    path_preserve = var.enable_edge ? "Full path forwarded to Cloud Run (no strip); FastAPI keeps /api/v1/..." : ""
+  }
+}
+
+output "edge_coordinator_notes" {
+  description = "Operator checklist summary"
+  value = var.enable_edge ? [
+    "DNS: A record ${var.edge_domain != "" ? var.edge_domain : "<your-domain>"} → edge_ip",
+    "IAP members: ${join(", ", var.iap_access_members)}",
+    "Cloud Run ingress for web/api: INTERNAL_LOAD_BALANCER only",
+    "No allUsers run.invoker",
+    "App IAP JWT wiring is Phase 6.2",
+    "See docs/runbooks/edge-lb-iap.md",
+  ] : []
+}

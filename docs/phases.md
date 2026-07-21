@@ -41,8 +41,8 @@ Update when a phase opens or closes.
 | **4.3** | Citation dedupe + BM25 warm-start | ✅ **Complete** | `CITATION_MAX_PER_DOC` · startup rebuild |
 | **6** | **Production edge + ops hardening** | 🔄 **In progress** | Starts with ADR-0012 (LB + IAP) |
 | **6.0** | ADR-0012 HTTPS LB + IAP edge access | ✅ **Accepted** | [ADR-0012](./adr/0012-production-edge-lb-iap.md) |
-| **6.1** | Terraform: LB, serverless NEG, IAP, Cloud Run ingress | 🔜 **Next** | After 6.0 merge |
-| **6.2** | App IAP JWT identity wire-up + same-origin frontend | Planned | After 6.1 |
+| **6.1** | Terraform: LB, serverless NEG, IAP, Cloud Run ingress | ✅ **Complete** | `terraform/edge.tf` · [runbook](./runbooks/edge-lb-iap.md) |
+| **6.2** | App IAP JWT identity wire-up + same-origin frontend | 🔜 **Next** | After edge apply smoke |
 | **6.x** | Analytics / Binary Auth / Cloud Armor (as prioritized) | Planned | Backlog |
 
 ## Delivery order (Coordinator — post–Phase 3)
@@ -134,6 +134,11 @@ Phase 5 delivers a **full Progressive Web App**: responsive on **desktop, tablet
 ### Phase 6.0 decision links
 
 - [ADR-0012 Production edge — HTTPS LB + IAP](./adr/0012-production-edge-lb-iap.md) — no public `run.invoker`; path-based same origin preferred; IAP AuthN; app roles in Firestore  
-- **6.1** Terraform resources listed in ADR; **6.2** IAP JWT app integration  
 
-Last updated: 2026-07-21 (Phase 6.0 ADR-0012)
+### Phase 6.1 implementation links
+
+- Terraform: `enable_edge`, `edge.tf` (NEGs, backends+IAP, URL map, HTTPS FR, managed cert)  
+- Runbook: [edge-lb-iap.md](./runbooks/edge-lb-iap.md)  
+- **6.2** App IAP JWT + same-origin `NEXT_PUBLIC_API_BASE_URL`  
+
+Last updated: 2026-07-21 (Phase 6.1 edge Terraform)

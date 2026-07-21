@@ -31,7 +31,7 @@ variable "labels" {
 }
 
 variable "required_apis" {
-  description = "Minimum Google APIs to enable for Phase 1 foundation"
+  description = "Minimum Google APIs to enable for foundation + edge (Phase 6.1)"
   type        = list(string)
   default = [
     "cloudresourcemanager.googleapis.com",
@@ -48,7 +48,72 @@ variable "required_apis" {
     "monitoring.googleapis.com",
     "aiplatform.googleapis.com",
     "firestore.googleapis.com",
+    "compute.googleapis.com",
+    "iap.googleapis.com",
   ]
+}
+
+# ── Phase 6.1: Production edge (HTTPS LB + IAP) ───────────────────────────────
+
+variable "enable_edge" {
+  description = "Provision global HTTPS LB + IAP + serverless NEGs (ADR-0012). Default false until Coordinator opts in."
+  type        = bool
+  default     = false
+}
+
+variable "edge_domain" {
+  description = "FQDN for managed SSL (e.g. rag.dev.example.com). Required for Google-managed cert when enable_edge and no edge_ssl_certificate_self_link."
+  type        = string
+  default     = ""
+}
+
+variable "edge_ssl_certificate_self_link" {
+  description = "Optional pre-created SSL cert self_link. When set, skips google_compute_managed_ssl_certificate."
+  type        = string
+  default     = ""
+}
+
+variable "iap_access_members" {
+  description = "Principals granted roles/iap.httpsResourceAccessor on edge backends (e.g. user:you@gmail.com). Never allUsers."
+  type        = list(string)
+  default     = []
+}
+
+variable "iap_support_email" {
+  description = "Support email for IAP OAuth brand (required if create_iap_brand=true)"
+  type        = string
+  default     = ""
+}
+
+variable "create_iap_brand" {
+  description = "Create google_iap_brand (often one-time / org-restricted). Prefer Console brand then set create_iap_client or existing OAuth client vars."
+  type        = bool
+  default     = false
+}
+
+variable "create_iap_client" {
+  description = "Create google_iap_client under project brand for IAP backends"
+  type        = bool
+  default     = false
+}
+
+variable "iap_brand_name" {
+  description = "Existing IAP brand resource name (projects/PROJECT_NUMBER/brands/BRAND_ID) when create_iap_brand=false but create_iap_client=true"
+  type        = string
+  default     = ""
+}
+
+variable "iap_oauth_client_id" {
+  description = "Existing IAP OAuth client ID (when not creating google_iap_client)"
+  type        = string
+  default     = ""
+}
+
+variable "iap_oauth_client_secret" {
+  description = "Existing IAP OAuth client secret (sensitive; prefer TF_VAR_ or secret-backed apply)"
+  type        = string
+  default     = ""
+  sensitive   = true
 }
 
 variable "firestore_database_name" {

@@ -9,3 +9,17 @@ labels = {
   environment = "dev"
   cost_center = "erp"
 }
+
+# ── Phase 6.1 edge (ADR-0012) — leave false until ready to apply LB + IAP ────
+enable_edge = false
+
+# When enable_edge = true, set:
+# edge_domain          = "rag-dev.example.com"   # managed cert + DNS A → edge_ip
+# iap_access_members   = ["user:you@chandraailabs.com", "user:you@gmail.com"]
+# create_iap_brand     = false                   # usually Console one-time brand
+# create_iap_client    = true
+# iap_brand_name       = "projects/PROJECT_NUMBER/brands/BRAND_ID"
+# iap_support_email    = "you@chandraailabs.com"
+# OR supply existing IAP OAuth client (sensitive secret via TF_VAR_):
+# iap_oauth_client_id     = "....apps.googleusercontent.com"
+# iap_oauth_client_secret = "...."   # do not commit real secrets
