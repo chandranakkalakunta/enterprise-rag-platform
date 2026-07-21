@@ -1,10 +1,10 @@
 # Architecture Overview — Enterprise RAG Platform
 
-**Version:** 1.5 (Phase 4.0 hybrid + eval ADR)  
-**Date:** 2026-07-19  
-**Status:** Phase 5 complete; Phase 4.0 quality track (eval + hybrid design)  
+**Version:** 1.6 (Phase 6.0 production edge ADR)  
+**Date:** 2026-07-21  
+**Status:** Phases 4–5 complete; Phase 6.0 edge access (LB + IAP) designed  
 
-Governing ADRs: [0001](../adr/0001-high-level-architecture.md) · [0002](../adr/0002-tech-stack.md) · [0003](../adr/0003-document-versioning.md) · [0004](../adr/0004-guardrails-architecture.md) · [0005](../adr/0005-security-posture.md) · [0006](../adr/0006-metadata-store-firestore.md) · [0007](../adr/0007-embedding-and-vector-search.md) · [0008](../adr/0008-retrieval-and-grounded-generation.md) · [0009](../adr/0009-authn-authz-user-profiles.md) · [0010](../adr/0010-pwa-shell-version-reload.md) · [0011](../adr/0011-rag-evaluation-and-hybrid-retrieval.md)
+Governing ADRs: [0001](../adr/0001-high-level-architecture.md) · [0002](../adr/0002-tech-stack.md) · [0003](../adr/0003-document-versioning.md) · [0004](../adr/0004-guardrails-architecture.md) · [0005](../adr/0005-security-posture.md) · [0006](../adr/0006-metadata-store-firestore.md) · [0007](../adr/0007-embedding-and-vector-search.md) · [0008](../adr/0008-retrieval-and-grounded-generation.md) · [0009](../adr/0009-authn-authz-user-profiles.md) · [0010](../adr/0010-pwa-shell-version-reload.md) · [0011](../adr/0011-rag-evaluation-and-hybrid-retrieval.md) · [0012](../adr/0012-production-edge-lb-iap.md)
 
 ---
 
@@ -55,7 +55,42 @@ This document expands ADR-0001 into an implementable **component breakdown**, da
              └──────────┘  └────────────────────────┘ └──────────┘
 ```
 
-**Later (not Phase 1):** Global HTTPS Load Balancer + Cloud Armor in front of `web`/`api`.
+**Production edge (Phase 6 / ADR-0012):** browsers do **not** use public `run.invoker`. Traffic enters via **global HTTPS LB + IAP + serverless NEGs**; Cloud Run ingress is **load-balancer only**.
+
+### 2.1 Production edge (Phase 6.0 design)
+
+```text
+  Browser (allowlisted Google identity)
+           │
+           ▼
+  ┌────────────────────────────────────────────┐
+  │  Global external HTTPS Application LB      │
+  │  + Identity-Aware Proxy (IAP)              │
+  │  URL map (preferred single host):          │
+  │    /api/*, /health, /ready  → rag-api NEG  │
+  │    /* (UI, PWA assets)      → rag-web NEG  │
+  └─────────────────┬──────────────────────────┘
+                    │ (only LB → Cloud Run)
+          ┌─────────┴─────────┐
+          ▼                   ▼
+   Cloud Run rag-web    Cloud Run rag-api
+   (Next.js PWA)        (FastAPI)
+   ingress: internal-   ingress: internal-
+   and-cloud-load-bal.  and-cloud-load-bal.
+          │                   │
+          └─────────┬─────────┘
+                    ▼
+           Firestore roles, GCS, Vertex, …
+```
+
+| Control | Rule |
+|---------|------|
+| Public `roles/run.invoker` (`allUsers`) | **Forbidden** (org policy + Coordinator) |
+| Invoker | IAP / Google-managed agents only |
+| App AuthZ | Firestore `users/{uid}` roles (ADR-0009) |
+| App AuthN target (6.2) | Prefer IAP JWT; GIS Bearer as transition fallback |
+
+Dual-host (app + api subdomains) is a documented alternative if path routing is impractical — [ADR-0012](../adr/0012-production-edge-lb-iap.md).
 
 ---
 
@@ -144,14 +179,14 @@ Enqueue mechanism (Cloud Tasks vs Pub/Sub) remains a small open decision; **work
 
 | Concern | Implementation sketch |
 |---------|----------------------|
-| AuthN | Google ID token (GIS) → verify audience + domain allowlist — [ADR-0009](../adr/0009-authn-authz-user-profiles.md) · [runbook](../runbooks/oauth-and-frontend-auth.md) |
+| AuthN | Edge: **IAP** (prod, ADR-0012); App: IAP JWT preferred (6.2) · GIS Bearer transition (ADR-0009) |
 | AuthZ | RBAC (`viewer` / `content_admin` / `admin`) in Firestore `users/{uid}`; backend enforces; UI from `/api/v1/me` |
 | PWA | Next.js shell + manifest; offline shell only; poll `/health` for version auto-reload — [ADR-0010](../adr/0010-pwa-shell-version-reload.md) |
-| Security | Zero JSON keys; WIF/OIDC; defence-in-depth ([ADR-0005](../adr/0005-security-posture.md)) |
+| Security | Zero JSON keys; WIF/OIDC; **no public run.invoker**; defence-in-depth ([ADR-0005](../adr/0005-security-posture.md)) |
 | Observability | JSON logs, metrics, correlation id, health version |
 | Config | Env + Secret Manager; model IDs pinned per env; `ADMIN_EMAILS` bootstrap |
-| Edge / LB | Cloud Run URLs for Phase 5; **HTTPS LB + Cloud Armor later** (Phase 6+ / pre-prod) |
-| IaC | Terraform modules under `terraform/` |
+| Edge / LB | **HTTPS LB + IAP + serverless NEG** (ADR-0012); Cloud Armor optional later |
+| IaC | Terraform modules under `terraform/` (edge resources in Phase 6.1) |
 
 ---
 
@@ -347,14 +382,14 @@ Environments supply `gcp_project_id` via tfvars (not committed secrets).
 | ~~AuthN/AuthZ + Firestore user profiles~~ | **Resolved** | [ADR-0009](../adr/0009-authn-authz-user-profiles.md) |
 | ~~PWA shell + backend version auto-reload~~ | **Resolved** | [ADR-0010](../adr/0010-pwa-shell-version-reload.md) |
 | ~~Eval methodology + hybrid BM25/dense/RRF~~ | **Resolved** | [ADR-0011](../adr/0011-rag-evaluation-and-hybrid-retrieval.md) |
-| Semantic cache store (Memorystore vs other) | BL-DEC-06 | Phase 4+ |
-| Hybrid BM25 + RRF | BL-RAG-01/02 | Phase 4 |
-| STT/TTS provider | BL-DEC-04 | Phase 5 (voice sub-track) |
+| ~~Production edge: HTTPS LB + IAP~~ | **Resolved (design)** | [ADR-0012](../adr/0012-production-edge-lb-iap.md); TF in 6.1 |
+| Semantic cache store (Memorystore vs other) | BL-DEC-06 | Backlog |
+| STT/TTS provider | BL-DEC-04 | Voice sub-track |
 | Ingest enqueue: Cloud Tasks vs Pub/Sub | BL-DEC-05 | Backlog (worker) |
-| Streaming tokens to client | BL-RAG-08 | Phase 4+ |
-| HTTPS LB + Cloud Armor | BL-FND-16 | **Phase 6+ / pre-prod** — not Phase 5 gate |
+| Streaming tokens to client | BL-RAG-08 | Backlog |
+| Cloud Armor WAF policies | BL-FND-16 residual | After LB/IAP live |
 
-**Locked:** LangGraph; Vertex embeddings + Vector Search; dense grounded Q&A; Firestore metadata; Google OAuth + domain allowlist + Firestore roles; installable PWA + health version reload; zero JSON keys + WIF.
+**Locked:** LangGraph; Vertex embeddings + Vector Search; hybrid RRF; Firestore metadata; domain allowlist + Firestore roles; installable PWA + health version reload; zero JSON keys + WIF; **no public Cloud Run invoker** (LB+IAP edge).
 
 ---
 

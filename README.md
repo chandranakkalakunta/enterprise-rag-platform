@@ -3,7 +3,8 @@
 Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
-**Status:** **Phase 4 complete** — RAG quality MVP; **next ops: Cloud Run zero-touch UI cutover**  
+**Status:** **Phase 6.0** — ADR-0012 HTTPS LB + IAP edge; **next: 6.1 Terraform**  
+
 
 
 
@@ -35,14 +36,17 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 | **5.0–5.4** | Auth, chat, admin, PWA install, closeout | ✅ **Complete** |
 | **4** | **RAG quality MVP** (eval + hybrid + dedupe + BM25 warm) | ✅ **Complete** |
 | **4.0–4.3** | ADR-0011, eval, hybrid RRF, citation dedupe, BM25 warm-start | ✅ **Complete** |
-| **6** | Analytics, eval ops, Binary Auth, **HTTPS LB + Cloud Armor** | Planned |
+| **6** | **Production edge + ops hardening** | 🔄 **In progress** |
+| **6.0** | ADR-0012 HTTPS LB + IAP (no public invoker) | ✅ **Accepted** |
+| **6.1** | Terraform LB + serverless NEG + IAP + ingress | 🔜 **Next** |
 
 ### Delivery order (post–Phase 3)
 
 1. **Phase 5** — full responsive PWA / UI — ✅ **Complete**  
 2. **Phase 4** — RAG quality MVP — ✅ **Complete**  
-3. **Ops:** Cloud Run zero-touch UI cutover (OAuth origins, secrets, hybrid flags)  
-4. **Phase 6** — analytics / evaluation / Binary Auth / LB + Armor (when scheduled)  
+3. **Phase 6** — production edge (**LB + IAP**) — **started 6.0**  
+4. Analytics / Binary Auth / Cloud Armor as follow-on  
+
 
 Full index: [docs/phases.md](docs/phases.md)  
 Phase 0: [retro](docs/retrospectives/phase-0.md) · [report](docs/reports/phase-0-engineering-report.md)  
@@ -51,6 +55,13 @@ Phase 2: [retro](docs/retrospectives/phase-2.md) · [report](docs/reports/phase-
 Phase 3: [retro](docs/retrospectives/phase-3.md) · [report](docs/reports/phase-3-engineering-report.md)  
 Phase 5: [retro](docs/retrospectives/phase-5.md) · [report](docs/reports/phase-5-engineering-report.md) · [PWA install](docs/runbooks/pwa-install.md)  
 Phase 4: [retro](docs/retrospectives/phase-4.md) · [report](docs/reports/phase-4-engineering-report.md)  
+
+### Phase 6 edge (in progress)
+
+- [ADR-0012](docs/adr/0012-production-edge-lb-iap.md) — Global HTTPS LB + **IAP** + serverless NEGs → `rag-web` / `rag-api`  
+- **No** `allUsers` / public `roles/run.invoker`  
+- Prefer **single browser origin** (path routing); dual-host documented fallback  
+- App AuthZ stays Firestore roles; AuthN prefers **IAP JWT** in 6.2  
 
 ### Phase 4 quality (complete)
 

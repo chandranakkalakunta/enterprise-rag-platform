@@ -73,7 +73,7 @@ Backend continues to expose on **`/health`** and **`/ready`**:
 | Phase 5 | Clients may call **Cloud Run service URLs** (or simple mapping) via `NEXT_PUBLIC_API_BASE_URL` |
 | Future (Phase 6+ / pre-prod hardening) | **HTTPS Load Balancing + Cloud Armor** in front of Cloud Run (and optionally web) — rate limits, WAF, custom domain, TLS  
 
-LB/Armor is **not** a Phase 5.0/5.1 gate; document only so architecture stays intentional ([BL-FND-16](../backlog.md)).
+LB was **not** a Phase 5 gate. Production edge is now **ADR-0012** (HTTPS LB + **IAP**, no public invoker); Cloud Armor remains optional hardening ([BL-FND-16](../backlog.md)).
 
 ## Rationale
 
