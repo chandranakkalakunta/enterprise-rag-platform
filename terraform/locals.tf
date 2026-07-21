@@ -67,9 +67,9 @@ locals {
 
   # Object prefix convention (logical folders inside each bucket — not separate buckets)
   docs_prefixes = [
-    "raw/",        # original uploads
-    "versions/",   # immutable published document versions
-    "assets/",     # multimodal assets (images, extracted tables)
-    "processed/",  # parse/chunk pipeline outputs
+    "raw/",       # original uploads
+    "versions/",  # immutable published document versions
+    "assets/",    # multimodal assets (images, extracted tables)
+    "processed/", # parse/chunk pipeline outputs
   ]
 }

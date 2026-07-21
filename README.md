@@ -3,7 +3,8 @@
 Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud Platform: grounded answers with citations, document versioning, guardrails, PWA UX, optional voice, multimodal evidence (tables/images), and privacy-safe analytics.
 
 **Owner:** Chandra AI Labs (`chandraailabs.com`)  
-**Status:** **Phase 6.0** — ADR-0012 HTTPS LB + IAP edge; **next: 6.1 Terraform**  
+**Status:** **Phase 6.1** — Terraform HTTPS LB + IAP edge; **next: apply + 6.2 app IAP JWT**  
+
 
 
 
@@ -38,7 +39,8 @@ Production-grade **Enterprise Retrieval-Augmented Generation** on Google Cloud P
 | **4.0–4.3** | ADR-0011, eval, hybrid RRF, citation dedupe, BM25 warm-start | ✅ **Complete** |
 | **6** | **Production edge + ops hardening** | 🔄 **In progress** |
 | **6.0** | ADR-0012 HTTPS LB + IAP (no public invoker) | ✅ **Accepted** |
-| **6.1** | Terraform LB + serverless NEG + IAP + ingress | 🔜 **Next** |
+| **6.1** | Terraform LB + serverless NEG + IAP + ingress | ✅ **Complete** |
+| **6.2** | App IAP JWT + same-origin frontend | 🔜 **Next** |
 
 ### Delivery order (post–Phase 3)
 
@@ -61,6 +63,7 @@ Phase 4: [retro](docs/retrospectives/phase-4.md) · [report](docs/reports/phase-
 - [ADR-0012](docs/adr/0012-production-edge-lb-iap.md) — Global HTTPS LB + **IAP** + serverless NEGs → `rag-web` / `rag-api`  
 - **No** `allUsers` / public `roles/run.invoker`  
 - Prefer **single browser origin** (path routing); dual-host documented fallback  
+- Terraform: `enable_edge` + [edge-lb-iap runbook](docs/runbooks/edge-lb-iap.md)  
 - App AuthZ stays Firestore roles; AuthN prefers **IAP JWT** in 6.2  
 
 ### Phase 4 quality (complete)

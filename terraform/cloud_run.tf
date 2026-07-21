@@ -37,7 +37,14 @@ resource "google_cloud_run_v2_service" "rag" {
   project  = var.gcp_project_id
   name     = each.value.name
   location = var.region
-  ingress  = "INGRESS_TRAFFIC_ALL"
+  # Phase 6.1: web/api only accept traffic from the HTTPS LB when enable_edge.
+  # ingest stays ALL (not on LB; still no public invoker binding).
+  # NEVER grant allUsers roles/run.invoker (org policy + ADR-0012).
+  ingress = (
+    each.key == "ingest" ? "INGRESS_TRAFFIC_ALL" : (
+      var.enable_edge ? "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER" : "INGRESS_TRAFFIC_ALL"
+    )
+  )
 
   labels = {
     environment = var.environment
